@@ -1,3 +1,21 @@
+#version: '3.1'
+
+#services:
+#  db:
+#    image: postgres
+#    restart: always
+#    environment:
+#      POSTGRES_USER: elder123
+#      POSTGRES_PASSWORD: elder123
+#      POSTGRES_DB: lottery_results
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+#    ports:
+#      - "5432:5432"
+
+#volumes:
+#  postgres_data:
+
 version: '3.1'
 
 services:
@@ -7,11 +25,13 @@ services:
     environment:
       POSTGRES_USER: elder123
       POSTGRES_PASSWORD: elder123
-      POSTGRES_DB: lottery_results
+      POSTGRES_DB: results_v2
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
 
 volumes:
   postgres_data:
+
