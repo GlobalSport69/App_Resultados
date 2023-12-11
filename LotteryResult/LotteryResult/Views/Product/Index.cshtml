@@ -1,0 +1,52 @@
+﻿@using LotteryResult.Data.Models;
+
+@{
+    ViewData["Title"] = "Products";
+}
+
+
+<h1>Index</h1>
+@{
+    var products = ViewBag.products as List<Product>;
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Enable</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in products)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>
+                        @item.Enable
+                        @{
+                            if (item.Enable) {
+                                <a href="@Url.Action("ActivateJob", "Product", new { id = item.Id })">Desactivar job</a>
+                            }
+                            else{
+                                <a href="@Url.Action("ActivateJob", "Product", new { id = item.Id })">Activar job</a>
+                            }
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@section scripts{
+    <script>
+        window.onload = function () {
+            let message = '@ViewBag.Message';
+            if (message) {
+                Swal.fire(message);
+            }
+        };
+    </script>
+}
+
