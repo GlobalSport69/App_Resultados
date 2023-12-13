@@ -1,5 +1,6 @@
 ﻿using LotteryResult.Data.Abstractions;
 using LotteryResult.Dtos;
+using LotteryResult.Enum;
 using PuppeteerSharp;
 
 namespace LotteryResult.Services
@@ -15,7 +16,7 @@ namespace LotteryResult.Services
             this.unitOfWork = unitOfWork;
         }
 
-        public async Task Handel()
+        public async Task Handler()
         {
             try
             {
@@ -66,6 +67,7 @@ namespace LotteryResult.Services
                         Date = string.Empty,
                         ProductId = zamoranoID,
                         ProviderId = zamoranoProviderID,
+                        ProductTypeId = (int)ProductTypeEnum.TRIPLES
                     });
                 }
 

@@ -5,12 +5,14 @@ using PuppeteerSharp;
 
 namespace LotteryResult.Services
 {
-    public class LottoReyOfficial : IGetResult
+    public class TripleZuliaOfficial : IGetResult
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
+        private const int tripleZuliaID = 6;
+        private const int tripleZuliaProviderID = 5;
 
-        public LottoReyOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork)
+        public TripleZuliaOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork)
         {
             this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
@@ -25,30 +27,41 @@ namespace LotteryResult.Services
                 await using var browser = await Puppeteer.LaunchAsync(
                     new LaunchOptions { Headless = true });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://lottorey.com.ve");
+                await page.GoToAsync("http://www.resultadostriplezulia.com/action/index");
 
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
                     let fecha = new Date();
                     let dia = String(fecha.getDate()).padStart(2, '0');
                     let mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript empiezan desde 0
                     let ano = fecha.getFullYear();
-                    let fechaFormateada = dia + '/' + mes + '/' + ano;
+                    let fechaFormateada = dia + '-' + mes + '-' + ano;
 
-                    let r = [...document.querySelectorAll('#main-container .card')]
-                    .filter(x => x.querySelector('.texto-fecha').innerText == fechaFormateada)
-                    .map(x => ({
-                        time: x.querySelector('.texto-hora').innerText,
-                        result: x.querySelector('.card-footer').innerText,
-                    }))
+                    let iframe = document.querySelector('iframe')
+                    let contenidoDelIframe = iframe.contentDocument || iframe.contentWindow.document;
+                    let table = contenidoDelIframe.querySelector('#miTabla');
+
+                    let r = [...table.querySelectorAll('tbody tr')]
+                    .filter(x => [...x.querySelectorAll('td')][1].innerText == fechaFormateada)
+                    .flatMap(x => {
+                        let tds = [...x.querySelectorAll('td')];
+                        let a ={
+                            time: tds[3].innerText,
+                            result: tds[4].innerText,
+                            sorteo: 'Triple A'
+                        };
+                        let b ={
+                            time: tds[3].innerText,
+                            result: tds[5].innerText,
+                            sorteo: 'Triple B'
+                        };
+                        return [a, b];
+                    });
 
                     return r;
                 }");
 
-                const int lottoReyID = 5;
-                const int lottoReyProviderID = 4;
-
                 var oldResult = await resultRepository
-                    .GetAllByAsync(x => x.ProviderId == lottoReyProviderID &&
+                    .GetAllByAsync(x => x.ProviderId == tripleZuliaProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
                 foreach (var item in oldResult)
                 {
@@ -64,9 +77,10 @@ namespace LotteryResult.Services
                         Result1 = item.Result,
                         Time = item.Time,
                         Date = string.Empty,
-                        ProductId = lottoReyID,
-                        ProviderId = lottoReyProviderID,
-                        ProductTypeId = (int)ProductTypeEnum.ANIMALITOS
+                        ProductId = tripleZuliaID,
+                        ProviderId = tripleZuliaProviderID,
+                        ProductTypeId = (int)ProductTypeEnum.ANIMALITOS,
+                        Sorteo = item.Sorteo
                     });
                 }
 

@@ -18,6 +18,8 @@ public partial class PostgresDbContext : DbContext
 
     public virtual DbSet<Product> Products { get; set; }
 
+    public virtual DbSet<ProductType> ProductTypes { get; set; }
+
     public virtual DbSet<Provider> Providers { get; set; }
 
     public virtual DbSet<ProviderProduct> ProviderProducts { get; set; }
@@ -36,6 +38,18 @@ public partial class PostgresDbContext : DbContext
                 .HasDefaultValueSql("nextval('product_id_seq'::regclass)")
                 .HasColumnName("id");
             entity.Property(e => e.Enable).HasColumnName("enable");
+            entity.Property(e => e.Name)
+                .HasColumnType("character varying")
+                .HasColumnName("name");
+        });
+
+        modelBuilder.Entity<ProductType>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("product_type_pk");
+
+            entity.ToTable("product_type");
+
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Name)
                 .HasColumnType("character varying")
                 .HasColumnName("name");
@@ -71,6 +85,9 @@ public partial class PostgresDbContext : DbContext
                 .HasColumnName("cron_expression");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.ProviderId).HasColumnName("provider_id");
+            entity.Property(e => e.Slug)
+                .HasColumnType("character varying")
+                .HasColumnName("slug");
 
             entity.HasOne(d => d.Product).WithMany(p => p.ProviderProducts)
                 .HasForeignKey(d => d.ProductId)
@@ -95,10 +112,15 @@ public partial class PostgresDbContext : DbContext
                 .HasColumnType("character varying")
                 .HasColumnName("date");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.ProductTypeId).HasColumnName("product_type_id");
             entity.Property(e => e.ProviderId).HasColumnName("provider_id");
             entity.Property(e => e.Result1)
                 .HasColumnType("character varying")
                 .HasColumnName("result");
+            entity.Property(e => e.Sorteo)
+                .HasComment("se almacena el nombre del sorteo en caso de que el poroducto tenga mas de un sorteo por hora, ejemplo tripla A y triple B a las 7:00")
+                .HasColumnType("character varying")
+                .HasColumnName("sorteo");
             entity.Property(e => e.Time)
                 .HasColumnType("character varying")
                 .HasColumnName("time");
@@ -106,6 +128,11 @@ public partial class PostgresDbContext : DbContext
             entity.HasOne(d => d.Product).WithMany(p => p.Results)
                 .HasForeignKey(d => d.ProductId)
                 .HasConstraintName("results_fk");
+
+            entity.HasOne(d => d.ProductType).WithMany(p => p.Results)
+                .HasForeignKey(d => d.ProductTypeId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("results_fk_2");
 
             entity.HasOne(d => d.Provider).WithMany(p => p.Results)
                 .HasForeignKey(d => d.ProviderId)

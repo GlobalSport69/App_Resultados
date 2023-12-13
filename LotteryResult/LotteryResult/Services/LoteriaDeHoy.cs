@@ -5,7 +5,7 @@ namespace LotteryResult.Services
 {
     public class LoteriaDeHoy : IGetResult
     {
-        public async Task Handel()
+        public async Task Handler()
         {
             try
             {

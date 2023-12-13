@@ -19,7 +19,16 @@ public partial class Result
 
     public DateTime CreatedAt { get; set; }
 
+    /// <summary>
+    /// se almacena el nombre del sorteo en caso de que el poroducto tenga mas de un sorteo por hora, ejemplo tripla A y triple B a las 7:00
+    /// </summary>
+    public string? Sorteo { get; set; }
+
+    public int? ProductTypeId { get; set; }
+
     public virtual Product Product { get; set; } = null!;
+
+    public virtual ProductType? ProductType { get; set; }
 
     public virtual Provider Provider { get; set; } = null!;
 }

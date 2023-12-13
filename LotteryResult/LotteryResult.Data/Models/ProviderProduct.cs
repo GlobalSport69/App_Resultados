@@ -13,6 +13,8 @@ public partial class ProviderProduct
 
     public string? CronExpression { get; set; }
 
+    public string? Slug { get; set; }
+
     public virtual Product Product { get; set; } = null!;
 
     public virtual Provider Provider { get; set; } = null!;

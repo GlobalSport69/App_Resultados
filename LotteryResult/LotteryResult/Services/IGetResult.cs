@@ -4,6 +4,6 @@ namespace LotteryResult.Services
 {
     public interface IGetResult
     {
-        public Task Handel();
+        public Task Handler();
     }
 }

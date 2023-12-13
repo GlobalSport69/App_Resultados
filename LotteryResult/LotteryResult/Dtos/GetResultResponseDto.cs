@@ -8,6 +8,8 @@ namespace LotteryResult.Dtos
         public string Time { get; set; }
         [JsonProperty("result")]
         public string Result { get; set; }
+        [JsonProperty("sorteo")]
+        public string Sorteo { get; set; }
     }
     public class GetResultResponseDto
     {
