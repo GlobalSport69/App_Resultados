@@ -10,6 +10,7 @@ namespace LotteryResult
             services.AddScoped<LottoReyOfficial>();
             services.AddScoped<TripleZamoranoOfficial>();
             services.AddScoped<TripleZuliaOfficial>();
+            services.AddScoped<TripleCalienteOfficial>();
             services.AddScoped<ProviderProductMapper>();
 
             return services;
