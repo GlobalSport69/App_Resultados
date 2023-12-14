@@ -11,11 +11,13 @@ namespace LotteryResult.Services
         private IUnitOfWork unitOfWork;
         private const int tripleZuliaID = 6;
         private const int tripleZuliaProviderID = 5;
+        private readonly ILogger<TripleZuliaOfficial> _logger;
 
-        public TripleZuliaOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork)
+        public TripleZuliaOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<TripleZuliaOfficial> logger)
         {
             this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         public async Task Handler()
@@ -90,7 +92,7 @@ namespace LotteryResult.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                _logger.LogError(exception: ex, message: nameof(TripleZuliaOfficial));
             }
         }
     }

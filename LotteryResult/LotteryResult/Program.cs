@@ -6,6 +6,8 @@ using LotteryResult.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using LotteryResult;
+using Serilog;
+using Serilog.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,8 @@ builder.Services.AddHangfireServer();
 
 builder.Services.AddData(builder.Configuration);
 builder.Services.AddServices(builder.Configuration);
+builder.Services.AddLogging(builder => builder.AddSerilog());
+
 
 // Add Hangfire services.
 builder.Services.AddHangfire(configuration => configuration
@@ -25,18 +29,16 @@ builder.Services.AddHangfire(configuration => configuration
     .UsePostgreSqlStorage(c => c.UseNpgsqlConnection(builder.Configuration.GetSection("DB:Hangfire").Value)));
 
 
+builder.Host.UseSerilog((hostContext, services, configuration) =>
+{
+    configuration
+        .WriteTo.File(builder.Configuration.GetSection("Serilog:LogPath").Value, rollingInterval: RollingInterval.Day)
+        .WriteTo.File(builder.Configuration.GetSection("Serilog:ErrorLogPath").Value,
+            restrictedToMinimumLevel: LogEventLevel.Error,
+            rollingInterval: RollingInterval.Day);
+});
+
 var app = builder.Build();
-
-
-
-//using (var serviceScope = app.Services.CreateScope())
-//{
-//    var services = serviceScope.ServiceProvider;
-//    var jobs = services.GetRequiredService<IBootstrapJobs>();
-//    jobs.Init();
-//}
-
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

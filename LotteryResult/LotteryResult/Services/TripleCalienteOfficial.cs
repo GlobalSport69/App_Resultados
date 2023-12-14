@@ -11,11 +11,13 @@ namespace LotteryResult.Services
         private IUnitOfWork unitOfWork;
         private const int tripleCalienteID = 4;
         private const int tripleCalienteProviderID = 6;
+        private readonly ILogger<TripleCalienteOfficial> _logger;
 
-        public TripleCalienteOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork)
+        public TripleCalienteOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<TripleCalienteOfficial> logger)
         {
             this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         public async Task Handler()
@@ -90,7 +92,7 @@ namespace LotteryResult.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                _logger.LogError(exception: ex, message: nameof(TripleCalienteOfficial));
             }
         }
     }

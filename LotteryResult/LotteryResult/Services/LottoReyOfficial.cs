@@ -9,11 +9,15 @@ namespace LotteryResult.Services
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
+        private const int lottoReyID = 5;
+        private const int lottoReyProviderID = 4;
+        private readonly ILogger<LottoReyOfficial> _logger;
 
-        public LottoReyOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork)
+        public LottoReyOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<LottoReyOfficial> logger)
         {
             this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         public async Task Handler()
@@ -44,9 +48,6 @@ namespace LotteryResult.Services
                     return r;
                 }");
 
-                const int lottoReyID = 5;
-                const int lottoReyProviderID = 4;
-
                 var oldResult = await resultRepository
                     .GetAllByAsync(x => x.ProviderId == lottoReyProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
@@ -76,7 +77,7 @@ namespace LotteryResult.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                _logger.LogError(exception:ex, message: nameof(LottoReyOfficial));
             }
         }
     }

@@ -9,11 +9,15 @@ namespace LotteryResult.Services
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
+        private const int zamoranoID = 2;
+        private const int zamoranoProviderID = 1;
+        private readonly ILogger<TripleZamoranoOfficial> _logger;
 
-        public TripleZamoranoOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork)
+        public TripleZamoranoOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<TripleZamoranoOfficial> logger)
         {
             this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         public async Task Handler()
@@ -45,9 +49,6 @@ namespace LotteryResult.Services
 
                     return r;
                 }");
-
-                const int zamoranoID = 2;
-                const int zamoranoProviderID = 1;
 
                 var oldResult = await resultRepository
                     .GetAllByAsync(x => x.ProviderId == zamoranoProviderID && 
@@ -82,7 +83,7 @@ namespace LotteryResult.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                _logger.LogError(exception: ex, message: nameof(TripleZamoranoOfficial));
             }
         }
     }
