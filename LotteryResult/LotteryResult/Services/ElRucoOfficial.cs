@@ -5,15 +5,15 @@ using PuppeteerSharp;
 
 namespace LotteryResult.Services
 {
-    public class TripleCalienteOfficial : IGetResult
+    public class ElRucoOfficial
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
-        private const int tripleCalienteID = 4;
-        private const int tripleCalienteProviderID = 6;
-        private readonly ILogger<TripleCalienteOfficial> _logger;
+        private const int elRucoID = 5;
+        private const int elRucoProviderID = 4;
+        private readonly ILogger<ElRucoOfficial> _logger;
 
-        public TripleCalienteOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<TripleCalienteOfficial> logger)
+        public ElRucoOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<ElRucoOfficial> logger)
         {
             this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
@@ -29,41 +29,27 @@ namespace LotteryResult.Services
                 await using var browser = await Puppeteer.LaunchAsync(
                     new LaunchOptions { Headless = true });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("http://www.triplecaliente.com/action/index");
+                await page.GoToAsync("https://lottollano.com.ve/elruco.php");
 
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
                     let fecha = new Date();
                     let dia = String(fecha.getDate()).padStart(2, '0');
                     let mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript empiezan desde 0
                     let ano = fecha.getFullYear();
-                    let fechaFormateada = dia + '-' + mes + '-' + ano;
+                    let fechaFormateada = dia + '/' + mes + '/' + ano;
 
-                    let iframe = document.querySelector('iframe')
-                    let contenidoDelIframe = iframe.contentDocument || iframe.contentWindow.document;
-                    let table = contenidoDelIframe.querySelector('#miTabla');
-
-                    let r = [...table.querySelectorAll('tbody tr')]
-                    .filter(x => [...x.querySelectorAll('td')][1].innerText == fechaFormateada)
-                    .flatMap(x => {
-                        let tds = [...x.querySelectorAll('td')];
-                        let a ={
-                            time: tds[3].innerText,
-                            result: tds[4].innerText,
-                            sorteo: 'Triple A'
-                        };
-                        let b ={
-                            time: tds[3].innerText,
-                            result: tds[5].innerText,
-                            sorteo: 'Triple B'
-                        };
-                        return [a, b];
-                    });
+                    let r = [...document.querySelectorAll('table tbody tr')]
+                    .filter(tr => ([...tr.querySelectorAll('td')][0]).innerHTML.split('<br>')[1] == fechaFormateada)
+                    .map(tr => ({
+                        time: ([...tr.querySelectorAll('td')][0]).innerHTML.split('<br>')[2],
+                        result: ([...tr.querySelectorAll('td')][1]).querySelector('img').getAttribute('src').replace('./elruco/', '').replace('.jpg', '')
+                    }))
 
                     return r;
                 }");
 
                 var oldResult = await resultRepository
-                    .GetAllByAsync(x => x.ProviderId == tripleCalienteProviderID &&
+                    .GetAllByAsync(x => x.ProviderId == elRucoProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
                 foreach (var item in oldResult)
                 {
@@ -79,10 +65,9 @@ namespace LotteryResult.Services
                         Result1 = item.Result,
                         Time = item.Time,
                         Date = string.Empty,
-                        ProductId = tripleCalienteID,
-                        ProviderId = tripleCalienteProviderID,
-                        ProductTypeId = (int)ProductTypeEnum.TRIPLES,
-                        Sorteo = item.Sorteo
+                        ProductId = elRucoID,
+                        ProviderId =elRucoProviderID,
+                        ProductTypeId = (int)ProductTypeEnum.TERMINALES
                     });
                 }
 
@@ -92,7 +77,7 @@ namespace LotteryResult.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(exception: ex, message: nameof(TripleCalienteOfficial));
+                _logger.LogError(exception: ex, message: nameof(LottoReyOfficial));
             }
         }
     }

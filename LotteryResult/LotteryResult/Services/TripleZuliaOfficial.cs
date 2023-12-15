@@ -81,7 +81,7 @@ namespace LotteryResult.Services
                         Date = string.Empty,
                         ProductId = tripleZuliaID,
                         ProviderId = tripleZuliaProviderID,
-                        ProductTypeId = (int)ProductTypeEnum.ANIMALITOS,
+                        ProductTypeId = (int)ProductTypeEnum.TRIPLES,
                         Sorteo = item.Sorteo
                     });
                 }

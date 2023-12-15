@@ -8,12 +8,14 @@ namespace LotteryResult.Services
         private LottoReyOfficial lottoReyOfficial;
         private TripleZuliaOfficial tripleZuliaOfficial;
         private TripleCalienteOfficial tripleCalienteOfficial;
-        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial)
+        private ElRucoOfficial elRucoOfficial;
+        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial, ElRucoOfficial elRucoOfficial)
         {
             this.tripleZamoranoOfficial = tripleZamoranoOfficial;
             this.lottoReyOfficial = lottoReyOfficial;
             this.tripleZuliaOfficial = tripleZuliaOfficial;
             this.tripleCalienteOfficial = tripleCalienteOfficial;
+            this.elRucoOfficial = elRucoOfficial;
         }
 
         public void AddJob(int product_id, string job_id, string cron_expression) {
@@ -58,6 +60,18 @@ namespace LotteryResult.Services
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => tripleCalienteOfficial.Handler(),
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
+                    });
+                return;
+            }
+
+            if (product_id == 8)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => elRucoOfficial.Handler(),
                     cron_expression,
                     new RecurringJobOptions
                     {
