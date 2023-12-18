@@ -2,12 +2,14 @@
 
 @{
     ViewData["Title"] = "Products";
+    
 }
 
 
 <h1>Index</h1>
+
 @{
-    var products = ViewBag.products as List<Product>;
+    var products = ViewBag.products as List<Product> ?? new List<Product>();
     <table class="table">
         <thead>
             <tr>
@@ -26,10 +28,10 @@
                         @item.Enable
                         @{
                             if (item.Enable) {
-                                <a href="@Url.Action("ActivateJob", "Product", new { id = item.Id })">Desactivar job</a>
+                                <a href="@Url.Action("SwicthProductStatus", "Product", new { id = item.Id })">Desactivar job</a>
                             }
                             else{
-                                <a href="@Url.Action("ActivateJob", "Product", new { id = item.Id })">Activar job</a>
+                                <a href="@Url.Action("SwicthProductStatus", "Product", new { id = item.Id })">Activar job</a>
                             }
                         }
                     </td>

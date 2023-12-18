@@ -9,13 +9,17 @@ namespace LotteryResult.Services
         private TripleZuliaOfficial tripleZuliaOfficial;
         private TripleCalienteOfficial tripleCalienteOfficial;
         private ElRucoOfficial elRucoOfficial;
-        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial, ElRucoOfficial elRucoOfficial)
+        private LaRucaOfficial laRucaOfficial;
+        private TripleCaracasOfficial tripleCaracasOfficial;
+        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial, ElRucoOfficial elRucoOfficial, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial)
         {
             this.tripleZamoranoOfficial = tripleZamoranoOfficial;
             this.lottoReyOfficial = lottoReyOfficial;
             this.tripleZuliaOfficial = tripleZuliaOfficial;
             this.tripleCalienteOfficial = tripleCalienteOfficial;
             this.elRucoOfficial = elRucoOfficial;
+            this.laRucaOfficial = laRucaOfficial;
+            this.tripleCaracasOfficial = tripleCaracasOfficial;
         }
 
         public void AddJob(int product_id, string job_id, string cron_expression) {
@@ -72,6 +76,29 @@ namespace LotteryResult.Services
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => elRucoOfficial.Handler(),
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
+                    });
+            }
+
+            if (product_id == 9)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => laRucaOfficial.Handler(),
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
+                    });
+                return;
+            }
+
+            if (product_id == 3)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => tripleCaracasOfficial.Handler(),
                     cron_expression,
                     new RecurringJobOptions
                     {

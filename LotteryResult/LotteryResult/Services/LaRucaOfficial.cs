@@ -5,15 +5,15 @@ using PuppeteerSharp;
 
 namespace LotteryResult.Services
 {
-    public class ElRucoOfficial
+    public class LaRucaOfficial
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
-        private const int elRucoID = 8;
-        private const int elRucoProviderID = 7;
-        private readonly ILogger<ElRucoOfficial> _logger;
+        private const int laRucaID = 9;
+        private const int laRucaProviderID = 8;
+        private readonly ILogger<LaRucaOfficial> _logger;
 
-        public ElRucoOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<ElRucoOfficial> logger)
+        public LaRucaOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<LaRucaOfficial> logger)
         {
             this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
@@ -29,7 +29,7 @@ namespace LotteryResult.Services
                 await using var browser = await Puppeteer.LaunchAsync(
                     new LaunchOptions { Headless = true });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://lottollano.com.ve/elruco.php");
+                await page.GoToAsync("https://lottollano.com.ve/laruca.php");
 
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
                     let fecha = new Date();
@@ -42,14 +42,14 @@ namespace LotteryResult.Services
                     .filter(tr => ([...tr.querySelectorAll('td')][0]).innerHTML.split('<br>')[1] == fechaFormateada)
                     .map(tr => ({
                         time: ([...tr.querySelectorAll('td')][0]).innerHTML.split('<br>')[2],
-                        result: ([...tr.querySelectorAll('td')][1]).querySelector('img').getAttribute('src').replace('./elruco/', '').replace('.jpg', '')
+                        result: ([...tr.querySelectorAll('td')][1]).querySelector('img').getAttribute('src').replace('./laruca/', '').replace('.jpg', '')
                     }))
 
                     return r;
                 }");
 
                 var oldResult = await resultRepository
-                    .GetAllByAsync(x => x.ProviderId == elRucoProviderID &&
+                    .GetAllByAsync(x => x.ProviderId == laRucaProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
                 foreach (var item in oldResult)
                 {
@@ -65,8 +65,8 @@ namespace LotteryResult.Services
                         Result1 = item.Result,
                         Time = item.Time,
                         Date = string.Empty,
-                        ProductId = elRucoID,
-                        ProviderId =elRucoProviderID,
+                        ProductId = laRucaID,
+                        ProviderId = laRucaProviderID,
                         ProductTypeId = (int)ProductTypeEnum.TERMINALES
                     });
                 }

@@ -23,7 +23,7 @@ namespace LotteryResult.Controllers
         public async Task<ActionResult> Index()
         {
             var products = await _productRepository.GetAllByAsync();
-            ViewBag.products = products;
+            ViewBag.products = products.OrderBy(x => x.Id).ToList();
 
             if (TempData["Message"] != null)
                 ViewBag.Message = TempData["Message"];
@@ -31,7 +31,7 @@ namespace LotteryResult.Controllers
             return View();
         }
 
-        public async Task<ActionResult> ActivateJob(int id)
+        public async Task<ActionResult> SwicthProductStatus(int id)
         {
             var product = await _productRepository.GetByAsync(x => x.Id == id, new string[] {
                 nameof(Product.ProviderProducts),
