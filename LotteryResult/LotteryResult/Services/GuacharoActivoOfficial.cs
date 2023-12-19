@@ -1,4 +1,6 @@
-﻿using LotteryResult.Data.Abstractions;
+﻿using Flurl;
+using Flurl.Http;
+using LotteryResult.Data.Abstractions;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
 using PuppeteerSharp;
@@ -24,23 +26,24 @@ namespace LotteryResult.Services
         {
             try
             {
-                using var browserFetcher = new BrowserFetcher();
-                await browserFetcher.DownloadAsync();
-                await using var browser = await Puppeteer.LaunchAsync(
-                    new LaunchOptions { Headless = true });
-                await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://guacharoactivo.com/#/resultados-guacharo");
+                // Obtén la zona horaria de Venezuela
+                TimeZoneInfo venezuelaZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
 
-                var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
-                    let r = [...document.querySelectorAll('.col-md-3.mb-4.text-center')]
-                    .map(x => ({
-                        time: x.querySelector('.hour').innerText.replace('Resultado ', ''),
-                        result: x.querySelector('img').getAttribute('src').replace('../../../animals/guacharo/', '').replace('.png', '') +' '+ x.querySelector('.name').innerText
-                    }))
-                    .filter(x => x.result != 'espera Esperando');
+                // Obtén la fecha y hora actual en UTC
+                DateTime utcNow = DateTime.UtcNow;
 
-                    return r;
-                }");
+                // Convierte la fecha y hora actual a la zona horaria de Venezuela
+                DateTime venezuelaNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, venezuelaZone);
+
+
+                var response = await "https://www.apuestanext.com/apuestanext.com/aplicativo/accion/apis/resultados.php"
+                .PostJsonAsync(new {
+                    id_tipo_loteria = 96,
+                    fecha = venezuelaNow.ToString("yyyy-MM-dd")
+                })
+                .ReceiveJson<List<GuacharoOfficialResponse>>();
+
+                if (!response.Any()) return;
 
                 var oldResult = await resultRepository
                     .GetAllByAsync(x => x.ProviderId == guacharoProviderID &&
@@ -52,20 +55,20 @@ namespace LotteryResult.Services
 
                 await unitOfWork.SaveChangeAsync();
 
-                foreach (var item in someObject)
+                foreach (var item in response)
                 {
                     resultRepository.Insert(new Data.Models.Result
                     {
-                        Result1 = item.Result,
-                        Time = item.Time,
+                        Result1 = item.numero + item.nombre,
+                        Time = item.loteria.Replace("Guacharo Activo ", "").ToUpper(),
                         Date = string.Empty,
                         ProductId = guacharoID,
                         ProviderId = guacharoProviderID,
-                        ProductTypeId = (int)ProductTypeEnum.TERMINALES
+                        ProductTypeId = (int)ProductTypeEnum.ANIMALES77
                     });
                 }
 
-                Console.WriteLine(someObject);
+                Console.WriteLine(response);
 
                 await unitOfWork.SaveChangeAsync();
             }

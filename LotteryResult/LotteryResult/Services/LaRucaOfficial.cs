@@ -24,26 +24,42 @@ namespace LotteryResult.Services
         {
             try
             {
+                //using var browserFetcher = new BrowserFetcher();
+                //await browserFetcher.DownloadAsync();
+                //await using var browser = await Puppeteer.LaunchAsync(
+                //    new LaunchOptions { Headless = true });
+                //await using var page = await browser.NewPageAsync();
+                //await page.GoToAsync("https://lottollano.com.ve/laruca.php");
+
+                //var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
+                //    let fecha = new Date();
+                //    let dia = String(fecha.getDate()).padStart(2, '0');
+                //    let mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript empiezan desde 0
+                //    let ano = fecha.getFullYear();
+                //    let fechaFormateada = dia + '/' + mes + '/' + ano;
+
+                //    let r = [...document.querySelectorAll('table tbody tr')]
+                //    .filter(tr => ([...tr.querySelectorAll('td')][0]).innerHTML.split('<br>')[1] == fechaFormateada)
+                //    .map(tr => ({
+                //        time: ([...tr.querySelectorAll('td')][0]).innerHTML.split('<br>')[2],
+                //        result: ([...tr.querySelectorAll('td')][1]).querySelector('img').getAttribute('src').replace('./laruca/', '').replace('.jpg', '')
+                //    }))
+
+                //    return r;
+                //}");
                 using var browserFetcher = new BrowserFetcher();
                 await browserFetcher.DownloadAsync();
                 await using var browser = await Puppeteer.LaunchAsync(
                     new LaunchOptions { Headless = true });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://lottollano.com.ve/laruca.php");
+                await page.GoToAsync("https://triples.bet/products-results/la-ruca-results");
 
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
-                    let fecha = new Date();
-                    let dia = String(fecha.getDate()).padStart(2, '0');
-                    let mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript empiezan desde 0
-                    let ano = fecha.getFullYear();
-                    let fechaFormateada = dia + '/' + mes + '/' + ano;
-
-                    let r = [...document.querySelectorAll('table tbody tr')]
-                    .filter(tr => ([...tr.querySelectorAll('td')][0]).innerHTML.split('<br>')[1] == fechaFormateada)
-                    .map(tr => ({
-                        time: ([...tr.querySelectorAll('td')][0]).innerHTML.split('<br>')[2],
-                        result: ([...tr.querySelectorAll('td')][1]).querySelector('img').getAttribute('src').replace('./laruca/', '').replace('.jpg', '')
-                    }))
+                   let r = [...document.querySelectorAll('.results-content-item')]
+                    .map(x => ({
+                        time: x.querySelector('.results-title-draw-hour').innerText,
+                        result: x.querySelector('.number-ruca')?.innerText
+                    })).filter(x => x.result !== undefined);
 
                     return r;
                 }");

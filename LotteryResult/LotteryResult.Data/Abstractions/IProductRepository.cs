@@ -9,5 +9,8 @@ namespace LotteryResult.Data.Abstractions
 {
     public interface IProductRepository : IGenericRepository<Product>
     {
+
+        Task<List<Product>> GetResultByProductsByDate(DateTime dateTime);
+
     }
 }

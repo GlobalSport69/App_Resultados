@@ -4,6 +4,7 @@ using LotteryResult.Data.Abstractions;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
 using PuppeteerSharp;
+using System.Globalization;
 
 namespace LotteryResult.Services
 {
@@ -63,10 +64,16 @@ namespace LotteryResult.Services
 
                 foreach (var item in results)
                 {
+                    // Crear un DateTime a partir de la cadena de texto "13:00:00"
+                    DateTime dt = DateTime.ParseExact(item.sorteo.hora, "HH:mm:ss", CultureInfo.InvariantCulture);
+                    // Convertir a formato de 12 horas (AM/PM)
+                    string time12Hour = dt.ToString("hh:mm tt", CultureInfo.InvariantCulture);
+
+
                     resultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.resultado,
-                        Time = item.sorteo.hora,
+                        Time = time12Hour,
                         Date = string.Empty,
                         ProductId = tripleCaracasID,
                         ProviderId = tripleCaracasProviderID,

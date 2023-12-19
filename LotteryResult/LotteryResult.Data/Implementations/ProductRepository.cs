@@ -1,6 +1,7 @@
 ﻿using LotteryResult.Data.Abstractions;
 using LotteryResult.Data.Context;
 using LotteryResult.Data.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,14 @@ namespace LotteryResult.Data.Implementations
     {
         public ProductRepository(PostgresDbContext dbContext) : base(dbContext)
         {
+        }
+
+        public async Task<List<Product>> GetResultByProductsByDate(DateTime dateTime)
+        {
+            return await _dbContext.Products
+                .Where(x => x.Enable)
+                .Include(x => x.Results.Where(r => r.CreatedAt.ToUniversalTime().Date == dateTime))
+                .ToListAsync();
         }
     }
 }

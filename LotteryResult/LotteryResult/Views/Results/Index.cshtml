@@ -1,0 +1,66 @@
+﻿@using LotteryResult.Data.Models;
+
+@{
+    ViewData["Title"] = "Results";
+
+}
+
+
+<h1>Resultados</h1>
+
+@{
+    var products = ViewBag.products as List<Product> ?? new List<Product>();
+
+    <div class="container-fluid">
+        <div class="row">
+            @foreach (var product in products)
+            {
+                <div class="col-4 border">
+                    <h3>@product.Name</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Resultado</th>
+                                <th>Hora</th>
+                                <th>Sorteo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                if (!product.Results.Any())
+                                {
+                                    <tr>
+                                        <td class="text-center" colspan="3">Sin data que mostrar</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    foreach (var result in product.Results.ToList())
+                                    {
+                                        <tr>
+                                            <td>@result.Result1</td>
+                                            <td>@result.Time</td>
+                                            <td>@(result.Sorteo ?? "N/A")</td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@section scripts{
+    <script>
+        window.onload = function () {
+            let message = '@ViewBag.Message';
+            if (message) {
+                Swal.fire(message);
+            }
+        };
+    </script>
+}
+
