@@ -14,6 +14,8 @@ namespace LotteryResult
             services.AddScoped<ElRucoOfficial>();
             services.AddScoped<LaRucaOfficial>();
             services.AddScoped<TripleCaracasOfficial>();
+            services.AddScoped<SelvaPlusOfficial>();
+            services.AddScoped<GuacharoActivoOfficial>();
 
             services.AddScoped<ProviderProductMapper>();
 

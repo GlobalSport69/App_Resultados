@@ -7,7 +7,7 @@ using PuppeteerSharp;
 
 namespace LotteryResult.Services
 {
-    public class TripleCaracasOfficial
+    public class TripleCaracasOfficial : IGetResult
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;

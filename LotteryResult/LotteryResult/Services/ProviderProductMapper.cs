@@ -11,7 +11,9 @@ namespace LotteryResult.Services
         private ElRucoOfficial elRucoOfficial;
         private LaRucaOfficial laRucaOfficial;
         private TripleCaracasOfficial tripleCaracasOfficial;
-        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial, ElRucoOfficial elRucoOfficial, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial)
+        private SelvaPlusOfficial selvaPlusOfficial;
+        private GuacharoActivoOfficial guacharoActivoOfficial;
+        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial, ElRucoOfficial elRucoOfficial, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial, SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial)
         {
             this.tripleZamoranoOfficial = tripleZamoranoOfficial;
             this.lottoReyOfficial = lottoReyOfficial;
@@ -20,6 +22,8 @@ namespace LotteryResult.Services
             this.elRucoOfficial = elRucoOfficial;
             this.laRucaOfficial = laRucaOfficial;
             this.tripleCaracasOfficial = tripleCaracasOfficial;
+            this.selvaPlusOfficial = selvaPlusOfficial;
+            this.guacharoActivoOfficial = guacharoActivoOfficial;
         }
 
         public void AddJob(int product_id, string job_id, string cron_expression) {
@@ -28,6 +32,30 @@ namespace LotteryResult.Services
             {
                 RecurringJob.AddOrUpdate(job_id, 
                     () => tripleZamoranoOfficial.Handler(), 
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
+                    });
+                return;
+            }
+
+            if (product_id == 3)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => tripleCaracasOfficial.Handler(),
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
+                    });
+                return;
+            }
+
+            if (product_id == 4)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => tripleCalienteOfficial.Handler(),
                     cron_expression,
                     new RecurringJobOptions
                     {
@@ -60,18 +88,6 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == 4)
-            {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => tripleCalienteOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
-                    });
-                return;
-            }
-
             if (product_id == 8)
             {
                 RecurringJob.AddOrUpdate(job_id,
@@ -95,10 +111,22 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == 3)
+            if (product_id == 10)
             {
                 RecurringJob.AddOrUpdate(job_id,
-                    () => tripleCaracasOfficial.Handler(),
+                    () => selvaPlusOfficial.Handler(),
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
+                    });
+                return;
+            }
+
+            if (product_id == 11)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => guacharoActivoOfficial.Handler(),
                     cron_expression,
                     new RecurringJobOptions
                     {

@@ -93,6 +93,7 @@ namespace LotteryResult.Services
             catch (Exception ex)
             {
                 _logger.LogError(exception: ex, message: nameof(TripleCalienteOfficial));
+                throw;
             }
         }
     }
