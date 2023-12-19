@@ -1,4 +1,5 @@
 ﻿@using LotteryResult.Data.Models;
+@using System.Globalization;
 
 @{
     ViewData["Title"] = "Results";
@@ -35,7 +36,7 @@
                                 }
                                 else
                                 {
-                                    foreach (var result in product.Results.ToList())
+                                    foreach (var result in product.Results.OrderByDescending(x => DateTime.ParseExact(x.Time, "hh:mm tt", CultureInfo.InvariantCulture)).ToList())
                                     {
                                         <tr>
                                             <td>@result.Result1</td>

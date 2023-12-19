@@ -79,7 +79,7 @@ namespace LotteryResult.Services
                     resultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.Result,
-                        Time = item.Time,
+                        Time = item.Time.ToUpper(),
                         Date = string.Empty,
                         ProductId = laRucaID,
                         ProviderId = laRucaProviderID,

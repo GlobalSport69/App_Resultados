@@ -13,7 +13,7 @@ namespace LotteryResult.Services
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
         private const int tripleCaracasID = 3;
-        private const int tripleCaracasProviderID = 8;
+        private const int tripleCaracasProviderID = 9;
         private readonly ILogger<TripleCaracasOfficial> _logger;
 
         public TripleCaracasOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<TripleCaracasOfficial> logger)
