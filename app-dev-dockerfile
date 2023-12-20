@@ -1,0 +1,29 @@
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+# WORKDIR /app
+WORKDIR /src
+
+# EXPOSE 80
+# EXPOSE 443
+
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+WORKDIR /src
+COPY LotteryResult/*.sln .
+COPY LotteryResult/LotteryResult/LotteryResult.csproj ./LotteryResult/
+COPY LotteryResult/LotteryResult.Data/LotteryResult.Data.csproj ./LotteryResult.Data/
+
+# RUN dotnet restore "LotteryResult/LotteryResult.csproj"
+# RUN dotnet restore "LotteryResult.Data/LotteryResult.Data.csproj"
+
+COPY LotteryResult/LotteryResult/ ./LotteryResult/
+COPY LotteryResult/LotteryResult.Data/ ./LotteryResult.Data/
+
+# COPY . .
+WORKDIR /src/LotteryResult
+RUN dotnet build "LotteryResult.csproj" -c Development -o /src/LotteryResult/build
+
+FROM build AS publish
+RUN dotnet publish "LotteryResult.csproj" -c Development -o /src/LotteryResult/publish /p:UseAppHost=false
+
+FROM base AS final
+COPY --from=publish /src/LotteryResult/publish .
+ENTRYPOINT ["dotnet", "LotteryResult.dll"]
