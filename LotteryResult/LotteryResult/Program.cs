@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using LotteryResult;
 using Serilog;
 using Serilog.Events;
+using LotteryResult.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,7 +52,12 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseHangfireDashboard();
+//app.UseHangfireDashboard();
+var options = new DashboardOptions()
+{
+    Authorization = new[] { new MyHangfireAuthorizationFilter() }
+};
+app.UseHangfireDashboard("/hangfire", options);
 
 app.UseRouting();
 
