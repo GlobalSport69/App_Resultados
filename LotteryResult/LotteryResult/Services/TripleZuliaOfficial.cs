@@ -27,7 +27,15 @@ namespace LotteryResult.Services
                 using var browserFetcher = new BrowserFetcher();
                 await browserFetcher.DownloadAsync();
                 await using var browser = await Puppeteer.LaunchAsync(
-                    new LaunchOptions { Headless = true });
+                    new LaunchOptions
+                    {
+                        Headless = true,
+                        Args = new string[]
+                        {
+                            "--no-sandbox",
+                            "--disable-setuid-sandbox"
+                        }
+                    });
                 await using var page = await browser.NewPageAsync();
                 await page.GoToAsync("http://www.resultadostriplezulia.com/action/index");
 

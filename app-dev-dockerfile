@@ -1,4 +1,9 @@
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+
+RUN apt-get update 
+RUN apt-get install sudo -y 
+RUN sudo apt-get install -y chromium
+
 # WORKDIR /app
 WORKDIR /src
 
