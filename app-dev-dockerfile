@@ -1,75 +1,26 @@
 FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 
-
-# RUN apt-get update
-# RUN apt-get install sudo -y
-# RUN sudo apt-get install -y chromium
-
-
-# RUN apt-get update && apt-get -f install && apt-get -y install wget gnupg2 apt-utils
-# RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-#     && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-#     && apt-get update \
-#     && apt-get install -y google-chrome-unstable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst ttf-freefont \
-#       --no-install-recommends \
-#     && rm -rf /var/lib/apt/lists/*
-# ENV PUPPETEER_EXECUTABLE_PATH "/usr/bin/google-chrome-unstable"
-
-
-
-RUN apt-get update && apt-get -f install && apt-get -y install wget gnupg2 apt-utils
-RUN echo "deb http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/google-chrome.list
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
-RUN apt-get update && apt-get install -y google-chrome-stable
-ENV PUPPETEER_EXECUTABLE_PATH "/usr/bin/google-chrome-stable"
-
-
-# Install Puppeteer dependencies
-# RUN apt-get update && apt-get install -y \
-    # chromium \
-    # gconf-service \
-    # libasound2 \
-    # libatk1.0-0 \
-    # libc6 \
-    # libcairo2 \
-    # libcups2 \
-    # libdbus-1-3 \
-    # libexpat1 \
-    # libfontconfig1 \
-    # libgcc1 \
-    # libgconf-2-4 \
-    # libgdk-pixbuf2.0-0 \
-    # libglib2.0-0 \
-    # libgtk-3-0 \
-    # libnspr4 \
-    # libpango-1.0-0 \
-    # libpangocairo-1.0-0 \
-    # libstdc++6 \
-    # libx11-6 \
-    # libx11-xcb1 \
-    # libxcb1 \
-    # libxcomposite1 \
-    # libxcursor1 \
-    # libxdamage1 \
-    # libxext6 \
-    # libxfixes3 \
-    # libxi6 \
-    # libxrandr2 \
-    # libxrender1 \
-    # libxss1 \
-    # libxtst6 \
-    # ca-certificates \
-    # fonts-liberation \
-    # libappindicator1 \
-    # libnss3 \
-    # lsb-release \
-    # xdg-utils \
-    # wget
-# ENV PUPPETEER_EXECUTABLE_PATH "/usr/bin/chromium"
-
-
-# WORKDIR /app
 WORKDIR /src
+
+# Establecer la arquitectura como un argumento
+ARG ARCH
+
+COPY chromium.sh .
+COPY chrome.sh .
+
+# Dar permisos de ejecución al script y ejecutarlo
+RUN chmod +x ./chromium.sh && chmod +x ./chrome.sh
+# RUN ls -al && echo "$ARCH" && exit 1;
+# RUN /bin/sh chrome.sh && exit 1 ;
+
+# Usar una instrucción condicional en el comando RUN
+RUN if [ "$ARCH" = "aarch64" ] ; then \
+        /bin/sh chromium.sh; \
+    elif [ "$ARCH" = "x86_64" ] ; then \
+       /bin/sh chrome.sh; \
+    else \
+        echo "Arquitectura no soportada" && exit 1 ; \
+    fi
 
 # EXPOSE 80
 # EXPOSE 443

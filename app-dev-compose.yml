@@ -15,11 +15,14 @@ services:
       - ./bk.sql:/docker-entrypoint-initdb.d/02_file.sql
     ports:
       - "5444:5432"
-  app_db:
+  app_dev:
+    image: "app_resultados"
     container_name: "app_dev"
     build:
       context: .
       dockerfile: app-dev-dockerfile
+      args:
+        ARCH: $ARCH
     volumes:
       - ./app/logs:/app/src/logs
     depends_on:
