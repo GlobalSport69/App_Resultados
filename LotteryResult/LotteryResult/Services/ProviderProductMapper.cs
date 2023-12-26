@@ -4,6 +4,7 @@ namespace LotteryResult.Services
 {
     public class ProviderProductMapper
     {
+        private TimeZoneInfo _timeZone;
         private TripleZamoranoOfficial tripleZamoranoOfficial;
         private LottoReyOfficial lottoReyOfficial;
         private TripleZuliaOfficial tripleZuliaOfficial;
@@ -13,8 +14,12 @@ namespace LotteryResult.Services
         private TripleCaracasOfficial tripleCaracasOfficial;
         private SelvaPlusOfficial selvaPlusOfficial;
         private GuacharoActivoOfficial guacharoActivoOfficial;
-        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial, ElRucoOfficial elRucoOfficial, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial, SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial)
+        private LaGranjitaOfficial laGranjitaOfficial;
+        private LaRicachonaOfficial laRicachonaOfficial;
+        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial, ElRucoOfficial elRucoOfficial, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial, SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial)
         {
+            _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
+
             this.tripleZamoranoOfficial = tripleZamoranoOfficial;
             this.lottoReyOfficial = lottoReyOfficial;
             this.tripleZuliaOfficial = tripleZuliaOfficial;
@@ -24,6 +29,8 @@ namespace LotteryResult.Services
             this.tripleCaracasOfficial = tripleCaracasOfficial;
             this.selvaPlusOfficial = selvaPlusOfficial;
             this.guacharoActivoOfficial = guacharoActivoOfficial;
+            this.laGranjitaOfficial = laGranjitaOfficial;
+            this.laRicachonaOfficial = laRicachonaOfficial;
         }
 
         public void AddJob(int product_id, string job_id, string cron_expression) {
@@ -35,7 +42,7 @@ namespace LotteryResult.Services
                     cron_expression,
                     new RecurringJobOptions
                     {
-                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
+                        TimeZone = _timeZone
                     });
                 return;
             }
@@ -47,7 +54,7 @@ namespace LotteryResult.Services
                     cron_expression,
                     new RecurringJobOptions
                     {
-                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
+                        TimeZone = _timeZone
                     });
                 return;
             }
@@ -59,7 +66,7 @@ namespace LotteryResult.Services
                     cron_expression,
                     new RecurringJobOptions
                     {
-                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
+                        TimeZone = _timeZone
                     });
                 return;
             }
@@ -71,7 +78,7 @@ namespace LotteryResult.Services
                     cron_expression,
                     new RecurringJobOptions
                     {
-                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
+                        TimeZone = _timeZone
                     });
                 return;
             }
@@ -83,7 +90,7 @@ namespace LotteryResult.Services
                     cron_expression,
                     new RecurringJobOptions
                     {
-                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
+                        TimeZone = _timeZone
                     });
                 return;
             }
@@ -95,7 +102,7 @@ namespace LotteryResult.Services
                     cron_expression,
                     new RecurringJobOptions
                     {
-                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
+                        TimeZone = _timeZone
                     });
             }
 
@@ -106,7 +113,7 @@ namespace LotteryResult.Services
                     cron_expression,
                     new RecurringJobOptions
                     {
-                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
+                        TimeZone = _timeZone
                     });
                 return;
             }
@@ -118,7 +125,7 @@ namespace LotteryResult.Services
                     cron_expression,
                     new RecurringJobOptions
                     {
-                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
+                        TimeZone = _timeZone
                     });
                 return;
             }
@@ -130,7 +137,31 @@ namespace LotteryResult.Services
                     cron_expression,
                     new RecurringJobOptions
                     {
-                        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time")
+                        TimeZone = _timeZone
+                    });
+                return;
+            }
+
+            if (product_id == 12)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => laGranjitaOfficial.Handler(),
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = _timeZone
+                    });
+                return;
+            }
+
+            if (product_id == 13)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => laRicachonaOfficial.Handler(),
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = _timeZone
                     });
                 return;
             }

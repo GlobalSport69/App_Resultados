@@ -16,6 +16,8 @@ namespace LotteryResult
             services.AddScoped<TripleCaracasOfficial>();
             services.AddScoped<SelvaPlusOfficial>();
             services.AddScoped<GuacharoActivoOfficial>();
+            services.AddScoped<LaGranjitaOfficial>();
+            services.AddScoped<LaRicachonaOfficial>();
 
             services.AddScoped<ProviderProductMapper>();
 
