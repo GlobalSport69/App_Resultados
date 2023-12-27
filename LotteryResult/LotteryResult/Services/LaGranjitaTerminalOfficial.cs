@@ -3,6 +3,7 @@ using Flurl.Http;
 using LotteryResult.Data.Abstractions;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
+using System.Globalization;
 
 namespace LotteryResult.Services
 {
@@ -56,10 +57,11 @@ namespace LotteryResult.Services
 
                 foreach (var item in response)
                 {
+                    var stringTime = item.lottery.name.Replace("TERMINAL LA GRANJITA ", "").Replace("O", "0").ToUpper();
                     resultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.result,
-                        Time = item.lottery.name.Replace("TERMINAL LA GRANJITA ", "").Replace("O", "0").ToUpper(),
+                        Time = FormatTime(stringTime),
                         Date = string.Empty,
                         ProductId = laGranjitaTerminalesID,
                         ProviderId = laGranjitaTerminalesProviderID,
@@ -74,6 +76,19 @@ namespace LotteryResult.Services
                 _logger.LogError(exception: ex, message: nameof(LaGranjitaTerminalOfficial));
                 throw;
             }
+        }
+
+        public static string FormatTime(string time) {
+            DateTime dateTime;
+
+            var cultureInfo = new CultureInfo("en-US");
+            if (DateTime.TryParseExact(time, "h:mm tt", cultureInfo, DateTimeStyles.None, out dateTime))
+            {
+                string formattedTime = dateTime.ToString("hh:mm tt", cultureInfo);
+                return formattedTime.ToUpper();
+            }
+
+            throw new Exception("El formato de la hora proporcionada no es válido.");
         }
     }
 }

@@ -18,6 +18,8 @@ namespace LotteryResult
             services.AddScoped<GuacharoActivoOfficial>();
             services.AddScoped<LaGranjitaOfficial>();
             services.AddScoped<LaRicachonaOfficial>();
+            services.AddScoped<LaGranjitaTerminalOfficial>();
+            services.AddScoped<LaRicachonaAnimalitosOfficial>();
 
             services.AddScoped<ProviderProductMapper>();
 

@@ -3,19 +3,18 @@ using Flurl.Http;
 using LotteryResult.Data.Abstractions;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
-using PuppeteerSharp;
 
 namespace LotteryResult.Services
 {
-    public class GuacharoActivoOfficial : IGetResult
+    public class LaRicachonaAnimalitosOfficial : IGetResult
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
-        private const int guacharoID = 11;
-        private const int guacharoProviderID = 11;
-        private readonly ILogger<GuacharoActivoOfficial> _logger;
+        private const int laGranjitaID = 14;
+        private const int laGranjitaProviderID = 14;
+        private readonly ILogger<LaRicachonaAnimalitosOfficial> _logger;
 
-        public GuacharoActivoOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<GuacharoActivoOfficial> logger)
+        public LaRicachonaAnimalitosOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<LaRicachonaAnimalitosOfficial> logger)
         {
             this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
@@ -35,19 +34,19 @@ namespace LotteryResult.Services
                 // Convierte la fecha y hora actual a la zona horaria de Venezuela
                 DateTime venezuelaNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, venezuelaZone);
 
-
-                var response = await "https://www.apuestanext.com/apuestanext.com/aplicativo/accion/apis/resultados.php"
-                .PostJsonAsync(new {
-                    id_tipo_loteria = 96,
-                    fecha = venezuelaNow.ToString("yyyy-MM-dd")
+                var response = await "https://webservice.premierpluss.com"
+                .AppendPathSegments("loteries", "results3")
+                .SetQueryParams(new
+                {
+                    since = venezuelaNow.ToString("yyyy-MM-dd"),
+                    product = 16
                 })
-                .ReceiveJson<List<GuacharoOfficialResponse>>();
-
-                if (!response.Any()) return;
+                .GetJsonAsync<List<GetLaGranjitaOfficialResponse>>();
 
                 var oldResult = await resultRepository
-                    .GetAllByAsync(x => x.ProviderId == guacharoProviderID &&
+                    .GetAllByAsync(x => x.ProviderId == laGranjitaProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
+
                 foreach (var item in oldResult)
                 {
                     resultRepository.Delete(item);
@@ -57,24 +56,23 @@ namespace LotteryResult.Services
 
                 foreach (var item in response)
                 {
+                    var time = item.lottery.name.Replace("ANIMALITOS LA RICACHONA ", "").Replace("O", "0").ToUpper();
                     resultRepository.Insert(new Data.Models.Result
                     {
-                        Result1 = item.numero + " " +item.nombre.Trim(),
-                        Time = item.loteria.Replace("Guacharo Activo ", "").ToUpper(),
+                        Result1 = item.result.Replace("-", " "),
+                        Time = LaGranjitaTerminalOfficial.FormatTime(time),
                         Date = string.Empty,
-                        ProductId = guacharoID,
-                        ProviderId = guacharoProviderID,
-                        ProductTypeId = (int)ProductTypeEnum.ANIMALES77
+                        ProductId = laGranjitaID,
+                        ProviderId = laGranjitaProviderID,
+                        ProductTypeId = (int)ProductTypeEnum.ANIMALITOS
                     });
                 }
-
-                Console.WriteLine(response);
 
                 await unitOfWork.SaveChangeAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(exception: ex, message: nameof(GuacharoActivoOfficial));
+                _logger.LogError(exception: ex, message: nameof(LaRicachonaAnimalitosOfficial));
                 throw;
             }
         }

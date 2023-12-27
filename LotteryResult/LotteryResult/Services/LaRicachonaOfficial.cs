@@ -11,8 +11,8 @@ namespace LotteryResult.Services
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
-        private const int laRicachonaID = 13;
-        private const int laRicachonaProviderID = 13;
+        private const int laRicachonaID = 12;
+        private const int laRicachonaProviderID = 12;
         private readonly ILogger<LaRicachonaOfficial> _logger;
 
         public LaRicachonaOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<LaRicachonaOfficial> logger)
@@ -56,10 +56,11 @@ namespace LotteryResult.Services
 
                 foreach (var item in response)
                 {
+                    var time = item.lottery.name.Replace("LA RICACHONA ", "").Replace("O", "0").ToUpper();
                     resultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.result,
-                        Time = item.lottery.name.Replace("LA RICACHONA ", "").Replace("O", "0").ToUpper(),
+                        Time = LaGranjitaTerminalOfficial.FormatTime(time),
                         Date = string.Empty,
                         ProductId = laRicachonaID,
                         ProviderId = laRicachonaProviderID,

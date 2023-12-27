@@ -16,7 +16,9 @@ namespace LotteryResult.Services
         private GuacharoActivoOfficial guacharoActivoOfficial;
         private LaGranjitaOfficial laGranjitaOfficial;
         private LaRicachonaOfficial laRicachonaOfficial;
-        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial, ElRucoOfficial elRucoOfficial, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial, SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial)
+        private LaGranjitaTerminalOfficial laGranjitaTerminalOfficial;
+        private LaRicachonaAnimalitosOfficial laRicachonaAnimalitosOfficial;
+        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial, ElRucoOfficial elRucoOfficial, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial, SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial, LaGranjitaTerminalOfficial laGranjitaTerminalOfficial, LaRicachonaAnimalitosOfficial laRicachonaAnimalitosOfficial)
         {
             _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
 
@@ -31,6 +33,8 @@ namespace LotteryResult.Services
             this.guacharoActivoOfficial = guacharoActivoOfficial;
             this.laGranjitaOfficial = laGranjitaOfficial;
             this.laRicachonaOfficial = laRicachonaOfficial;
+            this.laGranjitaTerminalOfficial = laGranjitaTerminalOfficial;
+            this.laRicachonaAnimalitosOfficial = laRicachonaAnimalitosOfficial;
         }
 
         public void AddJob(int product_id, string job_id, string cron_expression) {
@@ -142,7 +146,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == 12)
+            if (product_id == 1)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => laGranjitaOfficial.Handler(),
@@ -154,10 +158,34 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == 13)
+            if (product_id == 12)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => laRicachonaOfficial.Handler(),
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = _timeZone
+                    });
+                return;
+            }
+
+            if (product_id == 13)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => laGranjitaTerminalOfficial.Handler(),
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = _timeZone
+                    });
+                return;
+            }
+
+            if (product_id == 14)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => laRicachonaAnimalitosOfficial.Handler(),
                     cron_expression,
                     new RecurringJobOptions
                     {
