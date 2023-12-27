@@ -15,5 +15,5 @@ docker-compose -f app-dev-compose.yml up --build -d
 Ejecute este comando para generar un archivo .env con la arquitectura de su host o realice una copia de **.env.example**, remobrelo a **.env** y realice la modificacion pertinente
 
 ```bash
-echo "ARG=$(uname -m)" > .env
+echo "ARCH=$(uname -m)" > .env
 ```

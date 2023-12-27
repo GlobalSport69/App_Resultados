@@ -5,22 +5,12 @@ WORKDIR /src
 # Establecer la arquitectura como un argumento
 ARG ARCH
 
-COPY chromium.sh .
-COPY chrome.sh .
+RUN apt-get update && apt-get install -y wget gnupg ca-certificates && \
+    wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/chromium-archive-keyring.gpg && \
+    echo "deb [arch=$ARCH signed-by=/usr/share/keyrings/chromium-archive-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/chromium.list && \
+    apt-get update && apt-get install -y chromium
 
-# Dar permisos de ejecución al script y ejecutarlo
-RUN chmod +x ./chromium.sh && chmod +x ./chrome.sh
-# RUN ls -al && echo "$ARCH" && exit 1;
-# RUN /bin/sh chrome.sh && exit 1 ;
-
-# Usar una instrucción condicional en el comando RUN
-RUN if [ "$ARCH" = "aarch64" ] ; then \
-        /bin/sh chromium.sh; \
-    elif [ "$ARCH" = "x86_64" ] ; then \
-       /bin/sh chrome.sh; \
-    else \
-        echo "Arquitectura no soportada" && exit 1 ; \
-    fi
+ENV PUPPETEER_EXECUTABLE_PATH="/usr/bin/chromium"
 
 # EXPOSE 80
 # EXPOSE 443
