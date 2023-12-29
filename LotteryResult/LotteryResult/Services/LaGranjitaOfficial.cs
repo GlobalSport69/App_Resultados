@@ -12,7 +12,7 @@ namespace LotteryResult.Services
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
-        private const int laGranjitaID = 1;
+        public const int laGranjitaID = 1;
         private const int laGranjitaProviderID = 3;
         private readonly ILogger<LaGranjitaOfficial> _logger;
 

@@ -10,8 +10,8 @@ namespace LotteryResult.Services
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
-        private const int laGranjitaID = 14;
-        private const int laGranjitaProviderID = 14;
+        public const int laRicachonaAnimalitosID = 14;
+        private const int laRicachonaAnimalitosProviderID = 14;
         private readonly ILogger<LaRicachonaAnimalitosOfficial> _logger;
 
         public LaRicachonaAnimalitosOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<LaRicachonaAnimalitosOfficial> logger)
@@ -44,7 +44,7 @@ namespace LotteryResult.Services
                 .GetJsonAsync<List<GetLaGranjitaOfficialResponse>>();
 
                 var oldResult = await resultRepository
-                    .GetAllByAsync(x => x.ProviderId == laGranjitaProviderID &&
+                    .GetAllByAsync(x => x.ProviderId == laRicachonaAnimalitosProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
 
                 foreach (var item in oldResult)
@@ -62,8 +62,8 @@ namespace LotteryResult.Services
                         Result1 = item.result.Replace("-", " "),
                         Time = LaGranjitaTerminalOfficial.FormatTime(time),
                         Date = string.Empty,
-                        ProductId = laGranjitaID,
-                        ProviderId = laGranjitaProviderID,
+                        ProductId = laRicachonaAnimalitosID,
+                        ProviderId = laRicachonaAnimalitosProviderID,
                         ProductTypeId = (int)ProductTypeEnum.ANIMALITOS
                     });
                 }

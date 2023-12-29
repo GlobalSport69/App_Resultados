@@ -20,6 +20,7 @@ namespace LotteryResult
             services.AddScoped<LaRicachonaOfficial>();
             services.AddScoped<LaGranjitaTerminalOfficial>();
             services.AddScoped<LaRicachonaAnimalitosOfficial>();
+            services.AddScoped<TripleBombaOfficial>();
 
             services.AddScoped<ProviderProductMapper>();
 

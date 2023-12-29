@@ -11,7 +11,7 @@ namespace LotteryResult.Services
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
-        private const int guacharoID = 11;
+        public const int guacharoID = 11;
         private const int guacharoProviderID = 11;
         private readonly ILogger<GuacharoActivoOfficial> _logger;
 

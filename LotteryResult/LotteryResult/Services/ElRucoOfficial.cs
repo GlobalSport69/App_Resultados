@@ -9,7 +9,7 @@ namespace LotteryResult.Services
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
-        private const int elRucoID = 8;
+        public const int elRucoID = 8;
         private const int elRucoProviderID = 7;
         private readonly ILogger<ElRucoOfficial> _logger;
 

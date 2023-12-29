@@ -11,7 +11,7 @@ namespace LotteryResult.Services
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
-        private const int laRicachonaID = 12;
+        public const int laRicachonaID = 12;
         private const int laRicachonaProviderID = 12;
         private readonly ILogger<LaRicachonaOfficial> _logger;
 

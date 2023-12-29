@@ -18,7 +18,8 @@ namespace LotteryResult.Services
         private LaRicachonaOfficial laRicachonaOfficial;
         private LaGranjitaTerminalOfficial laGranjitaTerminalOfficial;
         private LaRicachonaAnimalitosOfficial laRicachonaAnimalitosOfficial;
-        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial, ElRucoOfficial elRucoOfficial, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial, SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial, LaGranjitaTerminalOfficial laGranjitaTerminalOfficial, LaRicachonaAnimalitosOfficial laRicachonaAnimalitosOfficial)
+        private TripleBombaOfficial tripleBombaOfficial;
+        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial, ElRucoOfficial elRucoOfficial, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial, SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial, LaGranjitaTerminalOfficial laGranjitaTerminalOfficial, LaRicachonaAnimalitosOfficial laRicachonaAnimalitosOfficial, TripleBombaOfficial tripleBombaOfficial)
         {
             _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
 
@@ -35,11 +36,12 @@ namespace LotteryResult.Services
             this.laRicachonaOfficial = laRicachonaOfficial;
             this.laGranjitaTerminalOfficial = laGranjitaTerminalOfficial;
             this.laRicachonaAnimalitosOfficial = laRicachonaAnimalitosOfficial;
+            this.tripleBombaOfficial = tripleBombaOfficial;
         }
 
         public void AddJob(int product_id, string job_id, string cron_expression) {
 
-            if (product_id == 2)
+            if (product_id == TripleZamoranoOfficial.zamoranoID)
             {
                 RecurringJob.AddOrUpdate(job_id, 
                     () => tripleZamoranoOfficial.Handler(), 
@@ -51,7 +53,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == 3)
+            if (product_id == TripleCaracasOfficial.tripleCaracasID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => tripleCaracasOfficial.Handler(),
@@ -63,7 +65,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == 4)
+            if (product_id == TripleCalienteOfficial.tripleCalienteID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => tripleCalienteOfficial.Handler(),
@@ -75,7 +77,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == 5)
+            if (product_id == LottoReyOfficial.lottoReyID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => lottoReyOfficial.Handler(),
@@ -87,7 +89,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == 6)
+            if (product_id == TripleZuliaOfficial.tripleZuliaID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => tripleZuliaOfficial.Handler(),
@@ -99,7 +101,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == 8)
+            if (product_id == ElRucoOfficial.elRucoID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => elRucoOfficial.Handler(),
@@ -110,7 +112,7 @@ namespace LotteryResult.Services
                     });
             }
 
-            if (product_id == 9)
+            if (product_id == LaRucaOfficial.laRucaID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => laRucaOfficial.Handler(),
@@ -122,7 +124,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == 10)
+            if (product_id == SelvaPlusOfficial.selvaPlusID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => selvaPlusOfficial.Handler(),
@@ -134,7 +136,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == 11)
+            if (product_id == GuacharoActivoOfficial.guacharoID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => guacharoActivoOfficial.Handler(),
@@ -146,7 +148,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == 1)
+            if (product_id == LaGranjitaOfficial.laGranjitaID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => laGranjitaOfficial.Handler(),
@@ -158,7 +160,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == 12)
+            if (product_id == LaRicachonaOfficial.laRicachonaID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => laRicachonaOfficial.Handler(),
@@ -170,7 +172,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == 13)
+            if (product_id == LaGranjitaTerminalOfficial.laGranjitaTerminalesID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => laGranjitaTerminalOfficial.Handler(),
@@ -182,10 +184,22 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == 14)
+            if (product_id == LaRicachonaAnimalitosOfficial.laRicachonaAnimalitosID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => laRicachonaAnimalitosOfficial.Handler(),
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = _timeZone
+                    });
+                return;
+            }
+
+            if (product_id == TripleBombaOfficial.tripleBombaID)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => tripleBombaOfficial.Handler(),
                     cron_expression,
                     new RecurringJobOptions
                     {

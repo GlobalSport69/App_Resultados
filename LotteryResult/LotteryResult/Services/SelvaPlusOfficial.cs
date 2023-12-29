@@ -10,7 +10,7 @@ namespace LotteryResult.Services
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
-        private const int selvaPlusID = 10;
+        public const int selvaPlusID = 10;
         private const int selvaPlusProviderID = 10;
         private readonly ILogger<SelvaPlusOfficial> _logger;
 

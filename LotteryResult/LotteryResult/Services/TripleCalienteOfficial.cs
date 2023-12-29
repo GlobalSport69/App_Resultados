@@ -9,7 +9,7 @@ namespace LotteryResult.Services
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
-        private const int tripleCalienteID = 4;
+        public const int tripleCalienteID = 4;
         private const int tripleCalienteProviderID = 6;
         private readonly ILogger<TripleCalienteOfficial> _logger;
 

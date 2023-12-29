@@ -9,7 +9,7 @@ namespace LotteryResult.Services
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
-        private const int tripleZuliaID = 6;
+        public const int tripleZuliaID = 6;
         private const int tripleZuliaProviderID = 5;
         private readonly ILogger<TripleZuliaOfficial> _logger;
 
@@ -37,7 +37,7 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("http://www.resultadostriplezulia.com/action/index");
+                await page.GoToAsync("http://www.resultadostriplezulia.com/action/index", waitUntil: WaitUntilNavigation.Networkidle2);
 
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
                     let fecha = new Date();

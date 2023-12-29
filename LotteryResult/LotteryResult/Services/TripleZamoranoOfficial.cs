@@ -9,7 +9,7 @@ namespace LotteryResult.Services
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
-        private const int zamoranoID = 2;
+        public const int zamoranoID = 2;
         private const int zamoranoProviderID = 1;
         private readonly ILogger<TripleZamoranoOfficial> _logger;
 

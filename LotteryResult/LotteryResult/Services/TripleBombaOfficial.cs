@@ -5,15 +5,15 @@ using PuppeteerSharp;
 
 namespace LotteryResult.Services
 {
-    public class LottoReyOfficial : IGetResult
+    public class TripleBombaOfficial : IGetResult
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
-        public const int lottoReyID = 5;
-        private const int lottoReyProviderID = 4;
-        private readonly ILogger<LottoReyOfficial> _logger;
+        public const int tripleBombaID = 15;
+        private const int tripleBombaProviderID = 15;
+        private readonly ILogger<TripleBombaOfficial> _logger;
 
-        public LottoReyOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<LottoReyOfficial> logger)
+        public TripleBombaOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<TripleBombaOfficial> logger)
         {
             this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
@@ -37,27 +37,23 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://lottorey.com.ve");
+                await page.GoToAsync("https://www.triplebomba.com/sistema", waitUntil: WaitUntilNavigation.Networkidle2);
 
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
-                    let fecha = new Date();
-                    let dia = String(fecha.getDate()).padStart(2, '0');
-                    let mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript empiezan desde 0
-                    let ano = fecha.getFullYear();
-                    let fechaFormateada = dia + '/' + mes + '/' + ano;
-
-                    let r = [...document.querySelectorAll('#main-container .card')]
-                    .filter(x => x.querySelector('.texto-fecha').innerText == fechaFormateada)
-                    .map(x => ({
-                        time: x.querySelector('.texto-hora').innerText,
-                        result: x.querySelector('.card-footer').innerText,
-                    }))
+                    let r = [...document.querySelector('.card-deck').querySelectorAll('.card')]
+                    .flatMap(x => [...x.querySelectorAll('.card-body .mx-auto div')]
+                                .map(y => ({
+                                    time: y.querySelector('h6').innerText.split('-')[1].trim(),
+                                    result: y.querySelector('input').value,
+                                    sorteo: y.querySelector('h6').innerText.split('-')[0].trim()
+                                }))
+                    ).filter(x => x.result !== '---')
 
                     return r;
                 }");
 
                 var oldResult = await resultRepository
-                    .GetAllByAsync(x => x.ProviderId == lottoReyProviderID &&
+                    .GetAllByAsync(x => x.ProviderId == tripleBombaProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
                 foreach (var item in oldResult)
                 {
@@ -71,11 +67,12 @@ namespace LotteryResult.Services
                     resultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.Result,
-                        Time = item.Time.ToUpper(),
+                        Time = LaGranjitaTerminalOfficial.FormatTime(item.Time.ToUpper()),
                         Date = string.Empty,
-                        ProductId = lottoReyID,
-                        ProviderId = lottoReyProviderID,
-                        ProductTypeId = (int)ProductTypeEnum.ANIMALITOS
+                        ProductId = tripleBombaID,
+                        ProviderId = tripleBombaProviderID,
+                        Sorteo = item.Sorteo,
+                        ProductTypeId = (int)ProductTypeEnum.TRIPLES
                     });
                 }
 
@@ -85,7 +82,7 @@ namespace LotteryResult.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(exception:ex, message: nameof(LottoReyOfficial));
+                _logger.LogError(exception: ex, message: nameof(TripleBombaOfficial));
                 throw;
             }
         }
