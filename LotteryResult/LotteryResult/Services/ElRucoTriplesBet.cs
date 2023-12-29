@@ -5,15 +5,15 @@ using PuppeteerSharp;
 
 namespace LotteryResult.Services
 {
-    public class ElRucoOfficial
+    public class ElRucoTriplesBet
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
         public const int elRucoID = 8;
         private const int elRucoProviderID = 7;
-        private readonly ILogger<ElRucoOfficial> _logger;
+        private readonly ILogger<ElRucoTriplesBet> _logger;
 
-        public ElRucoOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<ElRucoOfficial> logger)
+        public ElRucoTriplesBet(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<ElRucoTriplesBet> logger)
         {
             this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;

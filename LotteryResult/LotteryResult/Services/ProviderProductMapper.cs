@@ -9,7 +9,7 @@ namespace LotteryResult.Services
         private LottoReyOfficial lottoReyOfficial;
         private TripleZuliaOfficial tripleZuliaOfficial;
         private TripleCalienteOfficial tripleCalienteOfficial;
-        private ElRucoOfficial elRucoOfficial;
+        private ElRucoTriplesBet elRucoTriplesBet;
         private LaRucaOfficial laRucaOfficial;
         private TripleCaracasOfficial tripleCaracasOfficial;
         private SelvaPlusOfficial selvaPlusOfficial;
@@ -19,7 +19,7 @@ namespace LotteryResult.Services
         private LaGranjitaTerminalOfficial laGranjitaTerminalOfficial;
         private LaRicachonaAnimalitosOfficial laRicachonaAnimalitosOfficial;
         private TripleBombaOfficial tripleBombaOfficial;
-        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial, ElRucoOfficial elRucoOfficial, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial, SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial, LaGranjitaTerminalOfficial laGranjitaTerminalOfficial, LaRicachonaAnimalitosOfficial laRicachonaAnimalitosOfficial, TripleBombaOfficial tripleBombaOfficial)
+        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial, ElRucoTriplesBet elRucoTriplesBet, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial, SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial, LaGranjitaTerminalOfficial laGranjitaTerminalOfficial, LaRicachonaAnimalitosOfficial laRicachonaAnimalitosOfficial, TripleBombaOfficial tripleBombaOfficial)
         {
             _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
 
@@ -27,7 +27,7 @@ namespace LotteryResult.Services
             this.lottoReyOfficial = lottoReyOfficial;
             this.tripleZuliaOfficial = tripleZuliaOfficial;
             this.tripleCalienteOfficial = tripleCalienteOfficial;
-            this.elRucoOfficial = elRucoOfficial;
+            this.elRucoTriplesBet = elRucoTriplesBet;
             this.laRucaOfficial = laRucaOfficial;
             this.tripleCaracasOfficial = tripleCaracasOfficial;
             this.selvaPlusOfficial = selvaPlusOfficial;
@@ -101,10 +101,10 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == ElRucoOfficial.elRucoID)
+            if (product_id == ElRucoTriplesBet.elRucoID)
             {
                 RecurringJob.AddOrUpdate(job_id,
-                    () => elRucoOfficial.Handler(),
+                    () => elRucoTriplesBet.Handler(),
                     cron_expression,
                     new RecurringJobOptions
                     {
