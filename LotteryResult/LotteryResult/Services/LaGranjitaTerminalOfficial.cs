@@ -11,8 +11,8 @@ namespace LotteryResult.Services
     {
         private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
-        public const int laGranjitaTerminalesID = 14;
-        private const int laGranjitaTerminalesProviderID = 14;
+        public const int laGranjitaTerminalesID = 13;
+        private const int laGranjitaTerminalesProviderID = 13;
         private readonly ILogger<LaGranjitaTerminalOfficial> _logger;
 
         public LaGranjitaTerminalOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<LaGranjitaTerminalOfficial> logger)
