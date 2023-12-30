@@ -7,15 +7,13 @@ namespace LotteryResult.Services
 {
     public class LottoReyOfficial : IGetResult
     {
-        private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
         public const int lottoReyID = 5;
         private const int lottoReyProviderID = 4;
         private readonly ILogger<LottoReyOfficial> _logger;
 
-        public LottoReyOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<LottoReyOfficial> logger)
+        public LottoReyOfficial(IUnitOfWork unitOfWork, ILogger<LottoReyOfficial> logger)
         {
-            this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -56,19 +54,17 @@ namespace LotteryResult.Services
                     return r;
                 }");
 
-                var oldResult = await resultRepository
+                var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == lottoReyProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
                 foreach (var item in oldResult)
                 {
-                    resultRepository.Delete(item);
+                    unitOfWork.ResultRepository.Delete(item);
                 }
-
-                await unitOfWork.SaveChangeAsync();
 
                 foreach (var item in someObject)
                 {
-                    resultRepository.Insert(new Data.Models.Result
+                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.Result,
                         Time = item.Time.ToUpper(),

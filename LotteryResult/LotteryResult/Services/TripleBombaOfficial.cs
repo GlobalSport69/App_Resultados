@@ -7,15 +7,13 @@ namespace LotteryResult.Services
 {
     public class TripleBombaOfficial : IGetResult
     {
-        private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
         public const int tripleBombaID = 15;
         private const int tripleBombaProviderID = 15;
         private readonly ILogger<TripleBombaOfficial> _logger;
 
-        public TripleBombaOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<TripleBombaOfficial> logger)
+        public TripleBombaOfficial(IUnitOfWork unitOfWork, ILogger<TripleBombaOfficial> logger)
         {
-            this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -52,19 +50,17 @@ namespace LotteryResult.Services
                     return r;
                 }");
 
-                var oldResult = await resultRepository
+                var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == tripleBombaProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
                 foreach (var item in oldResult)
                 {
-                    resultRepository.Delete(item);
+                    unitOfWork.ResultRepository.Delete(item);
                 }
-
-                await unitOfWork.SaveChangeAsync();
 
                 foreach (var item in someObject)
                 {
-                    resultRepository.Insert(new Data.Models.Result
+                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.Result,
                         Time = LaGranjitaTerminalOfficial.FormatTime(item.Time.ToUpper()),

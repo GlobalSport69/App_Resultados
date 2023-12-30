@@ -10,15 +10,13 @@ namespace LotteryResult.Services
 {
     public class TripleCaracasOfficial : IGetResult
     {
-        private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
         public const int tripleCaracasID = 3;
         private const int tripleCaracasProviderID = 9;
         private readonly ILogger<TripleCaracasOfficial> _logger;
 
-        public TripleCaracasOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<TripleCaracasOfficial> logger)
+        public TripleCaracasOfficial(IUnitOfWork unitOfWork, ILogger<TripleCaracasOfficial> logger)
         {
-            this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -52,15 +50,13 @@ namespace LotteryResult.Services
                     .SelectMany(x => x)
                     .ToList();
 
-                var oldResult = await resultRepository
+                var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == tripleCaracasProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
                 foreach (var item in oldResult)
                 {
-                    resultRepository.Delete(item);
+                    unitOfWork.ResultRepository.Delete(item);
                 }
-
-                await unitOfWork.SaveChangeAsync();
 
                 foreach (var item in results)
                 {
@@ -70,7 +66,7 @@ namespace LotteryResult.Services
                     string time12Hour = dt.ToString("hh:mm tt", CultureInfo.InvariantCulture);
 
 
-                    resultRepository.Insert(new Data.Models.Result
+                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.resultado,
                         Time = time12Hour,

@@ -7,15 +7,13 @@ namespace LotteryResult.Services
 {
     public class TripleZuliaOfficial : IGetResult
     {
-        private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
         public const int tripleZuliaID = 6;
         private const int tripleZuliaProviderID = 5;
         private readonly ILogger<TripleZuliaOfficial> _logger;
 
-        public TripleZuliaOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<TripleZuliaOfficial> logger)
+        public TripleZuliaOfficial(IUnitOfWork unitOfWork, ILogger<TripleZuliaOfficial> logger)
         {
-            this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -70,19 +68,17 @@ namespace LotteryResult.Services
                     return r;
                 }");
 
-                var oldResult = await resultRepository
+                var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == tripleZuliaProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
                 foreach (var item in oldResult)
                 {
-                    resultRepository.Delete(item);
+                    unitOfWork.ResultRepository.Delete(item);
                 }
-
-                await unitOfWork.SaveChangeAsync();
 
                 foreach (var item in someObject)
                 {
-                    resultRepository.Insert(new Data.Models.Result
+                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.Result,
                         Time = item.Time,

@@ -7,15 +7,13 @@ namespace LotteryResult.Services
 {
     public class LaRucaOfficial : IGetResult
     {
-        private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
         public const int laRucaID = 9;
         private const int laRucaProviderID = 8;
         private readonly ILogger<LaRucaOfficial> _logger;
 
-        public LaRucaOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<LaRucaOfficial> logger)
+        public LaRucaOfficial(IUnitOfWork unitOfWork, ILogger<LaRucaOfficial> logger)
         {
-            this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -72,19 +70,17 @@ namespace LotteryResult.Services
                     return r;
                 }");
 
-                var oldResult = await resultRepository
+                var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == laRucaProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
                 foreach (var item in oldResult)
                 {
-                    resultRepository.Delete(item);
+                    unitOfWork.ResultRepository.Delete(item);
                 }
-
-                await unitOfWork.SaveChangeAsync();
 
                 foreach (var item in someObject)
                 {
-                    resultRepository.Insert(new Data.Models.Result
+                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.Result,
                         Time = item.Time.ToUpper(),

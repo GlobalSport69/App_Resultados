@@ -8,15 +8,13 @@ namespace LotteryResult.Services
 {
     public class SelvaPlusOfficial : IGetResult
     {
-        private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
         public const int selvaPlusID = 10;
         private const int selvaPlusProviderID = 10;
         private readonly ILogger<SelvaPlusOfficial> _logger;
 
-        public SelvaPlusOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<SelvaPlusOfficial> logger)
+        public SelvaPlusOfficial(IUnitOfWork unitOfWork, ILogger<SelvaPlusOfficial> logger)
         {
-            this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -45,19 +43,17 @@ namespace LotteryResult.Services
 
                 if (!response.Any()) return;
 
-                var oldResult = await resultRepository
+                var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == selvaPlusProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
                 foreach (var item in oldResult)
                 {
-                    resultRepository.Delete(item);
+                    unitOfWork.ResultRepository.Delete(item);
                 }
-
-                await unitOfWork.SaveChangeAsync();
 
                 foreach (var item in response)
                 {
-                    resultRepository.Insert(new Data.Models.Result
+                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.numero + " " + item.nombre,
                         Time = item.loteria.Replace("Selva Plus ", "").ToUpper(),

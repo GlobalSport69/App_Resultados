@@ -9,15 +9,13 @@ namespace LotteryResult.Services
 {
     public class LaGranjitaTerminalOfficial
     {
-        private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
         public const int laGranjitaTerminalesID = 13;
         private const int laGranjitaTerminalesProviderID = 13;
         private readonly ILogger<LaGranjitaTerminalOfficial> _logger;
 
-        public LaGranjitaTerminalOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<LaGranjitaTerminalOfficial> logger)
+        public LaGranjitaTerminalOfficial(IUnitOfWork unitOfWork, ILogger<LaGranjitaTerminalOfficial> logger)
         {
-            this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -44,21 +42,19 @@ namespace LotteryResult.Services
                 })
                 .GetJsonAsync<List<GetLaGranjitaOfficialResponse>>();
 
-                var oldResult = await resultRepository
+                var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == laGranjitaTerminalesProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
 
                 foreach (var item in oldResult)
                 {
-                    resultRepository.Delete(item);
+                    unitOfWork.ResultRepository.Delete(item);
                 }
-
-                await unitOfWork.SaveChangeAsync();
 
                 foreach (var item in response)
                 {
                     var stringTime = item.lottery.name.Replace("TERMINAL LA GRANJITA ", "").Replace("O", "0").ToUpper();
-                    resultRepository.Insert(new Data.Models.Result
+                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.result,
                         Time = FormatTime(stringTime),
