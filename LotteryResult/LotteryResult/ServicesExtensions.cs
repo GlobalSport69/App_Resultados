@@ -21,6 +21,7 @@ namespace LotteryResult
             services.AddScoped<LaGranjitaTerminalOfficial>();
             services.AddScoped<LaRicachonaAnimalitosOfficial>();
             services.AddScoped<TripleBombaOfficial>();
+            services.AddScoped<ChanceAnimalitosOfficial>();
 
             services.AddScoped<ProviderProductMapper>();
 
