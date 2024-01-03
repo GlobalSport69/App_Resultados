@@ -8,13 +8,11 @@ namespace LotteryResult.Controllers
 {
     public class ProductController : Controller
     {
-        private IProductRepository _productRepository;
         private ProviderProductMapper _providerProductMapper;
         private IUnitOfWork _unitOfWork;
 
-        public ProductController(IProductRepository productRepository, ProviderProductMapper providerProductMapper, IUnitOfWork unitOfWork)
+        public ProductController(ProviderProductMapper providerProductMapper, IUnitOfWork unitOfWork)
         {
-            _productRepository = productRepository;
             _providerProductMapper = providerProductMapper;
             _unitOfWork = unitOfWork;
         }
@@ -22,7 +20,7 @@ namespace LotteryResult.Controllers
         // GET: ProductController
         public async Task<ActionResult> Index()
         {
-            var products = await _productRepository.GetAllByAsync();
+            var products = await _unitOfWork.ProductRepository.GetAllByAsync();
             ViewBag.products = products.OrderBy(x => x.Id).ToList();
 
             if (TempData["Message"] != null)
@@ -33,7 +31,7 @@ namespace LotteryResult.Controllers
 
         public async Task<ActionResult> SwicthProductStatus(int id)
         {
-            var product = await _productRepository.GetByAsync(x => x.Id == id, new string[] {
+            var product = await _unitOfWork.ProductRepository.GetByAsync(x => x.Id == id, new string[] {
                 nameof(Product.ProviderProducts),
                 $"{nameof(Product.ProviderProducts)}.{nameof(ProviderProduct.Provider)}"
             });
@@ -51,7 +49,7 @@ namespace LotteryResult.Controllers
                         }
 
                         product.Enable = true;
-                        _productRepository.Update(product);
+                        _unitOfWork.ProductRepository.Update(product);
                         var cronExpression = product.ProviderProducts.First().CronExpression;
                         var jobId = product.ProviderProducts.First().ProviderId.ToString();
                         _providerProductMapper.AddJob(product.Id, jobId, cronExpression);
@@ -66,7 +64,7 @@ namespace LotteryResult.Controllers
                         }
 
                         product.Enable = false;
-                        _productRepository.Update(product);
+                        _unitOfWork.ProductRepository.Update(product);
                         var jobId = product.ProviderProducts.First().ProviderId.ToString();
                         _providerProductMapper.DeleteJob(jobId);
                         await _unitOfWork.SaveChangeAsync();

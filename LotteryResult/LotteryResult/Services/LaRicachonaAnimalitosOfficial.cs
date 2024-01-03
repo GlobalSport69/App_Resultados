@@ -8,15 +8,13 @@ namespace LotteryResult.Services
 {
     public class LaRicachonaAnimalitosOfficial : IGetResult
     {
-        private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
         public const int laRicachonaAnimalitosID = 14;
         private const int laRicachonaAnimalitosProviderID = 14;
         private readonly ILogger<LaRicachonaAnimalitosOfficial> _logger;
 
-        public LaRicachonaAnimalitosOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<LaRicachonaAnimalitosOfficial> logger)
+        public LaRicachonaAnimalitosOfficial(IUnitOfWork unitOfWork, ILogger<LaRicachonaAnimalitosOfficial> logger)
         {
-            this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -43,21 +41,19 @@ namespace LotteryResult.Services
                 })
                 .GetJsonAsync<List<GetLaGranjitaOfficialResponse>>();
 
-                var oldResult = await resultRepository
+                var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == laRicachonaAnimalitosProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
 
                 foreach (var item in oldResult)
                 {
-                    resultRepository.Delete(item);
+                    unitOfWork.ResultRepository.Delete(item);
                 }
-
-                await unitOfWork.SaveChangeAsync();
 
                 foreach (var item in response)
                 {
                     var time = item.lottery.name.Replace("ANIMALITOS LA RICACHONA ", "").Replace("O", "0").ToUpper();
-                    resultRepository.Insert(new Data.Models.Result
+                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.result.Replace("-", " "),
                         Time = LaGranjitaTerminalOfficial.FormatTime(time),

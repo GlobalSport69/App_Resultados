@@ -13,7 +13,31 @@ namespace LotteryResult.Data.Implementations
     internal class UnitOfWork : IUnitOfWork
     {
         private readonly PostgresDbContext _dbContext;
-        private IDbContextTransaction _transaction;
+
+        private IResultRepository resultRepository;
+        public IResultRepository ResultRepository
+        {
+            get
+            {
+                if (this.resultRepository == null)
+                {
+                    this.resultRepository = new ResultRepository(_dbContext);
+                }
+                return resultRepository;
+            }
+        }
+        public IProductRepository productRepository;
+        public IProductRepository ProductRepository
+        {
+            get
+            {
+                if (this.productRepository == null)
+                {
+                    this.productRepository = new ProductRepository(_dbContext);
+                }
+                return productRepository;
+            }
+        }
 
         public UnitOfWork(PostgresDbContext dbContext)
         {
@@ -25,18 +49,20 @@ namespace LotteryResult.Data.Implementations
             return await _dbContext.SaveChangesAsync();
         }
 
-        public void BeginTransaction() {
-            _transaction = _dbContext.Database.BeginTransaction();
-        }
+        //private IDbContextTransaction _transaction;
 
-        public void Commit()
-        {
-            _transaction.Commit();
-        }
+        //public void BeginTransaction() {
+        //    _transaction = _dbContext.Database.BeginTransaction();
+        //}
 
-        public void Rollback()
-        {
-            _transaction.Rollback();
-        }
+        //public void Commit()
+        //{
+        //    _transaction.Commit();
+        //}
+
+        //public void Rollback()
+        //{
+        //    _transaction.Rollback();
+        //}
     }
 }

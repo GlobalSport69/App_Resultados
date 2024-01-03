@@ -9,15 +9,13 @@ namespace LotteryResult.Services
 {
     public class GuacharoActivoOfficial : IGetResult
     {
-        private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
         public const int guacharoID = 11;
         private const int guacharoProviderID = 11;
         private readonly ILogger<GuacharoActivoOfficial> _logger;
 
-        public GuacharoActivoOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<GuacharoActivoOfficial> logger)
+        public GuacharoActivoOfficial(IUnitOfWork unitOfWork, ILogger<GuacharoActivoOfficial> logger)
         {
-            this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -45,19 +43,17 @@ namespace LotteryResult.Services
 
                 if (!response.Any()) return;
 
-                var oldResult = await resultRepository
+                var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == guacharoProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
                 foreach (var item in oldResult)
                 {
-                    resultRepository.Delete(item);
+                    unitOfWork.ResultRepository.Delete(item);
                 }
-
-                await unitOfWork.SaveChangeAsync();
 
                 foreach (var item in response)
                 {
-                    resultRepository.Insert(new Data.Models.Result
+                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.numero + " " +item.nombre.Trim(),
                         Time = item.loteria.Replace("Guacharo Activo ", "").ToUpper(),

@@ -7,15 +7,13 @@ namespace LotteryResult.Services
 {
     public class ElRucoTriplesBet
     {
-        private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
         public const int elRucoID = 8;
         private const int elRucoProviderID = 7;
         private readonly ILogger<ElRucoTriplesBet> _logger;
 
-        public ElRucoTriplesBet(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<ElRucoTriplesBet> logger)
+        public ElRucoTriplesBet(IUnitOfWork unitOfWork, ILogger<ElRucoTriplesBet> logger)
         {
-            this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -72,19 +70,17 @@ namespace LotteryResult.Services
                     return r;
                 }");
 
-                var oldResult = await resultRepository
+                var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == elRucoProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
                 foreach (var item in oldResult)
                 {
-                    resultRepository.Delete(item);
+                    unitOfWork.ResultRepository.Delete(item);
                 }
-
-                await unitOfWork.SaveChangeAsync();
 
                 foreach (var item in someObject)
                 {
-                    resultRepository.Insert(new Data.Models.Result
+                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.Result,
                         Time = item.Time.ToUpper(),
@@ -94,8 +90,6 @@ namespace LotteryResult.Services
                         ProductTypeId = (int)ProductTypeEnum.TERMINALES
                     });
                 }
-
-                Console.WriteLine(someObject);
 
                 await unitOfWork.SaveChangeAsync();
             }

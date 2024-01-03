@@ -7,15 +7,13 @@ namespace LotteryResult.Services
 {
     public class TripleZamoranoOfficial : IGetResult
     {
-        private IResultRepository resultRepository;
         private IUnitOfWork unitOfWork;
         public const int zamoranoID = 2;
         private const int zamoranoProviderID = 1;
         private readonly ILogger<TripleZamoranoOfficial> _logger;
 
-        public TripleZamoranoOfficial(IResultRepository resultRepository, IUnitOfWork unitOfWork, ILogger<TripleZamoranoOfficial> logger)
+        public TripleZamoranoOfficial(IUnitOfWork unitOfWork, ILogger<TripleZamoranoOfficial> logger)
         {
-            this.resultRepository = resultRepository;
             this.unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -57,19 +55,17 @@ namespace LotteryResult.Services
                     return r;
                 }");
 
-                var oldResult = await resultRepository
+                var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == zamoranoProviderID && 
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
                 foreach (var item in oldResult)
                 {
-                    resultRepository.Delete(item);
+                    unitOfWork.ResultRepository.Delete(item);
                 }
-
-                await unitOfWork.SaveChangeAsync();
 
                 foreach (var item in someObject)
                 {
-                    resultRepository.Insert(new Data.Models.Result { 
+                    unitOfWork.ResultRepository.Insert(new Data.Models.Result { 
                         Result1 = item.Result,
                         Time = item.Time,
                         Date = string.Empty,
@@ -82,11 +78,6 @@ namespace LotteryResult.Services
                 Console.WriteLine(someObject);
 
                 await unitOfWork.SaveChangeAsync();
-                //return new GetResultResponseDto
-                //{
-                //    LotteryName = "TRIPLE ZAMORANO",
-                //    Results = someObject
-                //};
             }
             catch (Exception ex)
             {

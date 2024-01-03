@@ -7,6 +7,7 @@
         TERMINALES = 3,
         TRIPLETA = 4,
         ANIMALES77 = 5,
-        PEGA5 = 6
+        PEGA5 = 6,
+        ZODIACAL = 7
     }
 }

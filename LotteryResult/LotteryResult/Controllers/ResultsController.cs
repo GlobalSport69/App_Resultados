@@ -7,18 +7,18 @@ namespace LotteryResult.Controllers
 {
     public class ResultsController : Controller
     {
-        private readonly IProductRepository productRepository;
+        private readonly IUnitOfWork unitOfWork;
 
-        public ResultsController(IProductRepository productRepository)
+        public ResultsController(IUnitOfWork unitOfWork)
         {
-            this.productRepository = productRepository;
+            this.unitOfWork = unitOfWork;
         }
 
         // GET: ResultsController
         public async Task<ActionResult> Index()
         {
             var today = DateTime.Now.ToUniversalTime().Date;
-            var products = await productRepository.GetResultByProductsByDate(today);
+            var products = await unitOfWork.ProductRepository.GetResultByProductsByDate(today);
 
             ViewBag.Products = products.OrderBy(x => x.Id).ToList();
 

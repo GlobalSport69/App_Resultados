@@ -5,14 +5,14 @@ using PuppeteerSharp;
 
 namespace LotteryResult.Services
 {
-    public class TripleBombaOfficial : IGetResult
+    public class TripleChanceOfficial : IGetResult
     {
         private IUnitOfWork unitOfWork;
-        public const int tripleBombaID = 15;
-        private const int tripleBombaProviderID = 15;
-        private readonly ILogger<TripleBombaOfficial> _logger;
+        public const int productID = 17;
+        private const int providerID = 17;
+        private readonly ILogger<TripleChanceOfficial> _logger;
 
-        public TripleBombaOfficial(IUnitOfWork unitOfWork, ILogger<TripleBombaOfficial> logger)
+        public TripleChanceOfficial(IUnitOfWork unitOfWork, ILogger<TripleChanceOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
             _logger = logger;
@@ -35,23 +35,31 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://www.triplebomba.com/sistema", waitUntil: WaitUntilNavigation.Networkidle2);
+                await page.GoToAsync("http://www.tuchance.com.ve/resultadosChance", waitUntil: WaitUntilNavigation.Networkidle2);
 
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
-                    let r = [...document.querySelector('.card-deck').querySelectorAll('.card')]
-                    .flatMap(x => [...x.querySelectorAll('.card-body .mx-auto div')]
-                                .map(y => ({
-                                    time: y.querySelector('h6').innerText.split('-')[1].trim(),
-                                    result: y.querySelector('input').value,
-                                    sorteo: y.querySelector('h6').innerText.split('-')[0].trim()
-                                }))
-                    ).filter(x => x.result !== '---')
+                    let r = [...document.querySelectorAll('.table tbody tr')]
+                    .flatMap(x => {
+                        let [t, a, b] = [...x.querySelectorAll('td span')]
+                        return [
+                            {
+                                time: t.innerText,
+                                result: a.innerText,
+                                sorteo: 'Triple A'
+                            },
+                            {
+                                time: t.innerText,
+                                result: b.innerText,
+                                sorteo: 'Triple B'
+                            }
+                        ]
+                    })
 
                     return r;
                 }");
 
                 var oldResult = await unitOfWork.ResultRepository
-                    .GetAllByAsync(x => x.ProviderId == tripleBombaProviderID &&
+                    .GetAllByAsync(x => x.ProviderId == providerID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
                 foreach (var item in oldResult)
                 {
@@ -60,27 +68,28 @@ namespace LotteryResult.Services
 
                 foreach (var item in someObject)
                 {
+                    var newTime = item.Time.Substring(0, item.Time.Length - 2) + " " + item.Time.Substring(item.Time.Length - 2);
                     unitOfWork.ResultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = item.Result,
-                        Time = LaGranjitaTerminalOfficial.FormatTime(item.Time.ToUpper()),
+                        Time = newTime,
                         Date = string.Empty,
-                        ProductId = tripleBombaID,
-                        ProviderId = tripleBombaProviderID,
-                        Sorteo = item.Sorteo,
-                        ProductTypeId = (int)ProductTypeEnum.TRIPLES
+                        ProductId = productID,
+                        ProviderId = providerID,
+                        ProductTypeId = (int)ProductTypeEnum.TRIPLES,
+                        Sorteo = item.Sorteo
                     });
                 }
 
-                Console.WriteLine(someObject);
 
                 await unitOfWork.SaveChangeAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(exception: ex, message: nameof(TripleBombaOfficial));
+                _logger.LogError(exception: ex, message: nameof(TripleChanceOfficial));
                 throw;
             }
         }
     }
 }
+
