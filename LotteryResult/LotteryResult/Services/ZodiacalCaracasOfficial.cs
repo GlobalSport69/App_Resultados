@@ -3,19 +3,18 @@ using Flurl.Http;
 using LotteryResult.Data.Abstractions;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
-using PuppeteerSharp;
 using System.Globalization;
 
 namespace LotteryResult.Services
 {
-    public class TripleCaracasOfficial : IGetResult
+    public class ZodiacalCaracasOfficial : IGetResult
     {
         private IUnitOfWork unitOfWork;
-        public const int tripleCaracasID = 3;
-        private const int tripleCaracasProviderID = 9;
-        private readonly ILogger<TripleCaracasOfficial> _logger;
+        public const int productID = 18;
+        private const int providerID = 18;
+        private readonly ILogger<ZodiacalCaracasOfficial> _logger;
 
-        public TripleCaracasOfficial(IUnitOfWork unitOfWork, ILogger<TripleCaracasOfficial> logger)
+        public ZodiacalCaracasOfficial(IUnitOfWork unitOfWork, ILogger<ZodiacalCaracasOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
             _logger = logger;
@@ -46,12 +45,12 @@ namespace LotteryResult.Services
                 var results = response.resultados
                     .GroupBy(x => x.producto_juego.order)
                     .OrderBy(x => x.Key)
-                    .Where(x => x.Key < 3)
+                    .Where(x => x.Key == 3)
                     .SelectMany(x => x)
                     .ToList();
 
                 var oldResult = await unitOfWork.ResultRepository
-                    .GetAllByAsync(x => x.ProviderId == tripleCaracasProviderID &&
+                    .GetAllByAsync(x => x.ProviderId == providerID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
                 foreach (var item in oldResult)
                 {
@@ -71,20 +70,17 @@ namespace LotteryResult.Services
                         Result1 = item.resultado,
                         Time = time12Hour,
                         Date = string.Empty,
-                        ProductId = tripleCaracasID,
-                        ProviderId = tripleCaracasProviderID,
-                        ProductTypeId = (int)ProductTypeEnum.TRIPLES,
-                        Sorteo = item.producto_juego.nombre
+                        ProductId = productID,
+                        ProviderId = providerID,
+                        ProductTypeId = (int)ProductTypeEnum.ZODIACAL,
                     });
                 }
-
-                Console.WriteLine(response);
 
                 await unitOfWork.SaveChangeAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(exception: ex, message: nameof(TripleCaracasOfficialResponse));
+                _logger.LogError(exception: ex, message: nameof(ZodiacalCaracasOfficial));
                 throw;
             }
         }

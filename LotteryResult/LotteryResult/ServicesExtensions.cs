@@ -24,6 +24,8 @@ namespace LotteryResult
             services.AddScoped<ChanceAnimalitosOfficial>();
             services.AddScoped<TripleChanceOfficial>();
 
+            services.AddScoped<ZodiacalCaracasOfficial>();
+
             services.AddScoped<ProviderProductMapper>();
 
             return services;
