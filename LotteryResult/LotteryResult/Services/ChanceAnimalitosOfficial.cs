@@ -76,18 +76,17 @@ namespace LotteryResult.Services
             }
         }
 
-        private static Animal GetAnimalLabelFromNumber(string number) {
-            var numberFormatted = number == "0" ? number : number.PadLeft(2, '0');
+        private Animal GetAnimalLabelFromNumber(string number) {
             var Animales = new ObservableCollection<Animal>()
             {
                 new Animal()
                 {
-                    Number = "0",
+                    Number = "37",
                     Name = "DELFIN",
                 },
                 new Animal()
                 {
-                    Number = "00",
+                    Number = "38",
                     Name = "BALLENA",
                 },
                 new Animal()
@@ -272,10 +271,10 @@ namespace LotteryResult.Services
                 },
             };
 
-            var found = Animales.FirstOrDefault(x => x.Number == numberFormatted);
+            var found = Animales.FirstOrDefault(x => x.Number == number);
             if (found is null)
             {
-                throw new Exception("Numero de animal invalido");
+                throw new Exception("Numero de animal invalido =>>> "+ number);
             }
             return found;
         }
