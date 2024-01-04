@@ -1,4 +1,6 @@
 ﻿using LotteryResult.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -13,12 +15,8 @@ namespace LotteryResult.Controllers
             _logger = logger;
         }
 
+        [Authorize]
         public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
         {
             return View();
         }

@@ -1,11 +1,13 @@
 ﻿using LotteryResult.Data.Abstractions;
 using LotteryResult.Data.Models;
 using LotteryResult.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LotteryResult.Controllers
 {
+    [Authorize]
     public class ProductController : Controller
     {
         private ProviderProductMapper _providerProductMapper;

@@ -9,6 +9,7 @@ using LotteryResult;
 using Serilog;
 using Serilog.Events;
 using LotteryResult.Filters;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 // Add the processing server as IHostedService
 builder.Services.AddHangfireServer();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
+{
+    options.LoginPath = "/auth/login";
+});
 
 builder.Services.AddData(builder.Configuration);
 builder.Services.AddServices(builder.Configuration);
@@ -57,14 +62,24 @@ var options = new DashboardOptions()
 {
     Authorization = new[] { new MyHangfireAuthorizationFilter() }
 };
+
 app.UseHangfireDashboard("/hangfire", options);
 
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
+
+//app.MapControllerRoute(
+//    name: "default",
+//    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Auth}/{action=Login}/{id?}");
+
+//app.MapControllerRoute(
+//    name: "login",
+//    pattern: "login",
+//    defaults: new { controller = "Auth", action = "Login" });
 
 app.Run();

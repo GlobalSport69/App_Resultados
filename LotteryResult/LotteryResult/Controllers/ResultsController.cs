@@ -1,10 +1,12 @@
 ﻿using LotteryResult.Data.Abstractions;
 using LotteryResult.Data.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LotteryResult.Controllers
 {
+    [Authorize]
     public class ResultsController : Controller
     {
         private readonly IUnitOfWork unitOfWork;
