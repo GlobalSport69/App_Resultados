@@ -62,6 +62,7 @@ var options = new DashboardOptions()
 {
     Authorization = new[] { new MyHangfireAuthorizationFilter() }
 };
+app.UseHangfireDashboard("/hangfire/index", options);
 
 app.UseHangfireDashboard("/hangfire", options);
 

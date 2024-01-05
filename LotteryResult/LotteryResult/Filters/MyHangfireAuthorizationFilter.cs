@@ -6,7 +6,16 @@ namespace LotteryResult.Filters
     {
         public bool Authorize(DashboardContext context)
         {
-            return true; // Autoriza todas las solicitudes. No recomendado para producción.
+            var _context = context.GetHttpContext();
+            if (_context.User == null || !_context.User.Identity.IsAuthenticated)
+            {
+                //_context.Response.Redirect("/auth/login");
+                return false;
+            }
+            return true;
+            //return _context.User != null && _context.User.Identity.IsAuthenticated;
+
+            //return true; // Autoriza todas las solicitudes. No recomendado para producción.
         }
     }
 }
