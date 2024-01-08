@@ -27,6 +27,7 @@ namespace LotteryResult
             services.AddScoped<TripleTachiraOfficial>();
             services.AddScoped<TachiraZodiacalOfficial>();
             services.AddScoped<ZodiacalCaracasOfficial>();
+            services.AddScoped<ChanceAstralOfficial>();
 
             services.AddScoped<ProviderProductMapper>();
 
