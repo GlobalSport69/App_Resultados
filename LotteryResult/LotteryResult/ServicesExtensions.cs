@@ -29,6 +29,7 @@ namespace LotteryResult
             services.AddScoped<ZodiacalCaracasOfficial>();
             services.AddScoped<ChanceAstralOfficial>();
             services.AddScoped<AstroZamoranoOfficial>();
+            services.AddScoped<ZodiacoDelZuliaOfficial>();
 
             services.AddScoped<ProviderProductMapper>();
 

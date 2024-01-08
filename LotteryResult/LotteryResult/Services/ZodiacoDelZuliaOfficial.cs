@@ -5,14 +5,14 @@ using PuppeteerSharp;
 
 namespace LotteryResult.Services
 {
-    public class AstroZamoranoOfficial : IGetResult
+    public class ZodiacoDelZuliaOfficial : IGetResult
     {
         private IUnitOfWork unitOfWork;
-        public const int productID = 22;
-        private const int providerID = 22;
-        private readonly ILogger<AstroZamoranoOfficial> _logger;
+        public const int productID = 24;
+        private const int providerID = 24;
+        private readonly ILogger<ZodiacoDelZuliaOfficial> _logger;
 
-        public AstroZamoranoOfficial(IUnitOfWork unitOfWork, ILogger<AstroZamoranoOfficial> logger)
+        public ZodiacoDelZuliaOfficial(IUnitOfWork unitOfWork, ILogger<ZodiacoDelZuliaOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
             _logger = logger;
@@ -35,26 +35,28 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("http://triplezamorano.com/action/index");
+                await page.GoToAsync("http://www.resultadostriplezulia.com/action/index", waitUntil: WaitUntilNavigation.Networkidle2);
 
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
-                    var fecha = new Date();
-                    var dia = String(fecha.getDate()).padStart(2, '0');
-                    var mes = String(fecha.getMonth() + 1).padStart(2, '0');
-                    var ano = fecha.getFullYear();
-                    var fechaFormateada = dia + '-' + mes + '-' + ano;
+                    let fecha = new Date();
+                    let dia = String(fecha.getDate()).padStart(2, '0');
+                    let mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript empiezan desde 0
+                    let ano = fecha.getFullYear();
+                    let fechaFormateada = dia + '-' + mes + '-' + ano;
 
                     let iframe = document.querySelector('iframe')
                     let contenidoDelIframe = iframe.contentDocument || iframe.contentWindow.document;
                     let table = contenidoDelIframe.querySelector('#miTabla');
-                    var result = [...table.querySelector('tbody').querySelectorAll('tr')].filter(x => ([...x.querySelectorAll('td')][1]).innerText == fechaFormateada)
-                    let r = result.map(x => {
-                        let [,,,time,, tsigno] = x.querySelectorAll('td');
+
+                    let r = [...table.querySelectorAll('tbody tr')]
+                    .filter(x => [...x.querySelectorAll('td')][1].innerText == fechaFormateada)
+                    .map(x => {
+                        let [,,,time,,tsigno] = x.querySelectorAll('td');
                         return {
                             time: time.innerText,
                             result: tsigno.innerText
-                        }
-                    })
+                        };
+                    });
 
                     return r;
                 }");
@@ -80,13 +82,11 @@ namespace LotteryResult.Services
                     });
                 }
 
-                Console.WriteLine(someObject);
-
                 await unitOfWork.SaveChangeAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(exception: ex, message: nameof(AstroZamoranoOfficial));
+                _logger.LogError(exception: ex, message: nameof(ZodiacoDelZuliaOfficial));
                 throw;
             }
         }

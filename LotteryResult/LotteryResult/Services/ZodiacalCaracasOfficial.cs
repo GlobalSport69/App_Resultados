@@ -67,7 +67,7 @@ namespace LotteryResult.Services
 
                     unitOfWork.ResultRepository.Insert(new Data.Models.Result
                     {
-                        Result1 = item.resultado,
+                        Result1 = item.resultado +" "+item.resultado_elemento,
                         Time = time12Hour,
                         Date = string.Empty,
                         ProductId = productID,
