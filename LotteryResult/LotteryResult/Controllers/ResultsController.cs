@@ -19,7 +19,16 @@ namespace LotteryResult.Controllers
         // GET: ResultsController
         public async Task<ActionResult> Index()
         {
-            var today = DateTime.Now.ToUniversalTime().Date;
+            // Obtén la zona horaria de Venezuela
+            TimeZoneInfo venezuelaZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
+
+            // Obtén la fecha y hora actual en UTC
+            DateTime utcNow = DateTime.UtcNow;
+
+            // Convierte la fecha y hora actual a la zona horaria de Venezuela
+            DateTime venezuelaNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, venezuelaZone);
+            //var today = DateTime.Now.ToUniversalTime().Date;
+            var today = venezuelaNow.ToUniversalTime().Date;
             var products = await unitOfWork.ProductRepository.GetResultByProductsByDate(today);
 
             ViewBag.Products = products.OrderBy(x => x.Id).ToList();
