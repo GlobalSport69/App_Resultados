@@ -3,6 +3,8 @@ using LotteryResult.Data.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
+using LotteryResult.Extensions;
 
 namespace LotteryResult.Controllers
 {
@@ -17,21 +19,21 @@ namespace LotteryResult.Controllers
         }
 
         // GET: ResultsController
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(string date = null)
         {
-            // Obtén la zona horaria de Venezuela
-            TimeZoneInfo venezuelaZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
-
-            // Obtén la fecha y hora actual en UTC
             DateTime utcNow = DateTime.UtcNow;
+            DateTime venezuelaNow = utcNow.ToVenezuelaTimeZone();
+            if (!string.IsNullOrEmpty(date))
+            {
+                venezuelaNow = DateTime.ParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+            }
 
-            // Convierte la fecha y hora actual a la zona horaria de Venezuela
-            DateTime venezuelaNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, venezuelaZone);
-            //var today = DateTime.Now.ToUniversalTime().Date;
             var today = venezuelaNow.ToUniversalTime().Date;
+
             var products = await unitOfWork.ProductRepository.GetResultByProductsByDate(today);
 
             ViewBag.Products = products.OrderBy(x => x.Id).ToList();
+            ViewBag.Date = venezuelaNow.Date;
 
             return View();
         }
