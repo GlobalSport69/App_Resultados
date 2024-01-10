@@ -42,6 +42,12 @@ namespace LotteryResult.Services
                 })
                 .GetJsonAsync<List<GetLaGranjitaOfficialResponse>>();
 
+                if (!response.Any())
+                {
+                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(LaGranjitaTerminalOfficial));
+                    return;
+                }
+
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == laGranjitaTerminalesProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);

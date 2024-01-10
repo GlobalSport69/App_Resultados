@@ -61,6 +61,12 @@ namespace LotteryResult.Services
                     return r;
                 }");
 
+                if (!someObject.Any())
+                {
+                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(ZodiacoDelZuliaOfficial));
+                    return;
+                }
+
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == providerID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);

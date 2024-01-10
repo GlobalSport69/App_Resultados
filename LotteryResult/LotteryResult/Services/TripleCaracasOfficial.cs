@@ -50,6 +50,12 @@ namespace LotteryResult.Services
                     .SelectMany(x => x)
                     .ToList();
 
+                if (!results.Any())
+                {
+                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(TripleCaracasOfficialResponse));
+                    return;
+                }
+
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == tripleCaracasProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);

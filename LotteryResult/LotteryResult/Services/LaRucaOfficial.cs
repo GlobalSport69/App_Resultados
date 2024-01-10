@@ -70,6 +70,13 @@ namespace LotteryResult.Services
                     return r;
                 }");
 
+                if (!someObject.Any())
+                {
+                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(LaRucaOfficial));
+                    return;
+                }
+
+
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == laRucaProviderID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
@@ -97,7 +104,7 @@ namespace LotteryResult.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(exception: ex, message: nameof(LottoReyOfficial));
+                _logger.LogError(exception: ex, message: nameof(LaRucaOfficial));
                 throw;
             }
         }

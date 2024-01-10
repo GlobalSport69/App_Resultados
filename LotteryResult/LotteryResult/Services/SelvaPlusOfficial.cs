@@ -41,7 +41,11 @@ namespace LotteryResult.Services
                 })
                 .ReceiveJson<List<GuacharoOfficialResponse>>();
 
-                if (!response.Any()) return;
+                if (!response.Any())
+                {
+                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(SelvaPlusOfficial));
+                    return;
+                }
 
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == selvaPlusProviderID &&

@@ -57,7 +57,14 @@ namespace LotteryResult.Services
                     })
 
                     return r;
-                }");
+                }"
+                );
+
+                if (!someObject.Any())
+                {
+                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(AstroZamoranoOfficial));
+                    return;
+                }
 
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == providerID &&

@@ -38,7 +38,11 @@ namespace LotteryResult.Services
                     .AppendPathSegments(venezuelaNow.ToString("dd-MM-yyyy"), venezuelaNow.ToString("dd-MM-yyyy"))
                     .GetJsonAsync<List<ChanceAnimalitosResponse>>();
 
-                if (!response.Any()) return;
+                if (!response.Any())
+                {
+                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(ChanceAnimalitosOfficial));
+                    return;
+                }
 
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == chanceAnimalitosProviderID &&

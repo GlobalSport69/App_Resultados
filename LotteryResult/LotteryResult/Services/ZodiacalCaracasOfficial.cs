@@ -49,6 +49,12 @@ namespace LotteryResult.Services
                     .SelectMany(x => x)
                     .ToList();
 
+                if (!results.Any())
+                {
+                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(ZodiacalCaracasOfficial));
+                    return;
+                }
+
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == providerID &&
                         x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
