@@ -16,11 +16,18 @@ namespace LotteryResult.Data.Implementations
         {
         }
 
-        public async Task<List<Product>> GetResultByProductsByDate(DateTime dateTime)
+        public async Task<List<Product>> GetResultByProductsByDate(DateTime date)
         {
+            DateTime inicioDelDia = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0);
+            DateTime inicioDelDiaUTC = inicioDelDia.ToUniversalTime();
+
+            DateTime finDelDia = new DateTime(date.Year, date.Month, date.Day, 23, 59, 59);
+            DateTime finDelDiaUTC = finDelDia.ToUniversalTime();
+
             return await _dbContext.Products
                 .Where(x => x.Enable)
-                .Include(x => x.Results.Where(r => r.CreatedAt.ToUniversalTime().Date == dateTime))
+                .Include(x => x.Results.Where(r => r.CreatedAt.ToUniversalTime() >= inicioDelDiaUTC && 
+                                                   r.CreatedAt.ToUniversalTime() <= finDelDiaUTC))
                 .ToListAsync();
         }
     }

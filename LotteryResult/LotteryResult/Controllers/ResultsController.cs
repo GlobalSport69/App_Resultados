@@ -28,9 +28,7 @@ namespace LotteryResult.Controllers
                 venezuelaNow = DateTime.ParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture);
             }
 
-            var today = venezuelaNow.ToUniversalTime().Date;
-
-            var products = await unitOfWork.ProductRepository.GetResultByProductsByDate(today);
+            var products = await unitOfWork.ProductRepository.GetResultByProductsByDate(venezuelaNow);
 
             ViewBag.Products = products.OrderBy(x => x.Id).ToList();
             ViewBag.Date = venezuelaNow.Date;

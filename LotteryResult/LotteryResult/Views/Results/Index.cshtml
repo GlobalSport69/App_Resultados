@@ -1,5 +1,6 @@
 ﻿@using LotteryResult.Data.Models;
 @using System.Globalization;
+@using LotteryResult.Extensions;
 
 @{
     ViewData["Title"] = "Results";
@@ -39,7 +40,7 @@
                     @{
                         if (product.Results.Any())
                         {
-                            <p>Ultima actualizacion @product.Results.First().CreatedAt.ToString("dd-MM-yyyy hh:mm tt")</p>
+                            <p>Ultima actualizacion @product.Results.First().CreatedAt.ToVenezuelaTimeZone().ToString("hh:mm tt")</p>
                         }
                     }
                     <table class="table">
