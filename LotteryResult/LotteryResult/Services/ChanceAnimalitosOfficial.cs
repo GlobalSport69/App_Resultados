@@ -3,6 +3,7 @@ using Flurl.Http;
 using LotteryResult.Data.Abstractions;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
+using LotteryResult.Extensions;
 using System.Collections.ObjectModel;
 
 namespace LotteryResult.Services
@@ -24,15 +25,7 @@ namespace LotteryResult.Services
         {
             try
             {
-                // Obtén la zona horaria de Venezuela
-                TimeZoneInfo venezuelaZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
-
-                // Obtén la fecha y hora actual en UTC
-                DateTime utcNow = DateTime.UtcNow;
-
-                // Convierte la fecha y hora actual a la zona horaria de Venezuela
-                DateTime venezuelaNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, venezuelaZone);
-
+                var venezuelaNow = DateTime.UtcNow.ToVenezuelaTimeZone();
 
                 var response = await "http://api.admfox.com.ve/Animalitos.svc/IAnimalitos/ListarResultados"
                     .AppendPathSegments(venezuelaNow.ToString("dd-MM-yyyy"), venezuelaNow.ToString("dd-MM-yyyy"))
@@ -46,7 +39,7 @@ namespace LotteryResult.Services
 
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == chanceAnimalitosProviderID &&
-                        x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
+                        x.CreatedAt >= venezuelaNow.Date.ToUniversalTime());
                 foreach (var item in oldResult)
                 {
                     unitOfWork.ResultRepository.Delete(item);

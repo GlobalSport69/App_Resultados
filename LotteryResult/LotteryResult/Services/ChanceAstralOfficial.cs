@@ -1,6 +1,7 @@
 ﻿using LotteryResult.Data.Abstractions;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
+using LotteryResult.Extensions;
 using PuppeteerSharp;
 
 namespace LotteryResult.Services
@@ -22,6 +23,8 @@ namespace LotteryResult.Services
         {
             try
             {
+                var venezuelaNow = DateTime.UtcNow.ToVenezuelaTimeZone();
+
                 using var browserFetcher = new BrowserFetcher();
                 await browserFetcher.DownloadAsync();
                 await using var browser = await Puppeteer.LaunchAsync(
@@ -58,8 +61,7 @@ namespace LotteryResult.Services
                 }
 
                 var oldResult = await unitOfWork.ResultRepository
-                    .GetAllByAsync(x => x.ProviderId == providerID &&
-                        x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
+                    .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt >= venezuelaNow.Date.ToUniversalTime());
                 foreach (var item in oldResult)
                 {
                     unitOfWork.ResultRepository.Delete(item);

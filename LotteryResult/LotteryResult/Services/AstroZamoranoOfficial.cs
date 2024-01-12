@@ -1,6 +1,8 @@
 ﻿using LotteryResult.Data.Abstractions;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
+using LotteryResult.Extensions;
+using Microsoft.Extensions.Logging;
 using PuppeteerSharp;
 
 namespace LotteryResult.Services
@@ -22,6 +24,8 @@ namespace LotteryResult.Services
         {
             try
             {
+                var venezuelaNow = DateTime.UtcNow.ToVenezuelaTimeZone();
+
                 using var browserFetcher = new BrowserFetcher();
                 await browserFetcher.DownloadAsync();
                 await using var browser = await Puppeteer.LaunchAsync(
@@ -34,15 +38,17 @@ namespace LotteryResult.Services
                             "--disable-setuid-sandbox"
                         }
                     });
+                _logger.LogInformation("///////////////////////////////////");
+                _logger.LogInformation(DateTime.UtcNow.ToString("yyyy-MM-dd hh:mm:ss"));
+                _logger.LogInformation(venezuelaNow.ToString("yyyy-MM-dd hh:mm:ss"));
+                _logger.LogInformation(venezuelaNow.Date.ToUniversalTime().ToString("yyyy-MM-dd hh:mm:ss"));
+                _logger.LogInformation("///////////////////////////////////");
+
                 await using var page = await browser.NewPageAsync();
                 await page.GoToAsync("http://triplezamorano.com/action/index");
 
-                var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
-                    var fecha = new Date();
-                    var dia = String(fecha.getDate()).padStart(2, '0');
-                    var mes = String(fecha.getMonth() + 1).padStart(2, '0');
-                    var ano = fecha.getFullYear();
-                    var fechaFormateada = dia + '-' + mes + '-' + ano;
+                var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
+                    var fechaFormateada = date;
 
                     let iframe = document.querySelector('iframe')
                     let contenidoDelIframe = iframe.contentDocument || iframe.contentWindow.document;
@@ -57,8 +63,7 @@ namespace LotteryResult.Services
                     })
 
                     return r;
-                }"
-                );
+                }", venezuelaNow.ToString("dd-MM-yyyy"));
 
                 if (!someObject.Any())
                 {
@@ -67,8 +72,7 @@ namespace LotteryResult.Services
                 }
 
                 var oldResult = await unitOfWork.ResultRepository
-                    .GetAllByAsync(x => x.ProviderId == providerID &&
-                        x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
+                    .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt >= venezuelaNow.Date.ToUniversalTime());
                 foreach (var item in oldResult)
                 {
                     unitOfWork.ResultRepository.Delete(item);
