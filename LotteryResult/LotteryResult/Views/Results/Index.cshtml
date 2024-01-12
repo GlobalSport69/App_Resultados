@@ -35,7 +35,7 @@
         <div class="row">
             @foreach (var product in products)
             {
-                <div class="col-3 border">
+                <div class="col-lg-3 col-md-4 col-sm-6 border table-responsive">
                     <h3>@product.Name</h3>
                     @{
                         if (product.Results.Any())
@@ -43,7 +43,7 @@
                             <p>Ultima actualizacion @product.Results.First().CreatedAt.ToVenezuelaTimeZone().ToString("hh:mm tt")</p>
                         }
                     }
-                    <table class="table">
+                    <table class="table table-sm">
                         <thead>
                             <tr>
                                 <th>Resultado</th>
