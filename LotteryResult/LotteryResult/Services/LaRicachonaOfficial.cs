@@ -24,14 +24,7 @@ namespace LotteryResult.Services
         {
             try
             {
-                // Obtén la zona horaria de Venezuela
-                TimeZoneInfo venezuelaZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
-
-                // Obtén la fecha y hora actual en UTC
-                DateTime utcNow = DateTime.UtcNow;
-
-                // Convierte la fecha y hora actual a la zona horaria de Venezuela
-                DateTime venezuelaNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, venezuelaZone);
+                DateTime venezuelaNow = DateTime.Now;
 
                 var response = await "https://webservice.premierpluss.com"
                 .AppendPathSegments("loteries", "results3")
@@ -49,8 +42,7 @@ namespace LotteryResult.Services
                 }
 
                 var oldResult = await unitOfWork.ResultRepository
-                    .GetAllByAsync(x => x.ProviderId == laRicachonaProviderID &&
-                        x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
+                    .GetAllByAsync(x => x.ProviderId == laRicachonaProviderID && x.CreatedAt.Date == venezuelaNow.Date);
                 foreach (var item in oldResult)
                 {
                     unitOfWork.ResultRepository.Delete(item);

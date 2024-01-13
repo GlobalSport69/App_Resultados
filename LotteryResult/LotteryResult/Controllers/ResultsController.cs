@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using LotteryResult.Extensions;
+using LotteryResult.Services;
 
 namespace LotteryResult.Controllers
 {
@@ -21,15 +22,14 @@ namespace LotteryResult.Controllers
         // GET: ResultsController
         public async Task<ActionResult> Index(string date = null)
         {
-            DateTime utcNow = DateTime.UtcNow;
-            DateTime venezuelaNow = utcNow.ToVenezuelaTimeZone();
+            DateTime venezuelaNow = DateTime.Now;
             if (!string.IsNullOrEmpty(date))
             {
                 venezuelaNow = DateTime.ParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture);
             }
 
             var products = await unitOfWork.ProductRepository.GetResultByProductsByDate(venezuelaNow);
-
+            
             ViewBag.Products = products.OrderBy(x => x.Id).ToList();
             ViewBag.Date = venezuelaNow.Date;
 

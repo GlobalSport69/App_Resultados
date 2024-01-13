@@ -45,6 +45,8 @@ namespace LotteryResult.Services
 
                 //    return r;
                 //}");
+                DateTime venezuelaNow = DateTime.Now;
+
                 using var browserFetcher = new BrowserFetcher();
                 await browserFetcher.DownloadAsync();
                 await using var browser = await Puppeteer.LaunchAsync(
@@ -78,8 +80,7 @@ namespace LotteryResult.Services
 
 
                 var oldResult = await unitOfWork.ResultRepository
-                    .GetAllByAsync(x => x.ProviderId == laRucaProviderID &&
-                        x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
+                    .GetAllByAsync(x => x.ProviderId == laRucaProviderID && x.CreatedAt.Date == venezuelaNow.Date);
                 foreach (var item in oldResult)
                 {
                     unitOfWork.ResultRepository.Delete(item);

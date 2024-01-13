@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,18 +20,9 @@ namespace LotteryResult.Data.Implementations
 
         public async Task<List<Product>> GetResultByProductsByDate(DateTime date)
         {
-            CultureInfo cultureInfo = new CultureInfo("es-VE");
-
-            DateTime inicioDelDia = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0, cultureInfo.Calendar);
-            DateTime inicioDelDiaUTC = inicioDelDia.ToUniversalTime();
-
-            DateTime finDelDia = new DateTime(date.Year, date.Month, date.Day, 23, 59, 59, cultureInfo.Calendar);
-            DateTime finDelDiaUTC = finDelDia.ToUniversalTime();
-
             return await _dbContext.Products
                 .Where(x => x.Enable)
-                .Include(x => x.Results.Where(r => r.CreatedAt >= inicioDelDiaUTC && 
-                                                   r.CreatedAt <= finDelDiaUTC))
+                .Include(x => x.Results.Where(r => r.CreatedAt.Date == date))
                 .ToListAsync();
         }
     }
