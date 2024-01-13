@@ -22,7 +22,7 @@ namespace LotteryResult.Data.Implementations
         {
             return await _dbContext.Products
                 .Where(x => x.Enable)
-                .Include(x => x.Results.Where(r => r.CreatedAt.Date == date))
+                .Include(x => x.Results.Where(r => r.CreatedAt.Date == date.Date))
                 .ToListAsync();
         }
     }
