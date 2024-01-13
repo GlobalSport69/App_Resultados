@@ -40,7 +40,7 @@
                     @{
                         if (product.Results.Any())
                         {
-                            <p>Ultima actualizacion @product.Results.First().CreatedAt.ToVenezuelaTimeZone().ToString("hh:mm tt")</p>
+                            <p>Ultima actualizacion @product.Results.First().CreatedAt.ToString("hh:mm tt")</p>
                         }
                     }
                     <table class="table table-sm">

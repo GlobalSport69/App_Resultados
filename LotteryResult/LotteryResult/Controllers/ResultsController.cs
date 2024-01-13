@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using LotteryResult.Extensions;
 using LotteryResult.Services;
+using Microsoft.Extensions.Logging;
 
 namespace LotteryResult.Controllers
 {
@@ -13,10 +14,12 @@ namespace LotteryResult.Controllers
     public class ResultsController : Controller
     {
         private readonly IUnitOfWork unitOfWork;
+        private readonly ILogger<ResultsController> logger;
 
-        public ResultsController(IUnitOfWork unitOfWork)
+        public ResultsController(IUnitOfWork unitOfWork, ILogger<ResultsController> logger)
         {
             this.unitOfWork = unitOfWork;
+            this.logger = logger;
         }
 
         // GET: ResultsController
@@ -27,7 +30,9 @@ namespace LotteryResult.Controllers
             {
                 venezuelaNow = DateTime.ParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture);
             }
-
+            logger.LogInformation("================================================================");
+            logger.LogInformation(venezuelaNow.ToString("yyyy-MM-dd hh:mm:ss"));
+            logger.LogInformation("================================================================");
             var products = await unitOfWork.ProductRepository.GetResultByProductsByDate(venezuelaNow);
             
             ViewBag.Products = products.OrderBy(x => x.Id).ToList();
