@@ -77,7 +77,8 @@ namespace LotteryResult.Services
                         Date = string.Empty,
                         ProductId = productID,
                         ProviderId = providerID,
-                        ProductTypeId = (int)ProductTypeEnum.TRIPLES
+                        ProductTypeId = (int)ProductTypeEnum.TRIPLES,
+                        Sorteo = item.Sorteo
                     });
                 }
 

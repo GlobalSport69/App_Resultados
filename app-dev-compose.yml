@@ -22,6 +22,7 @@ services:
     container_name: "app_dev"
     environment:
       TZ: America/Caracas
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
     build:
       context: .
       dockerfile: app-dev-dockerfile
