@@ -10,6 +10,7 @@ using Serilog;
 using Serilog.Events;
 using LotteryResult.Filters;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Serilog.Sinks.Grafana.Loki;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,11 +38,25 @@ builder.Services.AddHangfire(configuration => configuration
 
 builder.Host.UseSerilog((hostContext, services, configuration) =>
 {
-    configuration
-        .WriteTo.File(builder.Configuration.GetSection("Serilog:LogPath").Value, rollingInterval: RollingInterval.Day)
-        .WriteTo.File(builder.Configuration.GetSection("Serilog:ErrorLogPath").Value,
-            restrictedToMinimumLevel: LogEventLevel.Error,
-            rollingInterval: RollingInterval.Day);
+    //configuration
+    //    .WriteTo.File(builder.Configuration.GetSection("Serilog:LogPath").Value, rollingInterval: RollingInterval.Day)
+    //    .WriteTo.File(builder.Configuration.GetSection("Serilog:ErrorLogPath").Value,
+    //        restrictedToMinimumLevel: LogEventLevel.Error,
+    //        rollingInterval: RollingInterval.Day);
+    configuration.WriteTo.Console(outputTemplate: "{Timestamp:dd-MM-yyyy HH:mm:ss} [{Level:u3}] [{ThreadId}] {Message}{NewLine}{Exception}");
+
+    configuration.WriteTo.GrafanaLoki("http://localhost:3100",
+                new List<LokiLabel> { 
+                    new() { Key = "app", Value = "info" } 
+                },
+                restrictedToMinimumLevel: LogEventLevel.Information,
+                credentials: null);
+    configuration.WriteTo.GrafanaLoki("http://localhost:3100",
+             new List<LokiLabel> {
+                    new() { Key = "app", Value = "errors" }
+             },
+             restrictedToMinimumLevel: LogEventLevel.Error,
+             credentials: null);
 });
 
 var app = builder.Build();

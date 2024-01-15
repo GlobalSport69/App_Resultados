@@ -1,5 +1,8 @@
 version: '3'
 
+networks:
+  loki:
+
 services:
   app_db_dev:
     container_name: "app_db_dev"
@@ -17,6 +20,7 @@ services:
       - ./bk.sql:/docker-entrypoint-initdb.d/02_file.sql
     ports:
       - "5444:5432"
+
   app_dev:
     image: "app_resultados"
     container_name: "app_dev"
@@ -29,12 +33,54 @@ services:
       args:
         ARCH: $ARCH
     volumes:
-      - ./app/logs:/app/src/logs
+      - ./app/logs:/src/logs
     depends_on:
       - app_db_dev
     ports:
       - "8888:80"
       - "4444:443"
+      
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    #   - "./grafana_data:/var/lib/grafana"
+    #   - "./provisioning/:/etc/grafana/provisioning/"
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /etc/grafana/provisioning/datasources
+        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
+        apiVersion: 1
+        datasources:
+        - name: Loki
+          type: loki
+          access: proxy
+          orgId: 1
+          url: http://loki:3100
+          basicAuth: false
+          isDefault: true
+          version: 1
+          editable: false
+        EOF
+        /run.sh
+    networks:
+      - loki
+
+  loki:
+    container_name: loki
+    image: "grafana/loki:main"
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - loki
+
 volumes:
   app_db_dev_data:
 
