@@ -25,7 +25,7 @@ namespace LotteryResult.Services
         {
             try
             {
-                var venezuelaNow = DateTime.UtcNow.ToVenezuelaTimeZone();
+                var venezuelaNow = DateTime.Now;
 
                 var response = await "http://api.admfox.com.ve/Animalitos.svc/IAnimalitos/ListarResultados"
                     .AppendPathSegments(venezuelaNow.ToString("dd-MM-yyyy"), venezuelaNow.ToString("dd-MM-yyyy"))
@@ -39,7 +39,7 @@ namespace LotteryResult.Services
 
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == chanceAnimalitosProviderID &&
-                        x.CreatedAt >= venezuelaNow.Date.ToUniversalTime());
+                        x.CreatedAt.Date == venezuelaNow.Date);
                 foreach (var item in oldResult)
                 {
                     unitOfWork.ResultRepository.Delete(item);

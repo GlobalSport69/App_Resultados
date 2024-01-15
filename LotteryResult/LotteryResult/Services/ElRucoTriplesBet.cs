@@ -77,8 +77,7 @@ namespace LotteryResult.Services
                 }
 
                 var oldResult = await unitOfWork.ResultRepository
-                    .GetAllByAsync(x => x.ProviderId == elRucoProviderID &&
-                        x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
+                    .GetAllByAsync(x => x.ProviderId == elRucoProviderID && x.CreatedAt.Date == DateTime.Now.Date);
                 foreach (var item in oldResult)
                 {
                     unitOfWork.ResultRepository.Delete(item);

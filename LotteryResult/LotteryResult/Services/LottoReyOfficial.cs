@@ -22,6 +22,8 @@ namespace LotteryResult.Services
         {
             try
             {
+                DateTime venezuelaNow = DateTime.Now;
+
                 using var browserFetcher = new BrowserFetcher();
                 await browserFetcher.DownloadAsync();
                 await using var browser = await Puppeteer.LaunchAsync(
@@ -37,12 +39,8 @@ namespace LotteryResult.Services
                 await using var page = await browser.NewPageAsync();
                 await page.GoToAsync("https://lottorey.com.ve");
 
-                var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
-                    let fecha = new Date();
-                    let dia = String(fecha.getDate()).padStart(2, '0');
-                    let mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript empiezan desde 0
-                    let ano = fecha.getFullYear();
-                    let fechaFormateada = dia + '/' + mes + '/' + ano;
+                var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
+                    let fechaFormateada = date;
 
                     let r = [...document.querySelectorAll('#main-container .card')]
                     .filter(x => x.querySelector('.texto-fecha').innerText == fechaFormateada)
@@ -52,7 +50,7 @@ namespace LotteryResult.Services
                     }))
 
                     return r;
-                }");
+                }", venezuelaNow.ToString("dd/MM/yyyy"));
 
                 if (!someObject.Any())
                 {
@@ -61,8 +59,8 @@ namespace LotteryResult.Services
                 }
 
                 var oldResult = await unitOfWork.ResultRepository
-                    .GetAllByAsync(x => x.ProviderId == lottoReyProviderID &&
-                        x.CreatedAt.ToUniversalTime().Date == DateTime.Now.ToUniversalTime().Date);
+                    .GetAllByAsync(x => x.ProviderId == lottoReyProviderID && x.CreatedAt.Date == venezuelaNow.Date);
+
                 foreach (var item in oldResult)
                 {
                     unitOfWork.ResultRepository.Delete(item);

@@ -8,6 +8,8 @@ services:
     environment:
       POSTGRES_USER: elder123
       POSTGRES_PASSWORD: elder123
+      PGTZ: America/Caracas
+      TZ: America/Caracas
       # POSTGRES_DB: results_v2
     volumes:
       - app_db_dev_data:/var/lib/postgresql/data
@@ -18,6 +20,9 @@ services:
   app_dev:
     image: "app_resultados"
     container_name: "app_dev"
+    environment:
+      TZ: America/Caracas
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
     build:
       context: .
       dockerfile: app-dev-dockerfile
