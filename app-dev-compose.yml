@@ -39,11 +39,11 @@ services:
     ports:
       - "8888:80"
       - "4444:443"
-      
+
   grafana:
     image: grafana/grafana:latest
     ports:
-      - 3000:3000
+      - 4000:3000
     #   - "./grafana_data:/var/lib/grafana"
     #   - "./provisioning/:/etc/grafana/provisioning/"
     environment:
@@ -76,12 +76,14 @@ services:
     container_name: loki
     image: "grafana/loki:main"
     ports:
-      - "3100:3100"
+      - "3999:3100"
     command: -config.file=/etc/loki/local-config.yaml
     networks:
       - loki
+    volumes:
+      - loki-data:/loki
 
 volumes:
   app_db_dev_data:
-
+  loki-data:
 
