@@ -44,7 +44,7 @@ namespace LotteryResult.Controllers
             }
             catch (Exception ex) 
             {
-                logger.LogError(ex);
+                logger.LogError(ex.Message, ex);
                 throw;
             }
         }
