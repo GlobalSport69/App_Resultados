@@ -48,13 +48,14 @@ namespace LotteryResult.Services
                 foreach (var item in response)
                 {
                     var substrings = item.fecSorteo.Split(' ');
-                    var time = substrings[1].Substring(0, 5) + " " + substrings[2];
+                    //var time = substrings[1].Substring(0, 5).PadLeft(2) + " " + substrings[2];
+                    var time = substrings[1].Substring(0, 2).Replace(":", "") + ":00 " + substrings[2];
                     var animalFound = GetAnimalLabelFromNumber(item.codAnimalA);
 
                     unitOfWork.ResultRepository.Insert(new Data.Models.Result
                     {
                         Result1 = animalFound.Number +" "+ animalFound.Name.Capitalize(),
-                        Time = time.ToUpper(),
+                        Time = LaGranjitaTerminalOfficial.FormatTime(time.ToUpper()),
                         Date = string.Empty,
                         ProductId = chanceAnimalitosID,
                         ProviderId = chanceAnimalitosProviderID,
