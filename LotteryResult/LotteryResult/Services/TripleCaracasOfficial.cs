@@ -44,7 +44,7 @@ namespace LotteryResult.Services
 
                 if (!results.Any())
                 {
-                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(TripleCaracasOfficialResponse));
+                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(TripleCaracasOfficial));
                     return;
                 }
 
@@ -81,7 +81,7 @@ namespace LotteryResult.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(exception: ex, message: nameof(TripleCaracasOfficialResponse));
+                _logger.LogError(exception: ex, message: nameof(TripleCaracasOfficial));
                 throw;
             }
         }
