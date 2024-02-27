@@ -17,7 +17,7 @@ namespace LotteryResult.Data
     {
         public static IServiceCollection AddData(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             //services.AddTransient<IProductRepository, ProductRepository>();
             //services.AddScoped<IResultRepository, ResultRepository>();
