@@ -25,20 +25,28 @@ namespace LotteryResult.Controllers
         // GET: ResultsController
         public async Task<ActionResult> Index(string date = null)
         {
-            DateTime venezuelaNow = DateTime.Now;
-            if (!string.IsNullOrEmpty(date))
+            try
             {
-                venezuelaNow = DateTime.ParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture);
-            }
-            logger.LogInformation("================================================================");
-            logger.LogInformation(venezuelaNow.ToString("yyyy-MM-dd hh:mm:ss"));
-            logger.LogInformation("================================================================");
-            var products = await unitOfWork.ProductRepository.GetResultByProductsByDate(venezuelaNow);
+                DateTime venezuelaNow = DateTime.Now;
+                if (!string.IsNullOrEmpty(date))
+                {
+                    venezuelaNow = DateTime.ParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+                }
+                logger.LogInformation("================================================================");
+                logger.LogInformation(venezuelaNow.ToString("yyyy-MM-dd hh:mm:ss"));
+                logger.LogInformation("================================================================");
+                var products = await unitOfWork.ProductRepository.GetResultByProductsByDate(venezuelaNow);
             
-            ViewBag.Products = products.OrderBy(x => x.Id).ToList();
-            ViewBag.Date = venezuelaNow.Date;
+                ViewBag.Products = products.OrderBy(x => x.Id).ToList();
+                ViewBag.Date = venezuelaNow.Date;
 
-            return View();
+                return View();
+            }
+            catch (Exception ex) 
+            {
+                logger.LogError(ex.Message, ex);
+                throw;
+            }
         }
     }
 }

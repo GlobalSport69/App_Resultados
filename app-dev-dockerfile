@@ -5,6 +5,8 @@ WORKDIR /src
 # Establecer la arquitectura como un argumento
 ARG ARCH
 
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+
 RUN apt-get update && apt-get install -y wget gnupg ca-certificates && \
     wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/chromium-archive-keyring.gpg && \
     echo "deb [arch=$ARCH signed-by=/usr/share/keyrings/chromium-archive-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | tee /etc/apt/sources.list.d/chromium.list && \
