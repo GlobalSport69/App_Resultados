@@ -36,19 +36,31 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("http://triplezamorano.com/action/index");
+                await page.GoToAsync("http://triplezamorano.com/action/index", waitUntil: WaitUntilNavigation.Networkidle2);
+
+                //var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
+                //    //var fecha = new Date();
+                //    //var dia = String(fecha.getDate()).padStart(2, '0');
+                //    //var mes = String(fecha.getMonth() + 1).padStart(2, '0');
+                //    //var ano = fecha.getFullYear();
+                //    //var fechaFormateada = dia + '-' + mes + '-' + ano;
+                //    var fechaFormateada = date;
+
+                //    let iframe = document.querySelector('iframe')
+                //    let contenidoDelIframe = iframe.contentDocument || iframe.contentWindow.document;
+                //    let table = contenidoDelIframe.querySelector('#miTabla');
+                //    var result = [...table.querySelector('tbody').querySelectorAll('tr')].filter(x => ([...x.querySelectorAll('td')][1]).innerText == fechaFormateada)
+                //    let r = result.map(x => ({
+                //        result: ([...x.querySelectorAll('td')][4]).innerText,
+                //        time: ([...x.querySelectorAll('td')][3]).innerText
+                //    }))
+
+                //    return r;
+                //}", venezuelaNow.ToString("dd-MM-yyyy"));
 
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
-                    //var fecha = new Date();
-                    //var dia = String(fecha.getDate()).padStart(2, '0');
-                    //var mes = String(fecha.getMonth() + 1).padStart(2, '0');
-                    //var ano = fecha.getFullYear();
-                    //var fechaFormateada = dia + '-' + mes + '-' + ano;
                     var fechaFormateada = date;
-
-                    let iframe = document.querySelector('iframe')
-                    let contenidoDelIframe = iframe.contentDocument || iframe.contentWindow.document;
-                    let table = contenidoDelIframe.querySelector('#miTabla');
+                    let table = document.querySelector('table');
                     var result = [...table.querySelector('tbody').querySelectorAll('tr')].filter(x => ([...x.querySelectorAll('td')][1]).innerText == fechaFormateada)
                     let r = result.map(x => ({
                         result: ([...x.querySelectorAll('td')][4]).innerText,
@@ -56,7 +68,7 @@ namespace LotteryResult.Services
                     }))
 
                     return r;
-                }", venezuelaNow.ToString("dd-MM-yyyy"));
+                }", venezuelaNow.ToString("dd/MM/yyyy"));
 
                 if (!someObject.Any())
                 {
