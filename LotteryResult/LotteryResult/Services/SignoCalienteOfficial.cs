@@ -65,7 +65,7 @@ namespace LotteryResult.Services
                 //}", venezuelaNow.ToString("dd-MM-yyyy"));
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
                     let fechaFormateada = date;
-                    let table = document.querySelector('#miTabla');
+                    let table = document.querySelector('table');
                     let r = [...table.querySelectorAll('tbody tr')]
                     .filter(x => [...x.querySelectorAll('td')][1].innerText == fechaFormateada)
                     .map(x => {

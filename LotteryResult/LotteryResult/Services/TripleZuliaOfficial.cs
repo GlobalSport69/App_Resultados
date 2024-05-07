@@ -72,11 +72,7 @@ namespace LotteryResult.Services
                 //}", venezuelaNow.ToString("dd-MM-yyyy"));
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
                     let fechaFormateada = date;
-
-                    let iframe = document.querySelector('iframe')
-                    let contenidoDelIframe = iframe.contentDocument || iframe.contentWindow.document;
-                    let table = contenidoDelIframe.querySelector('#miTabla');
-
+                    let table = document.querySelector('table');
                     let r = [...table.querySelectorAll('tbody tr')]
                     .filter(x => [...x.querySelectorAll('td')][1].innerText == fechaFormateada)
                     .flatMap(x => {
@@ -95,7 +91,7 @@ namespace LotteryResult.Services
                     });
 
                     return r;
-                }", venezuelaNow.ToString("dd-MM-yyyy"));
+                }", venezuelaNow.ToString("dd/MM/yyyy"));
 
 
                 if (!someObject.Any())
