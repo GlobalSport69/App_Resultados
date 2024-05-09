@@ -37,7 +37,7 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("http://www.triplecaliente.com/action/index", waitUntil: WaitUntilNavigation.Networkidle2);
+                await page.GoToAsync("https://triplecaliente.com", waitUntil: WaitUntilNavigation.Networkidle2);
 
                 //var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
                 //    //let fecha = new Date();
@@ -75,7 +75,10 @@ namespace LotteryResult.Services
                     let fechaFormateada = date;
                     let table = document.querySelector('table');
                     let r = [...table.querySelectorAll('tbody tr')]
-                    .filter(x => [...x.querySelectorAll('td')][1].innerText == fechaFormateada)
+                    .filter(x => {
+                        let list = [...x.querySelectorAll('td')];
+                        return list[1].innerText == fechaFormateada;
+                    })
                     .flatMap(x => {
                         let tds = [...x.querySelectorAll('td')];
                         let a ={
