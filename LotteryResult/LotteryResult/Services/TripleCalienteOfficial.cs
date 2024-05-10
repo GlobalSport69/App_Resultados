@@ -39,37 +39,14 @@ namespace LotteryResult.Services
                 await using var page = await browser.NewPageAsync();
                 await page.GoToAsync("https://triplecaliente.com", waitUntil: WaitUntilNavigation.Networkidle2);
 
-                //var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
-                //    //let fecha = new Date();
-                //    //let dia = String(fecha.getDate()).padStart(2, '0');
-                //    //let mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript empiezan desde 0
-                //    //let ano = fecha.getFullYear();
-                //    //let fechaFormateada = dia + '-' + mes + '-' + ano;
-                //    let fechaFormateada = date;
-
-                //    let iframe = document.querySelector('iframe')
-                //    let contenidoDelIframe = iframe.contentDocument || iframe.contentWindow.document;
-                //    let table = contenidoDelIframe.querySelector('#miTabla');
-
-                //    let r = [...table.querySelectorAll('tbody tr')]
-                //    .filter(x => [...x.querySelectorAll('td')][1].innerText == fechaFormateada)
-                //    .flatMap(x => {
-                //        let tds = [...x.querySelectorAll('td')];
-                //        let a ={
-                //            time: tds[3].innerText,
-                //            result: tds[4].innerText,
-                //            sorteo: 'Triple A'
-                //        };
-                //        let b ={
-                //            time: tds[3].innerText,
-                //            result: tds[5].innerText,
-                //            sorteo: 'Triple B'
-                //        };
-                //        return [a, b];
-                //    });
-
-                //    return r;
-                //}", venezuelaNow.ToString("dd-MM-yyyy"));
+                // Espera hasta que haya al menos 2 elementos 'td' dentro de un 'tr' en una tabla
+                await page.WaitForFunctionAsync(@"() => {
+                    const tds = document.querySelectorAll('table tr td');
+                    return tds.length > 1;
+                }", new WaitForFunctionOptions
+                {
+                    PollingInterval = 1000,
+                });
 
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
                     let fechaFormateada = date;
@@ -105,6 +82,7 @@ namespace LotteryResult.Services
 
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == tripleCalienteProviderID && x.CreatedAt.Date == venezuelaNow.Date);
+
                 foreach (var item in oldResult)
                 {
                     unitOfWork.ResultRepository.Delete(item);

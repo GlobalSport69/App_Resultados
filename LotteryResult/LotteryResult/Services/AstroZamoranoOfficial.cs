@@ -47,6 +47,14 @@ namespace LotteryResult.Services
                 await using var page = await browser.NewPageAsync();
                 await page.GoToAsync("http://triplezamorano.com/action/index", waitUntil:WaitUntilNavigation.Networkidle2);
 
+                await page.WaitForFunctionAsync(@"() => {
+                    const tds = document.querySelectorAll('table tr td');
+                    return tds.length > 1;
+                }", new WaitForFunctionOptions
+                {
+                    PollingInterval = 1000,
+                });
+
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
                     var fechaFormateada = date;
 

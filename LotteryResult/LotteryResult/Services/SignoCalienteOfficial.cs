@@ -63,6 +63,14 @@ namespace LotteryResult.Services
 
                 //    return r;
                 //}", venezuelaNow.ToString("dd-MM-yyyy"));
+                await page.WaitForFunctionAsync(@"() => {
+                    const tds = document.querySelectorAll('table tr td');
+                    return tds.length > 1;
+                }", new WaitForFunctionOptions
+                {
+                    PollingInterval = 1000,
+                });
+
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
                     let fechaFormateada = date;
                     let table = document.querySelector('table');
