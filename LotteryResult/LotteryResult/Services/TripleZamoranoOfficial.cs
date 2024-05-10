@@ -58,6 +58,15 @@ namespace LotteryResult.Services
                 //    return r;
                 //}", venezuelaNow.ToString("dd-MM-yyyy"));
 
+                // Espera hasta que haya al menos 2 elementos 'td' dentro de un 'tr' en una tabla
+                await page.WaitForFunctionAsync(@"() => {
+                    const tds = document.querySelectorAll('table tr td');
+                    return tds.length > 1;
+                }", new WaitForFunctionOptions 
+                { 
+                    PollingInterval = 1000,
+                });
+
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
                     var fechaFormateada = date;
                     let table = document.querySelector('table');
