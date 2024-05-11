@@ -37,22 +37,25 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("http://www.triplecaliente.com/action/index");
+                await page.GoToAsync("https://triplecaliente.com", waitUntil: WaitUntilNavigation.Networkidle2);
+
+                // Espera hasta que haya al menos 2 elementos 'td' dentro de un 'tr' en una tabla
+                await page.WaitForFunctionAsync(@"() => {
+                    const tds = document.querySelectorAll('table tr td');
+                    return tds.length > 1;
+                }", new WaitForFunctionOptions
+                {
+                    PollingInterval = 1000,
+                });
 
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
-                    //let fecha = new Date();
-                    //let dia = String(fecha.getDate()).padStart(2, '0');
-                    //let mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript empiezan desde 0
-                    //let ano = fecha.getFullYear();
-                    //let fechaFormateada = dia + '-' + mes + '-' + ano;
                     let fechaFormateada = date;
-
-                    let iframe = document.querySelector('iframe')
-                    let contenidoDelIframe = iframe.contentDocument || iframe.contentWindow.document;
-                    let table = contenidoDelIframe.querySelector('#miTabla');
-
+                    let table = document.querySelector('table');
                     let r = [...table.querySelectorAll('tbody tr')]
-                    .filter(x => [...x.querySelectorAll('td')][1].innerText == fechaFormateada)
+                    .filter(x => {
+                        let list = [...x.querySelectorAll('td')];
+                        return list[1].innerText == fechaFormateada;
+                    })
                     .flatMap(x => {
                         let tds = [...x.querySelectorAll('td')];
                         let a ={
@@ -69,7 +72,7 @@ namespace LotteryResult.Services
                     });
 
                     return r;
-                }", venezuelaNow.ToString("dd-MM-yyyy"));
+                }", venezuelaNow.ToString("dd/MM/yyyy"));
 
                 if (!someObject.Any())
                 {
@@ -79,6 +82,7 @@ namespace LotteryResult.Services
 
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == tripleCalienteProviderID && x.CreatedAt.Date == venezuelaNow.Date);
+
                 foreach (var item in oldResult)
                 {
                     unitOfWork.ResultRepository.Delete(item);

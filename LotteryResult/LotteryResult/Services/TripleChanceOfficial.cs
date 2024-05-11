@@ -37,8 +37,8 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("http://www.tuchance.com.ve/resultadosChance", waitUntil: WaitUntilNavigation.Networkidle2);
-
+                await page.GoToAsync("https://tuchance.com.ve/resultadosChance", waitUntil: WaitUntilNavigation.Networkidle2);
+                //await page.WaitForNetworkIdleAsync();
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
                     let r = [...document.querySelectorAll('.table tbody tr')]
                     .flatMap(x => {

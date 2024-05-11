@@ -45,14 +45,20 @@ namespace LotteryResult.Services
                 _logger.LogInformation("///////////////////////////////////");
 
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("http://triplezamorano.com/action/index");
+                await page.GoToAsync("http://triplezamorano.com/action/index", waitUntil:WaitUntilNavigation.Networkidle2);
+
+                await page.WaitForFunctionAsync(@"() => {
+                    const tds = document.querySelectorAll('table tr td');
+                    return tds.length > 1;
+                }", new WaitForFunctionOptions
+                {
+                    PollingInterval = 1000,
+                });
 
                 var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
                     var fechaFormateada = date;
 
-                    let iframe = document.querySelector('iframe')
-                    let contenidoDelIframe = iframe.contentDocument || iframe.contentWindow.document;
-                    let table = contenidoDelIframe.querySelector('#miTabla');
+                    let table = document.querySelector('table');
                     var result = [...table.querySelector('tbody').querySelectorAll('tr')].filter(x => ([...x.querySelectorAll('td')][1]).innerText == fechaFormateada)
                     let r = result.map(x => {
                         let [,,,time,, tsigno] = x.querySelectorAll('td');
@@ -63,7 +69,7 @@ namespace LotteryResult.Services
                     })
 
                     return r;
-                }", venezuelaNow.ToString("dd-MM-yyyy"));
+                }", venezuelaNow.ToString("dd/MM/yyyy"));
 
                 if (!someObject.Any())
                 {
