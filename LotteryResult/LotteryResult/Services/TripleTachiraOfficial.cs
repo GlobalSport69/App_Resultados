@@ -74,7 +74,7 @@ namespace LotteryResult.Services
                     {
                         Result1 = item.Result,
                         Time = LaGranjitaTerminalOfficial.FormatTime(item.Time),
-                        Date = string.Empty,
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
                         ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.TRIPLES,

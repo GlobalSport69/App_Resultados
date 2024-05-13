@@ -7,6 +7,7 @@
     }
     public class ResultDetailDto
     {
+        public string Date { get; set; }
         public string Result { get; set; }
         public string Time { get; set; }
         public string? Sorteo { get; set; }

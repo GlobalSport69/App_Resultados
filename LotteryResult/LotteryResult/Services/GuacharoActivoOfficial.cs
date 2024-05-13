@@ -52,7 +52,7 @@ namespace LotteryResult.Services
                     {
                         Result1 = item.numero + " " +item.nombre.Trim(),
                         Time = item.loteria.Replace("Guacharo Activo ", "").ToUpper(),
-                        Date = string.Empty,
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = guacharoID,
                         ProviderId = guacharoProviderID,
                         ProductTypeId = (int)ProductTypeEnum.ANIMALES77

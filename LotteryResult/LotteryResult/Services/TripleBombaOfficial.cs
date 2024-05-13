@@ -73,7 +73,7 @@ namespace LotteryResult.Services
                     {
                         Result1 = item.Result,
                         Time = LaGranjitaTerminalOfficial.FormatTime(item.Time.ToUpper()),
-                        Date = string.Empty,
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = tripleBombaID,
                         ProviderId = tripleBombaProviderID,
                         Sorteo = item.Sorteo,

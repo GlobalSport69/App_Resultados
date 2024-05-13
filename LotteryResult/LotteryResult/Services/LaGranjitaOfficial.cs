@@ -45,6 +45,14 @@ namespace LotteryResult.Services
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == laGranjitaProviderID && x.CreatedAt.Date == venezuelaNow.Date);
 
+                //if (response.Count == oldResult.Count())
+                //{
+                //    foreach (var item in collection)
+                //    {
+
+                //    }
+                //}
+
                 foreach (var item in oldResult)
                 {
                     unitOfWork.ResultRepository.Delete(item);
@@ -58,7 +66,7 @@ namespace LotteryResult.Services
                     {
                         Result1 = item.result.Replace("-", " "),
                         Time = LaGranjitaTerminalOfficial.FormatTime(time),
-                        Date = string.Empty,
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = laGranjitaID,
                         ProviderId = laGranjitaProviderID,
                         ProductTypeId = (int)ProductTypeEnum.ANIMALITOS

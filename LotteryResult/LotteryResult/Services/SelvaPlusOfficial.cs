@@ -52,7 +52,7 @@ namespace LotteryResult.Services
                     {
                         Result1 = item.numero + " " + item.nombre,
                         Time = item.loteria.Replace("Selva Plus ", "").ToUpper(),
-                        Date = string.Empty,
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = selvaPlusID,
                         ProviderId = selvaPlusProviderID,
                         ProductTypeId = (int)ProductTypeEnum.ANIMALITOS

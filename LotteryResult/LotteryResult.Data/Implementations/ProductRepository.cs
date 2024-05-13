@@ -9,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LotteryResult.Data.Implementations
 {
@@ -23,6 +24,14 @@ namespace LotteryResult.Data.Implementations
             return await _dbContext.Products
                 .Where(x => x.Enable)
                 .Include(x => x.Results.Where(r => r.CreatedAt.Date == date.Date))
+                .ToListAsync();
+        }
+
+        public async Task<List<Product>> GetResultByProductsByRangeDate(DateTime from, DateTime until)
+        {
+            return await _dbContext.Products
+            .Where(x => x.Enable)
+                .Include(x => x.Results.Where(r => r.CreatedAt.Date >= from.Date && r.CreatedAt.Date <= until.Date))
                 .ToListAsync();
         }
     }

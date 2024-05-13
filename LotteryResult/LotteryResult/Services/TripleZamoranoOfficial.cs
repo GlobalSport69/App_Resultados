@@ -97,7 +97,7 @@ namespace LotteryResult.Services
                     unitOfWork.ResultRepository.Insert(new Data.Models.Result { 
                         Result1 = item.Result,
                         Time = item.Time,
-                        Date = string.Empty,
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = zamoranoID,
                         ProviderId = zamoranoProviderID,
                         ProductTypeId = (int)ProductTypeEnum.TRIPLES

@@ -56,7 +56,7 @@ namespace LotteryResult.Services
                     {
                         Result1 = animalFound.Number +" "+ animalFound.Name.Capitalize(),
                         Time = LaGranjitaTerminalOfficial.FormatTime(time.ToUpper()),
-                        Date = string.Empty,
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = chanceAnimalitosID,
                         ProviderId = chanceAnimalitosProviderID,
                         ProductTypeId = (int)ProductTypeEnum.ANIMALITOS

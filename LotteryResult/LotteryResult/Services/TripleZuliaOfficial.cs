@@ -124,7 +124,7 @@ namespace LotteryResult.Services
                     {
                         Result1 = item.Result,
                         Time = item.Time,
-                        Date = string.Empty,
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = tripleZuliaID,
                         ProviderId = tripleZuliaProviderID,
                         ProductTypeId = (int)ProductTypeEnum.TRIPLES,

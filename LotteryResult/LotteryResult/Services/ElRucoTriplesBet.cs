@@ -89,7 +89,7 @@ namespace LotteryResult.Services
                     {
                         Result1 = item.Result,
                         Time = item.Time.ToUpper(),
-                        Date = string.Empty,
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = elRucoID,
                         ProviderId =elRucoProviderID,
                         ProductTypeId = (int)ProductTypeEnum.TERMINALES

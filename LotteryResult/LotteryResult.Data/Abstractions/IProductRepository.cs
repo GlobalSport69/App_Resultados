@@ -11,6 +11,7 @@ namespace LotteryResult.Data.Abstractions
     {
 
         Task<List<Product>> GetResultByProductsByDate(DateTime dateTime);
+        Task<List<Product>> GetResultByProductsByRangeDate(DateTime from, DateTime until);
 
     }
 }
