@@ -42,7 +42,7 @@ namespace LotteryResult.Controllers
                 return products.Select(p => new ResultsDto
                 {
                     ProductName = p.Name,
-                    Results = p.Results.GroupBy(x => x.CreatedAt).SelectMany(g => g.Select(x => new ResultDetailDto
+                    Results = p.Results.GroupBy(x => x.CreatedAt).OrderBy(x => x.Key).SelectMany(g => g.Select(x => new ResultDetailDto
                     {
                         Date = g.Key.ToString("dd-MM-yyyy"),
                         Result = x.Result1,
