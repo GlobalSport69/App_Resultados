@@ -44,25 +44,12 @@ namespace LotteryResult.Services
 
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == laGranjitaProviderID && x.CreatedAt.Date == venezuelaNow.Date);
+                oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
-                //if (response.Count == oldResult.Count())
-                //{
-                //    foreach (var item in collection)
-                //    {
-
-                //    }
-                //}
-
-                foreach (var item in oldResult)
-                {
-                    unitOfWork.ResultRepository.Delete(item);
-                }
-
-                foreach (var item in response)
-                {
+                var newResult = response.Select(item => {
                     var time = item.lottery.name.Replace("LA GRANJITA ", "").Replace("O", "0").ToUpper();
 
-                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
+                    return new Result
                     {
                         Result1 = item.result.Replace("-", " "),
                         Time = LaGranjitaTerminalOfficial.FormatTime(time),
@@ -70,10 +57,49 @@ namespace LotteryResult.Services
                         ProductId = laGranjitaID,
                         ProviderId = laGranjitaProviderID,
                         ProductTypeId = (int)ProductTypeEnum.ANIMALITOS
-                    });
+                    };
+                })
+                .OrderBy(x => x.Time)
+                .ToList();
+
+                var needSave = false;
+
+                // no hay resultado nuevo
+                var len = oldResult.Count();
+                if (len == newResult.Count())
+                {
+                    for (int i = 0; i < len; i++)
+                    {
+                        if (oldResult[i].Time == newResult[i].Time && oldResult[i].Result1 != newResult[i].Result1)
+                        {
+                            oldResult[i].Result1 = newResult[i].Result1;
+                            unitOfWork.ResultRepository.Update(oldResult[i]);
+                            needSave = true;
+                        }
+                    }
                 }
 
-                await unitOfWork.SaveChangeAsync();
+                // hay resultado nuevo
+                if (newResult.Count() > len)
+                {
+                    var founds = newResult.Where(x => !oldResult.Any(y => y.Time == x.Time));
+
+                    foreach (var item in founds)
+                    {
+                        unitOfWork.ResultRepository.Insert(item);
+                        needSave = true;
+                    }
+                }
+
+                if (needSave) { 
+                    await unitOfWork.SaveChangeAsync();
+                }
+
+                if (!needSave)
+                {
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(LaGranjitaOfficial));
+                    return;
+                }
             }
             catch (Exception ex)
             {
