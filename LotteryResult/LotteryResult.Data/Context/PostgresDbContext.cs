@@ -16,6 +16,8 @@ public partial class PostgresDbContext : DbContext
     {
     }
 
+    public virtual DbSet<Lottery> Lotteries { get; set; }
+
     public virtual DbSet<Product> Products { get; set; }
 
     public virtual DbSet<ProductType> ProductTypes { get; set; }
@@ -28,6 +30,26 @@ public partial class PostgresDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Lottery>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("lotteries_pk");
+
+            entity.ToTable("lotteries");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.LotteryHour).HasColumnName("lottery_hour");
+            entity.Property(e => e.Name)
+                .HasColumnType("character varying")
+                .HasColumnName("name");
+            entity.Property(e => e.PremierId).HasColumnName("premier_id");
+            entity.Property(e => e.ProductId).HasColumnName("product_id");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.Lotteries)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("lotteries_fk");
+        });
+
         modelBuilder.Entity<Product>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("product_pk");
@@ -112,6 +134,7 @@ public partial class PostgresDbContext : DbContext
             entity.Property(e => e.Date)
                 .HasColumnType("character varying")
                 .HasColumnName("date");
+            entity.Property(e => e.LotteryId).HasColumnName("lottery_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.ProductTypeId).HasColumnName("product_type_id");
             entity.Property(e => e.ProviderId).HasColumnName("provider_id");

@@ -84,5 +84,18 @@ namespace LotteryResult.Services
 
             throw new Exception("El formato de la hora proporcionada no es válido.");
         }
+
+        public static TimeOnly ConvertToTime(string time)
+        {
+            TimeOnly dateTime;
+
+            var cultureInfo = new CultureInfo("en-US");
+            if (TimeOnly.TryParseExact(time, "h:mm tt", cultureInfo, DateTimeStyles.None, out dateTime))
+            {
+                return dateTime;
+            }
+
+            throw new Exception("El formato de la hora proporcionada no es válido.");
+        }
     }
 }

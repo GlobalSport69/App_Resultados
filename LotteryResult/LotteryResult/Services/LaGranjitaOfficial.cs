@@ -42,12 +42,15 @@ namespace LotteryResult.Services
                     return; 
                 }
 
+                var lotteries = await unitOfWork.LotteryRepository.GetAllByAsync(x => x.ProductId == laGranjitaID);
+
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == laGranjitaProviderID && x.CreatedAt.Date == venezuelaNow.Date);
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
                 var newResult = response.Select(item => {
                     var time = item.lottery.name.Replace("LA GRANJITA ", "").Replace("O", "0").ToUpper();
+                    var lottery = lotteries.FirstOrDefault(x => x.LotteryHour == LaGranjitaTerminalOfficial.ConvertToTime(time));
 
                     return new Result
                     {
@@ -56,14 +59,14 @@ namespace LotteryResult.Services
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = laGranjitaID,
                         ProviderId = laGranjitaProviderID,
-                        ProductTypeId = (int)ProductTypeEnum.ANIMALITOS
+                        ProductTypeId = (int)ProductTypeEnum.ANIMALITOS,
+                        LotteryId = lottery is null ? 0 : lottery.Id,
                     };
                 })
                 .OrderBy(x => x.Time)
                 .ToList();
 
                 var needSave = false;
-
                 // no hay resultado nuevo
                 var len = oldResult.Count();
                 if (len == newResult.Count())

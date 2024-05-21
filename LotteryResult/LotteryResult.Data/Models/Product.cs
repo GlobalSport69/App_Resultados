@@ -11,6 +11,8 @@ public partial class Product
 
     public bool Enable { get; set; }
 
+    public virtual ICollection<Lottery> Lotteries { get; set; } = new List<Lottery>();
+
     public virtual ICollection<ProviderProduct> ProviderProducts { get; set; } = new List<ProviderProduct>();
 
     public virtual ICollection<Result> Results { get; set; } = new List<Result>();
