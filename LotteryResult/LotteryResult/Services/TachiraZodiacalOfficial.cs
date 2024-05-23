@@ -16,9 +16,9 @@ namespace LotteryResult.Services
         private readonly ILogger<TachiraZodiacalOfficial> _logger;
         private Dictionary<string, long> lotteries = new Dictionary<string, long>
         {
-            { "01:00 PM", 135 },
-            { "04:30 PM", 163 },
-            { "07:10 PM", 139 }
+            { "01:15 PM", 141 },
+            { "04:45 PM", 143 },
+            { "10:00 PM", 145 }
         };
         public TachiraZodiacalOfficial(IUnitOfWork unitOfWork, ILogger<TachiraZodiacalOfficial> logger)
         {

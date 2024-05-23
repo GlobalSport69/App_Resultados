@@ -79,14 +79,14 @@ namespace LotteryResult.Services
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
                 var newResult = response.Select(item => {
-                    var time = item.Time.ToUpper();
+                    var time = LaGranjitaTerminalOfficial.FormatTime(item.Time);
                     var premierId = item.Sorteo == "Triple A" ? TripleA[time] : TripleB[time];
 
                     return new Result
                     {
                         Result1 = item.Result,
                         Time = time,
-                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),,
                         ProductId = productID,
                         ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.TRIPLES,
@@ -132,7 +132,7 @@ namespace LotteryResult.Services
 
                 if (!needSave)
                 {
-                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(TripleZuliaOfficial));
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(TripleTachiraOfficial));
                     return;
                 }
             }

@@ -61,12 +61,13 @@ namespace LotteryResult.Services
 
                 var newResult = response.Select(item => {
                     var time = item.lottery.name.Replace("ANIMALITOS LA RICACHONA ", "").Replace("O", "0").ToUpper();
-                    var PremierId = lotteries[LaGranjitaTerminalOfficial.FormatTime(time)];
+                    time = LaGranjitaTerminalOfficial.FormatTime(time);
+                    var PremierId = lotteries[time];
 
                     return new Result
                     {
                         Result1 = item.result.Replace("-", " "),
-                        Time = LaGranjitaTerminalOfficial.FormatTime(time),
+                        Time = time,
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
                         ProviderId = providerID,

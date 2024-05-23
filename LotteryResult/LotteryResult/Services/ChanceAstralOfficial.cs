@@ -16,9 +16,9 @@ namespace LotteryResult.Services
         private readonly ILogger<ChanceAstralOfficial> _logger;
         private Dictionary<string, long> lotteries = new Dictionary<string, long>
         {
-            { "01:05 PM", 255 },
+            { "01:00 PM", 255 },
             { "04:30 PM", 258 },
-            { "07:05 PM", 261 }
+            { "07:00 PM", 261 }
         };
         public ChanceAstralOfficial(IUnitOfWork unitOfWork, ILogger<ChanceAstralOfficial> logger)
         {
