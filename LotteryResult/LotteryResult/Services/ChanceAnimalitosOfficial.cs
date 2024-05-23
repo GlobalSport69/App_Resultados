@@ -57,16 +57,16 @@ namespace LotteryResult.Services
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
                 var newResult = response.Select(item => {
-
                     var substrings = item.fecSorteo.Split(' ');
                     var time = substrings[1].Substring(0, 2).Replace(":", "") + ":00 " + substrings[2];
+                    time = LaGranjitaTerminalOfficial.FormatTime(time.ToUpper());
                     var animalFound = GetAnimalLabelFromNumber(item.codAnimalA);
                     var premierId = lotteries[time];
 
                     return new Result
                     {
                         Result1 = animalFound.Number + " " + animalFound.Name.Capitalize(),
-                        Time = LaGranjitaTerminalOfficial.FormatTime(time.ToUpper()),
+                        Time = time,
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
                         ProviderId = providerID,
