@@ -15,6 +15,22 @@ namespace LotteryResult.Services
         private const int laGranjitaProviderID = 3;
         private readonly ILogger<LaGranjitaOfficial> _logger;
 
+        private Dictionary<string, long> lotteries = new Dictionary<string, long>
+        {
+            { "08:00 AM", 239 },
+            { "09:00 AM", 2 },
+            { "10:00 AM", 3 },
+            { "11:00 AM", 4},
+            { "12:00 PM", 5 },
+            { "01:00 PM", 6 },
+            { "02:00 PM", 7 },
+            { "03:00 PM", 8 },
+            { "04:00 PM", 9 },
+            { "05:00 PM", 10 },
+            { "06:00 PM", 11 },
+            { "07:00 PM", 12 }
+        };
+
         public LaGranjitaOfficial(IUnitOfWork unitOfWork, ILogger<LaGranjitaOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
@@ -42,15 +58,13 @@ namespace LotteryResult.Services
                     return; 
                 }
 
-                var lotteries = await unitOfWork.LotteryRepository.GetAllByAsync(x => x.ProductId == laGranjitaID);
-
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == laGranjitaProviderID && x.CreatedAt.Date == venezuelaNow.Date);
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
                 var newResult = response.Select(item => {
                     var time = item.lottery.name.Replace("LA GRANJITA ", "").Replace("O", "0").ToUpper();
-                    var lottery = lotteries.FirstOrDefault(x => x.LotteryHour == LaGranjitaTerminalOfficial.ConvertToTime(time));
+                    var premierId = lotteries[LaGranjitaTerminalOfficial.FormatTime(time)];
 
                     return new Result
                     {
@@ -60,7 +74,7 @@ namespace LotteryResult.Services
                         ProductId = laGranjitaID,
                         ProviderId = laGranjitaProviderID,
                         ProductTypeId = (int)ProductTypeEnum.ANIMALITOS,
-                        LotteryId = lottery is null ? 0 : lottery.Id,
+                        PremierId = premierId,
                     };
                 })
                 .OrderBy(x => x.Time)

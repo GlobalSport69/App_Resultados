@@ -1,6 +1,7 @@
 ﻿using Flurl;
 using Flurl.Http;
 using LotteryResult.Data.Abstractions;
+using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
 using LotteryResult.Extensions;
@@ -11,9 +12,23 @@ namespace LotteryResult.Services
     public class ChanceAnimalitosOfficial : IGetResult
     {
         private IUnitOfWork unitOfWork;
-        public const int chanceAnimalitosID = 16;
-        private const int chanceAnimalitosProviderID = 16;
+        public const int productID = 16;
+        private const int providerID = 16;
         private readonly ILogger<ChanceAnimalitosOfficial> _logger;
+        private Dictionary<string, long> lotteries = new Dictionary<string, long>
+        {
+            { "09:00 AM", 262 },
+            { "10:00 AM", 263 },
+            { "11:00 AM", 264 },
+            { "12:00 PM", 265 },
+            { "01:00 PM", 266 },
+            { "02:00 PM", 267 },
+            { "03:00 PM", 268 },
+            { "04:00 PM", 269 },
+            { "05:00 PM", 270 },
+            { "06:00 PM", 271 },
+            { "07:00 PM", 272 }
+        };
 
         public ChanceAnimalitosOfficial(IUnitOfWork unitOfWork, ILogger<ChanceAnimalitosOfficial> logger)
         {
@@ -38,34 +53,98 @@ namespace LotteryResult.Services
                 }
 
                 var oldResult = await unitOfWork.ResultRepository
-                    .GetAllByAsync(x => x.ProviderId == chanceAnimalitosProviderID &&
-                        x.CreatedAt.Date == venezuelaNow.Date);
-                foreach (var item in oldResult)
-                {
-                    unitOfWork.ResultRepository.Delete(item);
-                }
+                    .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
+                oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
-                foreach (var item in response)
-                {
+                var newResult = response.Select(item => {
+
                     var substrings = item.fecSorteo.Split(' ');
-                    //var time = substrings[1].Substring(0, 5).PadLeft(2) + " " + substrings[2];
                     var time = substrings[1].Substring(0, 2).Replace(":", "") + ":00 " + substrings[2];
                     var animalFound = GetAnimalLabelFromNumber(item.codAnimalA);
+                    var premierId = lotteries[time];
 
-                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
+                    return new Result
                     {
-                        Result1 = animalFound.Number +" "+ animalFound.Name.Capitalize(),
+                        Result1 = animalFound.Number + " " + animalFound.Name.Capitalize(),
                         Time = LaGranjitaTerminalOfficial.FormatTime(time.ToUpper()),
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
-                        ProductId = chanceAnimalitosID,
-                        ProviderId = chanceAnimalitosProviderID,
-                        ProductTypeId = (int)ProductTypeEnum.ANIMALITOS
-                    });
+                        ProductId = productID,
+                        ProviderId = providerID,
+                        ProductTypeId = (int)ProductTypeEnum.ANIMALITOS,
+                        PremierId = premierId,
+                    };
+                })
+                .OrderBy(x => x.Time)
+                .ToList();
+
+                var needSave = false;
+                // no hay resultado nuevo
+                var len = oldResult.Count();
+                if (len == newResult.Count())
+                {
+                    for (int i = 0; i < len; i++)
+                    {
+                        if (oldResult[i].Time == newResult[i].Time && oldResult[i].Result1 != newResult[i].Result1)
+                        {
+                            oldResult[i].Result1 = newResult[i].Result1;
+                            unitOfWork.ResultRepository.Update(oldResult[i]);
+                            needSave = true;
+                        }
+                    }
                 }
 
-                Console.WriteLine(response);
+                // hay resultado nuevo
+                if (newResult.Count() > len)
+                {
+                    var founds = newResult.Where(x => !oldResult.Any(y => y.Time == x.Time));
 
-                await unitOfWork.SaveChangeAsync();
+                    foreach (var item in founds)
+                    {
+                        unitOfWork.ResultRepository.Insert(item);
+                        needSave = true;
+                    }
+                }
+
+                if (needSave)
+                {
+                    await unitOfWork.SaveChangeAsync();
+                }
+
+                if (!needSave)
+                {
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(LaGranjitaOfficial));
+                    return;
+                }
+
+            //    var oldResult = await unitOfWork.ResultRepository
+            //        .GetAllByAsync(x => x.ProviderId == chanceAnimalitosProviderID &&
+            //            x.CreatedAt.Date == venezuelaNow.Date);
+            //    foreach (var item in oldResult)
+            //    {
+            //        unitOfWork.ResultRepository.Delete(item);
+            //    }
+
+                //    foreach (var item in response)
+                //    {
+                //        var substrings = item.fecSorteo.Split(' ');
+                //        //var time = substrings[1].Substring(0, 5).PadLeft(2) + " " + substrings[2];
+                //        var time = substrings[1].Substring(0, 2).Replace(":", "") + ":00 " + substrings[2];
+                //        var animalFound = GetAnimalLabelFromNumber(item.codAnimalA);
+
+                //        unitOfWork.ResultRepository.Insert(new Data.Models.Result
+                //        {
+                //            Result1 = animalFound.Number +" "+ animalFound.Name.Capitalize(),
+                //            Time = LaGranjitaTerminalOfficial.FormatTime(time.ToUpper()),
+                //            Date = DateTime.Now.ToString("dd-MM-yyyy"),
+                //            ProductId = chanceAnimalitosID,
+                //            ProviderId = chanceAnimalitosProviderID,
+                //            ProductTypeId = (int)ProductTypeEnum.ANIMALITOS
+                //        });
+                //    }
+
+                //    Console.WriteLine(response);
+
+                //    await unitOfWork.SaveChangeAsync();
             }
             catch (Exception ex)
             {

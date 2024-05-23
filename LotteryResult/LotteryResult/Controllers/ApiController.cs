@@ -47,7 +47,8 @@ namespace LotteryResult.Controllers
                         Date = g.Key.ToString("dd-MM-yyyy"),
                         Result = x.Result1,
                         Time = x.Time,
-                        Sorteo = x.Sorteo
+                        Sorteo = x.Sorteo,
+                        lottery = x.PremierId
                     })),
                 });
             }

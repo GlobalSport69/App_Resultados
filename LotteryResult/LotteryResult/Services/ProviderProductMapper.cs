@@ -59,7 +59,7 @@ namespace LotteryResult.Services
 
         public void AddJob(int product_id, string job_id, string cron_expression) {
 
-            if (product_id == TripleZamoranoOfficial.zamoranoID)
+            if (product_id == TripleZamoranoOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id, 
                     () => tripleZamoranoOfficial.Handler(), 
@@ -71,7 +71,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == TripleCaracasOfficial.tripleCaracasID)
+            if (product_id == TripleCaracasOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => tripleCaracasOfficial.Handler(),
@@ -83,7 +83,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == TripleCalienteOfficial.tripleCalienteID)
+            if (product_id == TripleCalienteOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => tripleCalienteOfficial.Handler(),
@@ -95,7 +95,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == LottoReyOfficial.lottoReyID)
+            if (product_id == LottoReyOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => lottoReyOfficial.Handler(),
@@ -107,7 +107,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == TripleZuliaOfficial.tripleZuliaID)
+            if (product_id == TripleZuliaOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => tripleZuliaOfficial.Handler(),
@@ -130,7 +130,7 @@ namespace LotteryResult.Services
                     });
             }
 
-            if (product_id == LaRucaOfficial.laRucaID)
+            if (product_id == LaRucaOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => laRucaOfficial.Handler(),
@@ -142,7 +142,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == SelvaPlusOfficial.selvaPlusID)
+            if (product_id == SelvaPlusOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => selvaPlusOfficial.Handler(),
@@ -154,7 +154,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == GuacharoActivoOfficial.guacharoID)
+            if (product_id == GuacharoActivoOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => guacharoActivoOfficial.Handler(),
@@ -178,7 +178,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == LaRicachonaOfficial.laRicachonaID)
+            if (product_id == LaRicachonaOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => laRicachonaOfficial.Handler(),
@@ -190,7 +190,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == LaGranjitaTerminalOfficial.laGranjitaTerminalesID)
+            if (product_id == LaGranjitaTerminalOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => laGranjitaTerminalOfficial.Handler(),
@@ -214,7 +214,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == TripleBombaOfficial.tripleBombaID)
+            if (product_id == TripleBombaOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => tripleBombaOfficial.Handler(),
@@ -226,7 +226,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == ChanceAnimalitosOfficial.chanceAnimalitosID)
+            if (product_id == ChanceAnimalitosOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => chanceAnimalitosOfficial.Handler(),

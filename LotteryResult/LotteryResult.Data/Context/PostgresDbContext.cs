@@ -134,7 +134,7 @@ public partial class PostgresDbContext : DbContext
             entity.Property(e => e.Date)
                 .HasColumnType("character varying")
                 .HasColumnName("date");
-            entity.Property(e => e.LotteryId).HasColumnName("lottery_id");
+            entity.Property(e => e.PremierId).HasColumnName("premier_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.ProductTypeId).HasColumnName("product_type_id");
             entity.Property(e => e.ProviderId).HasColumnName("provider_id");

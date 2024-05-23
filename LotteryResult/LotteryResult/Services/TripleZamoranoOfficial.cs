@@ -1,6 +1,9 @@
-﻿using LotteryResult.Data.Abstractions;
+﻿using Azure;
+using LotteryResult.Data.Abstractions;
+using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
+using Microsoft.AspNetCore.Mvc;
 using PuppeteerSharp;
 
 namespace LotteryResult.Services
@@ -8,10 +11,16 @@ namespace LotteryResult.Services
     public class TripleZamoranoOfficial : IGetResult
     {
         private IUnitOfWork unitOfWork;
-        public const int zamoranoID = 2;
-        private const int zamoranoProviderID = 1;
+        public const int productID = 2;
+        private const int providerID = 1;
         private readonly ILogger<TripleZamoranoOfficial> _logger;
 
+        private Dictionary<string, long> TripleA = new Dictionary<string, long>
+        {
+            { "12:00 PM", 115 },
+            { "7:00 PM", 117 },
+            { "4:00 PM", 159 },
+        };
         public TripleZamoranoOfficial(IUnitOfWork unitOfWork, ILogger<TripleZamoranoOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
@@ -38,26 +47,6 @@ namespace LotteryResult.Services
                 await using var page = await browser.NewPageAsync();
                 await page.GoToAsync("http://triplezamorano.com/action/index", waitUntil: WaitUntilNavigation.Networkidle2);
 
-                //var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
-                //    //var fecha = new Date();
-                //    //var dia = String(fecha.getDate()).padStart(2, '0');
-                //    //var mes = String(fecha.getMonth() + 1).padStart(2, '0');
-                //    //var ano = fecha.getFullYear();
-                //    //var fechaFormateada = dia + '-' + mes + '-' + ano;
-                //    var fechaFormateada = date;
-
-                //    let iframe = document.querySelector('iframe')
-                //    let contenidoDelIframe = iframe.contentDocument || iframe.contentWindow.document;
-                //    let table = contenidoDelIframe.querySelector('#miTabla');
-                //    var result = [...table.querySelector('tbody').querySelectorAll('tr')].filter(x => ([...x.querySelectorAll('td')][1]).innerText == fechaFormateada)
-                //    let r = result.map(x => ({
-                //        result: ([...x.querySelectorAll('td')][4]).innerText,
-                //        time: ([...x.querySelectorAll('td')][3]).innerText
-                //    }))
-
-                //    return r;
-                //}", venezuelaNow.ToString("dd-MM-yyyy"));
-
                 // Espera hasta que haya al menos 2 elementos 'td' dentro de un 'tr' en una tabla
                 await page.WaitForFunctionAsync(@"() => {
                     const tds = document.querySelectorAll('table tr td');
@@ -67,7 +56,7 @@ namespace LotteryResult.Services
                     PollingInterval = 1000,
                 });
 
-                var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
+                var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
                     var fechaFormateada = date;
                     let table = document.querySelector('table');
                     var result = [...table.querySelector('tbody').querySelectorAll('tr')].filter(x => ([...x.querySelectorAll('td')][1]).innerText == fechaFormateada)
@@ -79,34 +68,72 @@ namespace LotteryResult.Services
                     return r;
                 }", venezuelaNow.ToString("dd/MM/yyyy"));
 
-                if (!someObject.Any())
+                if (!response.Any())
                 {
                     _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(TripleZamoranoOfficial));
                     return;
                 }
 
                 var oldResult = await unitOfWork.ResultRepository
-                    .GetAllByAsync(x => x.ProviderId == zamoranoProviderID && x.CreatedAt.Date == venezuelaNow.Date);
-                foreach (var item in oldResult)
-                {
-                    unitOfWork.ResultRepository.Delete(item);
-                }
+                    .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
+                oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
-                foreach (var item in someObject)
-                {
-                    unitOfWork.ResultRepository.Insert(new Data.Models.Result { 
+                var newResult = response.Select(item => {
+                    var time = item.Time.ToUpper();
+                    var premierId = TripleA[time];
+
+                    return new Result
+                    {
                         Result1 = item.Result,
                         Time = item.Time,
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
-                        ProductId = zamoranoID,
-                        ProviderId = zamoranoProviderID,
-                        ProductTypeId = (int)ProductTypeEnum.TRIPLES
-                    });
+                        ProductId = productID,
+                        ProviderId = providerID,
+                        ProductTypeId = (int)ProductTypeEnum.TRIPLES,
+                        PremierId = premierId,
+                    };
+                })
+                .OrderBy(x => x.Time)
+                .ToList();
+
+                var needSave = false;
+                // no hay resultado nuevo
+                var len = oldResult.Count();
+                if (len == newResult.Count())
+                {
+                    for (int i = 0; i < len; i++)
+                    {
+                        if (oldResult[i].Time == newResult[i].Time && oldResult[i].Result1 != newResult[i].Result1)
+                        {
+                            oldResult[i].Result1 = newResult[i].Result1;
+                            unitOfWork.ResultRepository.Update(oldResult[i]);
+                            needSave = true;
+                        }
+                    }
                 }
 
-                Console.WriteLine(someObject);
+                // hay resultado nuevo
+                if (newResult.Count() > len)
+                {
+                    var founds = newResult.Where(x => !oldResult.Any(y => y.Time == x.Time));
 
-                await unitOfWork.SaveChangeAsync();
+                    foreach (var item in founds)
+                    {
+                        unitOfWork.ResultRepository.Insert(item);
+                        needSave = true;
+                    }
+                }
+
+                if (needSave)
+                {
+                    await unitOfWork.SaveChangeAsync();
+                }
+
+                if (!needSave)
+                {
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(TripleZamoranoOfficial));
+                    return;
+                }
             }
             catch (Exception ex)
             {

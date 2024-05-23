@@ -11,5 +11,6 @@
         public string Result { get; set; }
         public string Time { get; set; }
         public string? Sorteo { get; set; }
+        public long? lottery { get; set; }
     }
 }

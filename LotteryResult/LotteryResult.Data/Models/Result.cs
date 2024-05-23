@@ -26,7 +26,7 @@ public partial class Result
 
     public int? ProductTypeId { get; set; }
 
-    public long LotteryId { get; set; }
+    public long? PremierId { get; set; }
 
     public virtual Product Product { get; set; } = null!;
 
