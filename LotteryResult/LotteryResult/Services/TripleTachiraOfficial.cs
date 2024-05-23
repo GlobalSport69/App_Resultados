@@ -86,7 +86,7 @@ namespace LotteryResult.Services
                     {
                         Result1 = item.Result,
                         Time = time,
-                        Date = DateTime.Now.ToString("dd-MM-yyyy"),,
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
                         ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.TRIPLES,
