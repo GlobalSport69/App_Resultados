@@ -64,6 +64,7 @@ namespace LotteryResult.Services
                     time = LaGranjitaTerminalOfficial.FormatTime(time);
                     var PremierId = lotteries[time];
 
+
                     return new Result
                     {
                         Result1 = item.result.Replace("-", " "),
