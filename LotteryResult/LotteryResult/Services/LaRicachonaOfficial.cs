@@ -60,7 +60,7 @@ namespace LotteryResult.Services
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
                 var newResult = response.Select(item => {
-                    var time = item.lottery.name.Replace("ANIMALITOS LA RICACHONA ", "").Replace("O", "0").ToUpper();
+                    var time = item.lottery.name.Replace("LA RICACHONA ", "").Replace("O", "0").ToUpper();
                     time = LaGranjitaTerminalOfficial.FormatTime(time);
                     var PremierId = lotteries[time];
 
