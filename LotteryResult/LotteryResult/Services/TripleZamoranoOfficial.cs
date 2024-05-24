@@ -18,8 +18,8 @@ namespace LotteryResult.Services
         private Dictionary<string, long> TripleA = new Dictionary<string, long>
         {
             { "12:00 PM", 115 },
-            { "7:00 PM", 117 },
-            { "4:00 PM", 159 },
+            { "07:00 PM", 117 },
+            { "04:00 PM", 159 },
         };
         public TripleZamoranoOfficial(IUnitOfWork unitOfWork, ILogger<TripleZamoranoOfficial> logger)
         {

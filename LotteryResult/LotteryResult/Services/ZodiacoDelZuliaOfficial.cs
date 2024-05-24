@@ -17,7 +17,7 @@ namespace LotteryResult.Services
         {
             { "12:45 PM", 125 },
             { "04:45 PM", 158 },
-            { "07:45 PM", 129 }
+            { "07:05 PM", 129 }
         };
         public ZodiacoDelZuliaOfficial(IUnitOfWork unitOfWork, ILogger<ZodiacoDelZuliaOfficial> logger)
         {
