@@ -28,7 +28,15 @@ namespace LotteryResult.Services
         private AstroZamoranoOfficial astroZamoranoOfficial;
         private ZodiacoDelZuliaOfficial zodiacoDelZuliaOfficial;
         private SignoCalienteOfficial signoCalienteOfficial;
-        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial, ElRucoTriplesBet elRucoTriplesBet, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial, SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial, LaGranjitaTerminalOfficial laGranjitaTerminalOfficial, LaRicachonaAnimalitosOfficial laRicachonaAnimalitosOfficial, TripleBombaOfficial tripleBombaOfficial, ChanceAnimalitosOfficial chanceAnimalitosOfficial, TripleChanceOfficial tripleChanceOfficial, ZodiacalCaracasOfficial zodiacalCaracasOfficial, TripleTachiraOfficial tripleTachiraOfficial = null, TachiraZodiacalOfficial tachiraZodiacalOfficial = null, ChanceAstralOfficial chanceAstralOfficial = null, AstroZamoranoOfficial astroZamoranoOfficial = null, ZodiacoDelZuliaOfficial zodiacoDelZuliaOfficial = null, SignoCalienteOfficial signoCalienteOfficial = null)
+        private LottoActivoOfficial lottoActivoOfficial;
+        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial,
+            TripleCalienteOfficial tripleCalienteOfficial, ElRucoTriplesBet elRucoTriplesBet, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial,
+            SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial,
+            LaGranjitaTerminalOfficial laGranjitaTerminalOfficial, LaRicachonaAnimalitosOfficial laRicachonaAnimalitosOfficial, TripleBombaOfficial tripleBombaOfficial,
+            ChanceAnimalitosOfficial chanceAnimalitosOfficial, TripleChanceOfficial tripleChanceOfficial, ZodiacalCaracasOfficial zodiacalCaracasOfficial,
+            TripleTachiraOfficial tripleTachiraOfficial, TachiraZodiacalOfficial tachiraZodiacalOfficial, ChanceAstralOfficial chanceAstralOfficial,
+            AstroZamoranoOfficial astroZamoranoOfficial, ZodiacoDelZuliaOfficial zodiacoDelZuliaOfficial, SignoCalienteOfficial signoCalienteOfficial, 
+            LottoActivoOfficial lottoActivoOfficial)
         {
             _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
 
@@ -55,6 +63,7 @@ namespace LotteryResult.Services
             this.astroZamoranoOfficial = astroZamoranoOfficial;
             this.zodiacoDelZuliaOfficial = zodiacoDelZuliaOfficial;
             this.signoCalienteOfficial = signoCalienteOfficial;
+            this.lottoActivoOfficial = lottoActivoOfficial;
         }
 
         public void AddJob(int product_id, string job_id, string cron_expression) {
@@ -326,6 +335,18 @@ namespace LotteryResult.Services
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => signoCalienteOfficial.Handler(),
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = _timeZone
+                    });
+                return;
+            }
+            
+            if (product_id == LottoActivoOfficial.productID)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => lottoActivoOfficial.Handler(),
                     cron_expression,
                     new RecurringJobOptions
                     {
