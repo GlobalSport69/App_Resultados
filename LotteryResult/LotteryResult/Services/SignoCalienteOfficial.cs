@@ -110,7 +110,7 @@ namespace LotteryResult.Services
                     return new Result
                     {
                         Result1 = item.Result,
-                        Time = item.Time,
+                        Time = time,
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
                         ProviderId = providerID,
