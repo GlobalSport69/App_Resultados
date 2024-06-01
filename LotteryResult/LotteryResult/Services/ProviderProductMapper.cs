@@ -130,7 +130,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == ElRucoTriplesBet.elRucoID)
+            if (product_id == ElRucoTriplesBet.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => elRucoTriplesBet.Handler(),
