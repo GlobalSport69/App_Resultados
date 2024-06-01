@@ -7,6 +7,7 @@ using LotteryResult.Enum;
 using LotteryResult.Models;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace LotteryResult.Services
 {
@@ -92,7 +93,7 @@ namespace LotteryResult.Services
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
                 var newResult = response.Select(item => {
-                    var time = LaGranjitaTerminalOfficial.FormatTime(item.Time.ToUpper());
+                    var time = RuletaActivaOfficial.FormatTime(item.Time.ToUpper());
                     var premierId = lotteries[time];
 
                     return new Result
@@ -155,6 +156,21 @@ namespace LotteryResult.Services
                 throw;
             }
         }
+
+        private static string FormatTime(string time)
+        {
+            DateTime dateTime;
+            var cultureInfo = new CultureInfo("en-US");
+
+            if (DateTime.TryParseExact(time, "H:mm tt", cultureInfo, DateTimeStyles.None, out dateTime))
+            {
+                string formattedTime = dateTime.ToString("hh:mm tt", cultureInfo);
+                return formattedTime;
+            }
+
+            throw new Exception("El formato de la hora proporcionada no es válido. "+time);
+        }
+
     }
 }
 
