@@ -94,7 +94,7 @@ namespace LotteryResult.Services
 
                 var newResult = response.Select(item => {
                     var time = RuletaActivaOfficial.FormatTime(item.Time.ToUpper());
-                    var premierId = lotteries[time];
+                    long? premierId = item.Sorteo == "Triple A" ? lotteries[time] : null;
 
                     return new Result
                     {
