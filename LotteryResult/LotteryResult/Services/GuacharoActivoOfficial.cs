@@ -73,6 +73,8 @@ namespace LotteryResult.Services
                         ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.ANIMALES77,
                         PremierId = premierId,
+                        //number = item.numero,
+                        //animal = item.nombre
                     };
                 })
                 .OrderBy(x => x.Time)
@@ -116,30 +118,6 @@ namespace LotteryResult.Services
                     _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(TripleZuliaOfficial));
                     return;
                 }
-
-                //var oldResult = await unitOfWork.ResultRepository
-                //    .GetAllByAsync(x => x.ProviderId == guacharoProviderID && x.CreatedAt.Date == venezuelaNow.Date);
-                //foreach (var item in oldResult)
-                //{
-                //    unitOfWork.ResultRepository.Delete(item);
-                //}
-
-                //foreach (var item in response)
-                //{
-                //    unitOfWork.ResultRepository.Insert(new Data.Models.Result
-                //    {
-                //        Result1 = item.numero + " " +item.nombre.Trim(),
-                //        Time = item.loteria.Replace("Guacharo Activo ", "").ToUpper(),
-                //        Date = DateTime.Now.ToString("dd-MM-yyyy"),
-                //        ProductId = guacharoID,
-                //        ProviderId = guacharoProviderID,
-                //        ProductTypeId = (int)ProductTypeEnum.ANIMALES77
-                //    });
-                //}
-
-                //Console.WriteLine(response);
-
-                //await unitOfWork.SaveChangeAsync();
             }
             catch (Exception ex)
             {

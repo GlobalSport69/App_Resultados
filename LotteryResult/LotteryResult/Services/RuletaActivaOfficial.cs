@@ -66,6 +66,8 @@ namespace LotteryResult.Services
                             Time = x.hora,
                             Result = x.a.nro+" "+x.a.nombre,
                             Sorteo = "Triple A",
+                            //number = x.a.nro,
+                            //animal = x.a.nombre
                         },
                         new LotteryDetail {
                             Time = x.hora,
@@ -94,7 +96,7 @@ namespace LotteryResult.Services
 
                 var newResult = response.Select(item => {
                     var time = RuletaActivaOfficial.FormatTime(item.Time.ToUpper());
-                    long? premierId = item.Sorteo == "Triple A" ? lotteries[time] : null;
+                    long? premierId = item.Sorteo == "Triple D" ? lotteries[time] : null;
 
                     return new Result
                     {
