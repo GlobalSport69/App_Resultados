@@ -1,6 +1,7 @@
 ﻿using Flurl;
 using Flurl.Http;
 using LotteryResult.Data.Abstractions;
+using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
 using PuppeteerSharp;
@@ -11,9 +12,22 @@ namespace LotteryResult.Services
     public class TripleCaracasOfficial : IGetResult
     {
         private IUnitOfWork unitOfWork;
-        public const int tripleCaracasID = 3;
-        private const int tripleCaracasProviderID = 9;
+        public const int productID = 3;
+        private const int providerID = 9;
         private readonly ILogger<TripleCaracasOfficial> _logger;
+        private Dictionary<string, long> TripleA = new Dictionary<string, long>
+        {
+            { "01:00 PM", 146 },
+            { "04:30 PM", 164 },
+            { "07:00 PM", 149 }
+        };
+
+        private Dictionary<string, long> TripleB = new Dictionary<string, long>
+        {
+            { "01:00 PM", 147 },
+            { "04:30 PM", 165 },
+            { "07:00 PM", 150 }
+        };
 
         public TripleCaracasOfficial(IUnitOfWork unitOfWork, ILogger<TripleCaracasOfficial> logger)
         {
@@ -27,7 +41,7 @@ namespace LotteryResult.Services
             {
                 DateTime venezuelaNow = DateTime.Now;
 
-                var response = await "http://165.227.185.69:8000"
+                var results = await "http://165.227.185.69:8000"
                 .AppendPathSegments("api", "resultados")
                 .SetQueryParams(new
                 {
@@ -35,49 +49,81 @@ namespace LotteryResult.Services
                 })
                 .GetJsonAsync<TripleCaracasOfficialResponse>();
 
-                var results = response.resultados
+                var response = results.resultados
                     .GroupBy(x => x.producto_juego.order)
                     .OrderBy(x => x.Key)
                     .Where(x => x.Key < 3)
                     .SelectMany(x => x)
                     .ToList();
 
-                if (!results.Any())
+                if (!response.Any())
                 {
                     _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(TripleCaracasOfficial));
                     return;
                 }
 
-                var oldResult = await unitOfWork.ResultRepository
-                    .GetAllByAsync(x => x.ProviderId == tripleCaracasProviderID && x.CreatedAt.Date == venezuelaNow.Date);
-                foreach (var item in oldResult)
-                {
-                    unitOfWork.ResultRepository.Delete(item);
-                }
+                var oldResult = await unitOfWork.ResultRepository.GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
+                oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
-                foreach (var item in results)
-                {
+                var newResult = response.Select(item => {
                     // Crear un DateTime a partir de la cadena de texto "13:00:00"
                     DateTime dt = DateTime.ParseExact(item.sorteo.hora, "HH:mm:ss", CultureInfo.InvariantCulture);
                     // Convertir a formato de 12 horas (AM/PM)
-                    string time12Hour = dt.ToString("hh:mm tt", CultureInfo.InvariantCulture);
+                    string time = dt.ToString("hh:mm tt", CultureInfo.InvariantCulture).ToUpper();
+                    var premierId = item.producto_juego.nombre == "Triple A" ? TripleA[time] : TripleB[time];
 
-
-                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
+                    return new Result
                     {
                         Result1 = item.resultado,
-                        Time = time12Hour,
-                        Date = string.Empty,
-                        ProductId = tripleCaracasID,
-                        ProviderId = tripleCaracasProviderID,
+                        Time = time,
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
+                        ProductId = productID,
+                        ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.TRIPLES,
-                        Sorteo = item.producto_juego.nombre
-                    });
+                        Sorteo = item.producto_juego.nombre,
+                        PremierId = premierId,
+                    };
+                })
+                .OrderBy(x => x.Time)
+                .ToList();
+
+                var needSave = false;
+                // no hay resultado nuevo
+                var len = oldResult.Count();
+                if (len == newResult.Count())
+                {
+                    for (int i = 0; i < len; i++)
+                    {
+                        if (oldResult[i].Time == newResult[i].Time && oldResult[i].Result1 != newResult[i].Result1)
+                        {
+                            oldResult[i].Result1 = newResult[i].Result1;
+                            unitOfWork.ResultRepository.Update(oldResult[i]);
+                            needSave = true;
+                        }
+                    }
                 }
 
-                Console.WriteLine(response);
+                // hay resultado nuevo
+                if (newResult.Count() > len)
+                {
+                    var founds = newResult.Where(x => !oldResult.Any(y => y.Time == x.Time));
+                    foreach (var item in founds)
+                    {
+                        unitOfWork.ResultRepository.Insert(item);
+                        needSave = true;
+                    }
+                }
 
-                await unitOfWork.SaveChangeAsync();
+                if (needSave)
+                {
+                    await unitOfWork.SaveChangeAsync();
+                }
+
+                if (!needSave)
+                {
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(TripleCaracasOfficial));
+                    return;
+                }
             }
             catch (Exception ex)
             {

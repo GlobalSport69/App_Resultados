@@ -20,25 +20,36 @@ namespace LotteryResult.Controllers
         }
 
         [HttpGet]
-        public async Task<IEnumerable<ResultsDto>> Get([FromQuery] string date = null)
+        public async Task<IEnumerable<ResultsDto>> Get([FromQuery] string fromDate = null, [FromQuery] string endDate = null)
         {
             try
             {
-                DateTime venezuelaNow = DateTime.Now;
-                if (!string.IsNullOrEmpty(date))
+                DateTime venezuelaFromDate, venezuelaEndDate;
+                venezuelaFromDate = venezuelaEndDate = DateTime.Now;
+
+                if (!string.IsNullOrEmpty(fromDate))
                 {
-                    venezuelaNow = DateTime.ParseExact(date, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+                    venezuelaFromDate = DateTime.ParseExact(fromDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
                 }
-                var products = await unitOfWork.ProductRepository.GetResultByProductsByDate(venezuelaNow);
+
+                if (!string.IsNullOrEmpty(endDate))
+                {
+                    venezuelaEndDate = DateTime.ParseExact(endDate, "dd-MM-yyyy", CultureInfo.InvariantCulture);
+                }
+
+                var products = await unitOfWork.ProductRepository.GetResultByProductsByRangeDate(venezuelaFromDate, venezuelaEndDate);
 
                 return products.Select(p => new ResultsDto
                 {
                     ProductName = p.Name,
-                    Results = p.Results.Select(x => new ResultDetailDto { 
+                    Results = p.Results.GroupBy(x => x.CreatedAt).OrderBy(x => x.Key).SelectMany(g => g.Select(x => new ResultDetailDto
+                    {
+                        Date = g.Key.ToString("dd-MM-yyyy"),
                         Result = x.Result1,
                         Time = x.Time,
-                        Sorteo = x.Sorteo
-                    }),
+                        Sorteo = x.Sorteo,
+                        lottery = x.PremierId
+                    })),
                 });
             }
             catch (Exception ex)

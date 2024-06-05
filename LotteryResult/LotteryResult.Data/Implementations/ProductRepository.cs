@@ -2,6 +2,7 @@
 using LotteryResult.Data.Context;
 using LotteryResult.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -23,6 +24,14 @@ namespace LotteryResult.Data.Implementations
             return await _dbContext.Products
                 .Where(x => x.Enable)
                 .Include(x => x.Results.Where(r => r.CreatedAt.Date == date.Date))
+                .ToListAsync();
+        }
+
+        public async Task<List<Product>> GetResultByProductsByRangeDate(DateTime from, DateTime until)
+        {
+            return await _dbContext.Products
+            .Where(x => x.Enable)
+                .Include(x => x.Results.Where(r => r.CreatedAt.Date >= from.Date && r.CreatedAt.Date <= until.Date))
                 .ToListAsync();
         }
     }

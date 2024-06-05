@@ -26,7 +26,7 @@ namespace LotteryResult.Data.Implementations
             _dbContext.Set<T>().Remove(entity);
         }
 
-        public async Task<IEnumerable<T>> GetAllByAsync(Expression<Func<T, bool>> predicate = null, IEnumerable<string> includes = null)
+        public async Task<List<T>> GetAllByAsync(Expression<Func<T, bool>> predicate = null, IEnumerable<string> includes = null)
         {
             IQueryable<T> query = _dbContext.Set<T>();
             if (includes != null && includes.Any())

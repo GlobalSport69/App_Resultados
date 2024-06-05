@@ -1,4 +1,6 @@
-﻿using LotteryResult.Data.Abstractions;
+﻿using Azure;
+using LotteryResult.Data.Abstractions;
+using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
 using PuppeteerSharp;
@@ -11,7 +13,12 @@ namespace LotteryResult.Services
         public const int productID = 23;
         private const int providerID = 23;
         private readonly ILogger<SignoCalienteOfficial> _logger;
-
+        private Dictionary<string, long> lotteries = new Dictionary<string, long>
+        {
+            { "01:00 PM", 135 },
+            { "04:30 PM", 163 },
+            { "07:10 PM", 139 },
+        };
         public SignoCalienteOfficial(IUnitOfWork unitOfWork, ILogger<SignoCalienteOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
@@ -71,7 +78,7 @@ namespace LotteryResult.Services
                     PollingInterval = 1000,
                 });
 
-                var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
+                var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
                     let fechaFormateada = date;
                     let table = document.querySelector('table');
                     let r = [...table.querySelectorAll('tbody tr')]
@@ -87,34 +94,95 @@ namespace LotteryResult.Services
                     return r;
                 }", venezuelaNow.ToString("dd/MM/yyyy"));
 
-                if (!someObject.Any())
+                if (!response.Any())
                 {
                     _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(SignoCalienteOfficial));
                     return;
                 }
 
-                var oldResult = await unitOfWork.ResultRepository
-                    .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
-                foreach (var item in oldResult)
-                {
-                    unitOfWork.ResultRepository.Delete(item);
-                }
+                var oldResult = await unitOfWork.ResultRepository.GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
+                oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
-                foreach (var item in someObject)
-                {
-                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
+                var newResult = response.Select(item => {
+                    var time = item.Time.ToUpper();
+                    var premierId = lotteries[time];
+
+                    return new Result
                     {
                         Result1 = item.Result,
-                        Time = item.Time,
-                        Date = string.Empty,
+                        Time = time,
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
                         ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.ZODIACAL,
-                        Sorteo = item.Sorteo
-                    });
+                        //Sorteo = item.Sorteo
+                        PremierId = premierId,
+                    };
+                })
+                .OrderBy(x => x.Time)
+                .ToList();
+
+                var needSave = false;
+                // no hay resultado nuevo
+                var len = oldResult.Count();
+                if (len == newResult.Count())
+                {
+                    for (int i = 0; i < len; i++)
+                    {
+                        if (oldResult[i].Time == newResult[i].Time && oldResult[i].Result1 != newResult[i].Result1)
+                        {
+                            oldResult[i].Result1 = newResult[i].Result1;
+                            unitOfWork.ResultRepository.Update(oldResult[i]);
+                            needSave = true;
+                        }
+                    }
                 }
 
-                await unitOfWork.SaveChangeAsync();
+                // hay resultado nuevo
+                if (newResult.Count() > len)
+                {
+                    var founds = newResult.Where(x => !oldResult.Any(y => y.Time == x.Time));
+
+                    foreach (var item in founds)
+                    {
+                        unitOfWork.ResultRepository.Insert(item);
+                        needSave = true;
+                    }
+                }
+
+                if (needSave)
+                {
+                    await unitOfWork.SaveChangeAsync();
+                }
+
+                if (!needSave)
+                {
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(AstroZamoranoOfficial));
+                    return;
+                }
+
+                //var oldResult = await unitOfWork.ResultRepository
+                //    .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
+                //foreach (var item in oldResult)
+                //{
+                //    unitOfWork.ResultRepository.Delete(item);
+                //}
+
+                //foreach (var item in someObject)
+                //{
+                //    unitOfWork.ResultRepository.Insert(new Data.Models.Result
+                //    {
+                //        Result1 = item.Result,
+                //        Time = item.Time,
+                //        Date = DateTime.Now.ToString("dd-MM-yyyy"),
+                //        ProductId = productID,
+                //        ProviderId = providerID,
+                //        ProductTypeId = (int)ProductTypeEnum.ZODIACAL,
+                //        Sorteo = item.Sorteo
+                //    });
+                //}
+
+                //await unitOfWork.SaveChangeAsync();
             }
             catch (Exception ex)
             {

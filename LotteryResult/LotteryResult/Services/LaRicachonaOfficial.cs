@@ -1,6 +1,7 @@
 ﻿using Flurl;
 using Flurl.Http;
 using LotteryResult.Data.Abstractions;
+using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
 using PuppeteerSharp;
@@ -10,10 +11,23 @@ namespace LotteryResult.Services
     public class LaRicachonaOfficial : IGetResult
     {
         private IUnitOfWork unitOfWork;
-        public const int laRicachonaID = 12;
-        private const int laRicachonaProviderID = 12;
+        public const int productID = 12;
+        private const int providerID = 12;
         private readonly ILogger<LaRicachonaOfficial> _logger;
-
+        private Dictionary<string, long> lotteries = new Dictionary<string, long>
+        {
+            { "09:05 AM", 90 },
+            { "10:05 AM", 91 },
+            { "11:05 AM", 92 },
+            { "12:05 PM", 93 },
+            { "01:05 PM", 94 },
+            { "02:05 PM", 95 },
+            { "03:05 PM", 96 },
+            { "04:05 PM", 97 },
+            { "05:05 PM", 98 },
+            { "06:05 PM", 99 },
+            { "07:05 PM", 100 }
+        };
         public LaRicachonaOfficial(IUnitOfWork unitOfWork, ILogger<LaRicachonaOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
@@ -42,29 +56,67 @@ namespace LotteryResult.Services
                 }
 
                 var oldResult = await unitOfWork.ResultRepository
-                    .GetAllByAsync(x => x.ProviderId == laRicachonaProviderID && x.CreatedAt.Date == venezuelaNow.Date);
-                foreach (var item in oldResult)
-                {
-                    unitOfWork.ResultRepository.Delete(item);
-                }
+                    .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
+                oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
-                foreach (var item in response)
-                {
+                var newResult = response.Select(item => {
                     var time = item.lottery.name.Replace("LA RICACHONA ", "").Replace("O", "0").ToUpper();
-                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
+                    time = LaGranjitaTerminalOfficial.FormatTime(time);
+                    var PremierId = lotteries[time];
+
+
+                    return new Result
                     {
-                        Result1 = item.result,
-                        Time = LaGranjitaTerminalOfficial.FormatTime(time),
-                        Date = string.Empty,
-                        ProductId = laRicachonaID,
-                        ProviderId = laRicachonaProviderID,
-                        ProductTypeId = (int)ProductTypeEnum.TRIPLES
-                    });
+                        Result1 = item.result.Replace("-", " "),
+                        Time = time,
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
+                        ProductId = productID,
+                        ProviderId = providerID,
+                        ProductTypeId = (int)ProductTypeEnum.ANIMALITOS,
+                        PremierId = PremierId
+                    };
+                })
+                .OrderBy(x => x.Time)
+                .ToList();
+
+                var needSave = false;
+                // no hay resultado nuevo
+                var len = oldResult.Count();
+                if (len == newResult.Count())
+                {
+                    for (int i = 0; i < len; i++)
+                    {
+                        if (oldResult[i].Time == newResult[i].Time && oldResult[i].Result1 != newResult[i].Result1)
+                        {
+                            oldResult[i].Result1 = newResult[i].Result1;
+                            unitOfWork.ResultRepository.Update(oldResult[i]);
+                            needSave = true;
+                        }
+                    }
                 }
 
-                //Console.WriteLine(response);
+                // hay resultado nuevo
+                if (newResult.Count() > len)
+                {
+                    var founds = newResult.Where(x => !oldResult.Any(y => y.Time == x.Time));
 
-                await unitOfWork.SaveChangeAsync();
+                    foreach (var item in founds)
+                    {
+                        unitOfWork.ResultRepository.Insert(item);
+                        needSave = true;
+                    }
+                }
+
+                if (needSave)
+                {
+                    await unitOfWork.SaveChangeAsync();
+                }
+
+                if (!needSave)
+                {
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(LaRicachonaOfficial));
+                    return;
+                }
             }
             catch (Exception ex)
             {

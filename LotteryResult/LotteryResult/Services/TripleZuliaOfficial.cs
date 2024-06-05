@@ -1,4 +1,6 @@
-﻿using LotteryResult.Data.Abstractions;
+﻿using Azure;
+using LotteryResult.Data.Abstractions;
+using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
 using PuppeteerSharp;
@@ -8,9 +10,23 @@ namespace LotteryResult.Services
     public class TripleZuliaOfficial : IGetResult
     {
         private IUnitOfWork unitOfWork;
-        public const int tripleZuliaID = 6;
-        private const int tripleZuliaProviderID = 5;
+        public const int productID = 6;
+        private const int providerID = 5;
         private readonly ILogger<TripleZuliaOfficial> _logger;
+
+        private Dictionary<string, long> TripleA = new Dictionary<string, long>
+        {
+            { "12:45 PM", 112 },
+            { "04:45 PM", 156 },
+            { "07:05 PM", 114 },
+        };
+
+        private Dictionary<string, long> TripleB = new Dictionary<string, long>
+        {
+            { "12:45 PM", 124 },
+            { "04:45 PM", 157 },
+            { "07:05 PM", 128 },
+        };
 
         public TripleZuliaOfficial(IUnitOfWork unitOfWork, ILogger<TripleZuliaOfficial> logger)
         {
@@ -81,7 +97,7 @@ namespace LotteryResult.Services
                     PollingInterval = 1000,
                 });
 
-                var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
+                var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
                     let fechaFormateada = date;
                     let table = document.querySelector('table');
                     let r = [...table.querySelectorAll('tbody tr')]
@@ -105,36 +121,73 @@ namespace LotteryResult.Services
                 }", venezuelaNow.ToString("dd/MM/yyyy"));
 
 
-                if (!someObject.Any())
+                if (!response.Any())
                 {
                     _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(TripleZuliaOfficial));
                     return;
                 }
 
                 var oldResult = await unitOfWork.ResultRepository
-                    .GetAllByAsync(x => x.ProviderId == tripleZuliaProviderID && x.CreatedAt.Date == venezuelaNow.Date);
-                foreach (var item in oldResult)
-                {
-                    unitOfWork.ResultRepository.Delete(item);
-                }
+                    .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
+                oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
-                foreach (var item in someObject)
-                {
-                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
+                var newResult = response.Select(item => {
+                    var time = item.Time.ToUpper();
+                    var premierId = item.Sorteo == "Triple A" ? TripleA[time] : TripleB[time];
+
+                    return new Result
                     {
                         Result1 = item.Result,
-                        Time = item.Time,
-                        Date = string.Empty,
-                        ProductId = tripleZuliaID,
-                        ProviderId = tripleZuliaProviderID,
+                        Time = time,
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
+                        ProductId = productID,
+                        ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.TRIPLES,
-                        Sorteo = item.Sorteo
-                    });
+                        Sorteo = item.Sorteo,
+                        PremierId = premierId,
+                    };
+                })
+                .OrderBy(x => x.Time)
+                .ToList();
+
+                var needSave = false;
+                // no hay resultado nuevo
+                var len = oldResult.Count();
+                if (len == newResult.Count())
+                {
+                    for (int i = 0; i < len; i++)
+                    {
+                        if (oldResult[i].Time == newResult[i].Time && oldResult[i].Result1 != newResult[i].Result1)
+                        {
+                            oldResult[i].Result1 = newResult[i].Result1;
+                            unitOfWork.ResultRepository.Update(oldResult[i]);
+                            needSave = true;
+                        }
+                    }
                 }
 
-                Console.WriteLine(someObject);
+                // hay resultado nuevo
+                if (newResult.Count() > len)
+                {
+                    var founds = newResult.Where(x => !oldResult.Any(y => y.Time == x.Time));
 
-                await unitOfWork.SaveChangeAsync();
+                    foreach (var item in founds)
+                    {
+                        unitOfWork.ResultRepository.Insert(item);
+                        needSave = true;
+                    }
+                }
+
+                if (needSave)
+                {
+                    await unitOfWork.SaveChangeAsync();
+                }
+
+                if (!needSave)
+                {
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(TripleZuliaOfficial));
+                    return;
+                }
             }
             catch (Exception ex)
             {

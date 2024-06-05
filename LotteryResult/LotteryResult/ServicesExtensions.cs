@@ -31,6 +31,9 @@ namespace LotteryResult
             services.AddScoped<AstroZamoranoOfficial>();
             services.AddScoped<ZodiacoDelZuliaOfficial>();
             services.AddScoped<SignoCalienteOfficial>();
+            services.AddScoped<LottoActivoOfficial>();
+            services.AddScoped<RuletaActivaOfficial>();
+            services.AddScoped<GranjaPlusOfficial>();
 
             services.AddScoped<ProviderProductMapper>();
 

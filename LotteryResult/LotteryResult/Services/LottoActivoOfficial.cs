@@ -1,33 +1,35 @@
-﻿using Azure;
-using LotteryResult.Data.Abstractions;
+﻿using LotteryResult.Data.Abstractions;
 using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
 using PuppeteerSharp;
-using System.Globalization;
 
 namespace LotteryResult.Services
 {
-    public class TripleBombaOfficial : IGetResult
+    public class LottoActivoOfficial : IGetResult
     {
         private IUnitOfWork unitOfWork;
-        public const int productID = 15;
-        private const int providerID = 15;
-        private readonly ILogger<TripleBombaOfficial> _logger;
-        private Dictionary<string, long> TripleA = new Dictionary<string, long>
+        public const int productID = 27;
+        private const int providerID = 25;
+        private readonly ILogger<LottoActivoOfficial> _logger;
+
+
+        private Dictionary<string, long> Lotteries = new Dictionary<string, long>
         {
-            { "01:30 PM", 218 },
-            { "04:30 PM", 220 },
-            { "08:30 PM", 222 }
+            { "09:00 AM", 45 },
+            { "10:00 AM", 46 },
+            { "11:00 AM", 47 },
+            { "12:00 PM", 48 },
+            { "01:00 PM", 49 },
+            { "02:00 PM", 206 },
+            { "03:00 PM", 51 },
+            { "04:00 PM", 52 },
+            { "05:00 PM", 53 },
+            { "06:00 PM", 54 },
+            { "07:00 PM", 55 },
         };
 
-        private Dictionary<string, long> TripleB = new Dictionary<string, long>
-        {
-            { "01:30 PM", 219 },
-            { "04:30 PM", 221 },
-            { "08:30 PM", 223 }
-        };
-        public TripleBombaOfficial(IUnitOfWork unitOfWork, ILogger<TripleBombaOfficial> logger)
+        public LottoActivoOfficial(IUnitOfWork unitOfWork, ILogger<LottoActivoOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
             _logger = logger;
@@ -52,34 +54,41 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://www.triplebomba.com/sistema", waitUntil: WaitUntilNavigation.Networkidle2);
+                await page.GoToAsync("https://www.lottoactivo.com/resultados/lotto_activo/", waitUntil: WaitUntilNavigation.Networkidle2);
 
-                var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
-                    let dateText = document.querySelector('legend > h6').innerText;
-                    if(dateText.substr(dateText.length - 10) != date) return [];
+                // Espera hasta que haya al menos 1 elementos 'div' dentro de '#resultados'
+                await page.WaitForFunctionAsync(@"() => {
+                    const tds = document.querySelectorAll('#resultados div');
+                    return tds.length > 0;
+                }", new WaitForFunctionOptions
+                {
+                    PollingInterval = 1000,
+                });
 
-                    let r = [...document.querySelector('.card-deck').querySelectorAll('.card')]
-                    .flatMap(x => [...x.querySelectorAll('.card-body .mx-auto div')]
-                                .map(y => ({time: y.querySelector('h6').innerText.split('-')[1].trim(),
-                                    result: y.querySelector('input').value,
-                                    sorteo: y.querySelector('h6').innerText.split('-')[0].trim()
-                                }))
-                    ).filter(x => x.result !== '---')
+                var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
+                    let r = [...document.querySelectorAll('#resultados div')]
+                    .map(row =>({ 
+	                    result: row.querySelector('h6').innerText,
+	                    time: row.querySelector('p').innerText.replace('LOTTO ACTIVO ', '')
+                    }))
 
                     return r;
-                }", venezuelaNow.ToString("dd/MM/yyyy"));
+                }");
+
 
                 if (!response.Any())
                 {
-                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(TripleBombaOfficial));
+                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(LottoActivoOfficial));
                     return;
                 }
-                var oldResult = await unitOfWork.ResultRepository.GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
+
+                var oldResult = await unitOfWork.ResultRepository
+                    .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
                 var newResult = response.Select(item => {
-                    string time = LaGranjitaTerminalOfficial.FormatTime(item.Time.ToUpper());
-                    var premierId = item.Sorteo == "Triple A" ? TripleA[time] : TripleB[time];
+                    var time = item.Time.ToUpper();
+                    var premierId = Lotteries[time];
 
                     return new Result
                     {
@@ -88,8 +97,7 @@ namespace LotteryResult.Services
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
                         ProviderId = providerID,
-                        Sorteo = item.Sorteo,
-                        ProductTypeId = (int)ProductTypeEnum.TRIPLES,
+                        ProductTypeId = (int)ProductTypeEnum.ANIMALITOS,
                         PremierId = premierId,
                     };
                 })
@@ -116,6 +124,7 @@ namespace LotteryResult.Services
                 if (newResult.Count() > len)
                 {
                     var founds = newResult.Where(x => !oldResult.Any(y => y.Time == x.Time));
+
                     foreach (var item in founds)
                     {
                         unitOfWork.ResultRepository.Insert(item);
@@ -130,13 +139,13 @@ namespace LotteryResult.Services
 
                 if (!needSave)
                 {
-                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(TripleBombaOfficial));
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(LottoActivoOfficial));
                     return;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(exception: ex, message: nameof(TripleBombaOfficial));
+                _logger.LogError(exception: ex, message: nameof(LottoActivoOfficial));
                 throw;
             }
         }

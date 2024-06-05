@@ -14,7 +14,7 @@ namespace LotteryResult.Data.Abstractions
         public void Update(T entity);
         public void Delete(T entity);
         public Task<T> GetByAsync(Expression<Func<T, bool>> predicate, IEnumerable<string> includes = null);
-        public Task<IEnumerable<T>> GetAllByAsync(Expression<Func<T, bool>> predicate = null, IEnumerable<string> includes = null);
+        public Task<List<T>> GetAllByAsync(Expression<Func<T, bool>> predicate = null, IEnumerable<string> includes = null);
         //public Task<int> SaveChangeAsync();
     }
 }

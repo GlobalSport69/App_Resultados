@@ -28,7 +28,17 @@ namespace LotteryResult.Services
         private AstroZamoranoOfficial astroZamoranoOfficial;
         private ZodiacoDelZuliaOfficial zodiacoDelZuliaOfficial;
         private SignoCalienteOfficial signoCalienteOfficial;
-        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial, TripleCalienteOfficial tripleCalienteOfficial, ElRucoTriplesBet elRucoTriplesBet, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial, SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial, LaGranjitaTerminalOfficial laGranjitaTerminalOfficial, LaRicachonaAnimalitosOfficial laRicachonaAnimalitosOfficial, TripleBombaOfficial tripleBombaOfficial, ChanceAnimalitosOfficial chanceAnimalitosOfficial, TripleChanceOfficial tripleChanceOfficial, ZodiacalCaracasOfficial zodiacalCaracasOfficial, TripleTachiraOfficial tripleTachiraOfficial = null, TachiraZodiacalOfficial tachiraZodiacalOfficial = null, ChanceAstralOfficial chanceAstralOfficial = null, AstroZamoranoOfficial astroZamoranoOfficial = null, ZodiacoDelZuliaOfficial zodiacoDelZuliaOfficial = null, SignoCalienteOfficial signoCalienteOfficial = null)
+        private LottoActivoOfficial lottoActivoOfficial;
+        private RuletaActivaOfficial ruletaActivaOfficial;
+        private GranjaPlusOfficial granjaPlusOfficial;
+        public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial,
+            TripleCalienteOfficial tripleCalienteOfficial, ElRucoTriplesBet elRucoTriplesBet, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial,
+            SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial,
+            LaGranjitaTerminalOfficial laGranjitaTerminalOfficial, LaRicachonaAnimalitosOfficial laRicachonaAnimalitosOfficial, TripleBombaOfficial tripleBombaOfficial,
+            ChanceAnimalitosOfficial chanceAnimalitosOfficial, TripleChanceOfficial tripleChanceOfficial, ZodiacalCaracasOfficial zodiacalCaracasOfficial,
+            TripleTachiraOfficial tripleTachiraOfficial, TachiraZodiacalOfficial tachiraZodiacalOfficial, ChanceAstralOfficial chanceAstralOfficial,
+            AstroZamoranoOfficial astroZamoranoOfficial, ZodiacoDelZuliaOfficial zodiacoDelZuliaOfficial, SignoCalienteOfficial signoCalienteOfficial,
+            LottoActivoOfficial lottoActivoOfficial, RuletaActivaOfficial ruletaActivaOfficial, GranjaPlusOfficial granjaPlusOfficial)
         {
             _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
 
@@ -55,11 +65,14 @@ namespace LotteryResult.Services
             this.astroZamoranoOfficial = astroZamoranoOfficial;
             this.zodiacoDelZuliaOfficial = zodiacoDelZuliaOfficial;
             this.signoCalienteOfficial = signoCalienteOfficial;
+            this.lottoActivoOfficial = lottoActivoOfficial;
+            this.ruletaActivaOfficial = ruletaActivaOfficial;
+            this.granjaPlusOfficial = granjaPlusOfficial;
         }
 
         public void AddJob(int product_id, string job_id, string cron_expression) {
 
-            if (product_id == TripleZamoranoOfficial.zamoranoID)
+            if (product_id == TripleZamoranoOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id, 
                     () => tripleZamoranoOfficial.Handler(), 
@@ -71,7 +84,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == TripleCaracasOfficial.tripleCaracasID)
+            if (product_id == TripleCaracasOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => tripleCaracasOfficial.Handler(),
@@ -83,7 +96,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == TripleCalienteOfficial.tripleCalienteID)
+            if (product_id == TripleCalienteOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => tripleCalienteOfficial.Handler(),
@@ -95,7 +108,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == LottoReyOfficial.lottoReyID)
+            if (product_id == LottoReyOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => lottoReyOfficial.Handler(),
@@ -107,7 +120,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == TripleZuliaOfficial.tripleZuliaID)
+            if (product_id == TripleZuliaOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => tripleZuliaOfficial.Handler(),
@@ -119,7 +132,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == ElRucoTriplesBet.elRucoID)
+            if (product_id == ElRucoTriplesBet.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => elRucoTriplesBet.Handler(),
@@ -130,7 +143,7 @@ namespace LotteryResult.Services
                     });
             }
 
-            if (product_id == LaRucaOfficial.laRucaID)
+            if (product_id == LaRucaOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => laRucaOfficial.Handler(),
@@ -142,7 +155,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == SelvaPlusOfficial.selvaPlusID)
+            if (product_id == SelvaPlusOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => selvaPlusOfficial.Handler(),
@@ -154,7 +167,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == GuacharoActivoOfficial.guacharoID)
+            if (product_id == GuacharoActivoOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => guacharoActivoOfficial.Handler(),
@@ -178,7 +191,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == LaRicachonaOfficial.laRicachonaID)
+            if (product_id == LaRicachonaOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => laRicachonaOfficial.Handler(),
@@ -190,7 +203,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == LaGranjitaTerminalOfficial.laGranjitaTerminalesID)
+            if (product_id == LaGranjitaTerminalOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => laGranjitaTerminalOfficial.Handler(),
@@ -214,7 +227,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == TripleBombaOfficial.tripleBombaID)
+            if (product_id == TripleBombaOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => tripleBombaOfficial.Handler(),
@@ -226,7 +239,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == ChanceAnimalitosOfficial.chanceAnimalitosID)
+            if (product_id == ChanceAnimalitosOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => chanceAnimalitosOfficial.Handler(),
@@ -326,6 +339,43 @@ namespace LotteryResult.Services
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => signoCalienteOfficial.Handler(),
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = _timeZone
+                    });
+                return;
+            }
+            
+            if (product_id == LottoActivoOfficial.productID)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => lottoActivoOfficial.Handler(),
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = _timeZone
+                    });
+                return;
+            }
+
+            
+            if (product_id == RuletaActivaOfficial.productID)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => ruletaActivaOfficial.Handler(),
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = _timeZone
+                    });
+                return;
+            }
+
+            if (product_id == GranjaPlusOfficial.productID)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => granjaPlusOfficial.Handler(),
                     cron_expression,
                     new RecurringJobOptions
                     {

@@ -39,6 +39,19 @@ namespace LotteryResult.Data.Implementations
             }
         }
 
+        private ILotteryRepository lotteryRepository;
+        public ILotteryRepository LotteryRepository
+        {
+            get
+            {
+                if (this.lotteryRepository == null)
+                {
+                    this.lotteryRepository = new LotteryRepository(_dbContext);
+                }
+                return lotteryRepository;
+            }
+        }
+
         public UnitOfWork(PostgresDbContext dbContext)
         {
             _dbContext = dbContext;

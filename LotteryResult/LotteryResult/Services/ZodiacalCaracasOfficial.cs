@@ -1,6 +1,7 @@
 ﻿using Flurl;
 using Flurl.Http;
 using LotteryResult.Data.Abstractions;
+using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
 using System.Globalization;
@@ -13,7 +14,12 @@ namespace LotteryResult.Services
         public const int productID = 18;
         private const int providerID = 18;
         private readonly ILogger<ZodiacalCaracasOfficial> _logger;
-
+        private Dictionary<string, long> lotteries = new Dictionary<string, long>
+        {
+            { "01:00 PM", 148 },
+            { "04:30 PM", 166 },
+            { "07:00 PM", 151 }
+        };
         public ZodiacalCaracasOfficial(IUnitOfWork unitOfWork, ILogger<ZodiacalCaracasOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
@@ -26,7 +32,7 @@ namespace LotteryResult.Services
             {
                 DateTime venezuelaNow = DateTime.Now;
 
-                var response = await "http://165.227.185.69:8000"
+                var results = await "http://165.227.185.69:8000"
                 .AppendPathSegments("api", "resultados")
                 .SetQueryParams(new
                 {
@@ -34,14 +40,14 @@ namespace LotteryResult.Services
                 })
                 .GetJsonAsync<TripleCaracasOfficialResponse>();
 
-                var results = response.resultados
+                var response = results.resultados
                     .GroupBy(x => x.producto_juego.order)
                     .OrderBy(x => x.Key)
                     .Where(x => x.Key == 3)
                     .SelectMany(x => x)
                     .ToList();
 
-                if (!results.Any())
+                if (!response.Any())
                 {
                     _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(ZodiacalCaracasOfficial));
                     return;
@@ -49,31 +55,68 @@ namespace LotteryResult.Services
 
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
-                foreach (var item in oldResult)
-                {
-                    unitOfWork.ResultRepository.Delete(item);
-                }
+                oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
-                foreach (var item in results)
-                {
-                    // Crear un DateTime a partir de la cadena de texto "13:00:00"
+                var newResult = response.Select(item => {
+
+                    //Crear un DateTime a partir de la cadena de texto "13:00:00"
                     DateTime dt = DateTime.ParseExact(item.sorteo.hora, "HH:mm:ss", CultureInfo.InvariantCulture);
                     // Convertir a formato de 12 horas (AM/PM)
-                    string time12Hour = dt.ToString("hh:mm tt", CultureInfo.InvariantCulture);
+                    string time = dt.ToString("hh:mm tt", CultureInfo.InvariantCulture).ToUpper();
+                    var premierId = lotteries[time];
 
-
-                    unitOfWork.ResultRepository.Insert(new Data.Models.Result
+                    return new Result
                     {
-                        Result1 = item.resultado +" "+item.resultado_elemento,
-                        Time = time12Hour,
-                        Date = string.Empty,
+                        Result1 = item.resultado + " " + item.resultado_elemento,
+                        Time = time,
+                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
                         ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.ZODIACAL,
-                    });
+                        PremierId = premierId,
+                    };
+                })
+                .OrderBy(x => x.Time)
+                .ToList();
+
+                var needSave = false;
+                // no hay resultado nuevo
+                var len = oldResult.Count();
+                if (len == newResult.Count())
+                {
+                    for (int i = 0; i < len; i++)
+                    {
+                        if (oldResult[i].Time == newResult[i].Time && oldResult[i].Result1 != newResult[i].Result1)
+                        {
+                            oldResult[i].Result1 = newResult[i].Result1;
+                            unitOfWork.ResultRepository.Update(oldResult[i]);
+                            needSave = true;
+                        }
+                    }
                 }
 
-                await unitOfWork.SaveChangeAsync();
+                // hay resultado nuevo
+                if (newResult.Count() > len)
+                {
+                    var founds = newResult.Where(x => !oldResult.Any(y => y.Time == x.Time));
+
+                    foreach (var item in founds)
+                    {
+                        unitOfWork.ResultRepository.Insert(item);
+                        needSave = true;
+                    }
+                }
+
+                if (needSave)
+                {
+                    await unitOfWork.SaveChangeAsync();
+                }
+
+                if (!needSave)
+                {
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(ZodiacalCaracasOfficial));
+                    return;
+                }
             }
             catch (Exception ex)
             {
