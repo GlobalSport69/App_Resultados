@@ -4,6 +4,8 @@ using LotteryResult.Data.Abstractions;
 using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
+using LotteryResult.Extensions;
+using Microsoft.CodeAnalysis;
 using PuppeteerSharp;
 
 namespace LotteryResult.Services
@@ -11,25 +13,25 @@ namespace LotteryResult.Services
     public class LaGranjitaOfficial : IGetResult
     {
         private IUnitOfWork unitOfWork;
-        public const int laGranjitaID = 1;
-        private const int laGranjitaProviderID = 3;
+        public const int productID = 1;
+        private const int providerID = 3;
         private readonly ILogger<LaGranjitaOfficial> _logger;
 
-        private Dictionary<string, long> lotteries = new Dictionary<string, long>
-        {
-            { "08:00 AM", 239 },
-            { "09:00 AM", 2 },
-            { "10:00 AM", 3 },
-            { "11:00 AM", 4},
-            { "12:00 PM", 5 },
-            { "01:00 PM", 6 },
-            { "02:00 PM", 7 },
-            { "03:00 PM", 8 },
-            { "04:00 PM", 9 },
-            { "05:00 PM", 10 },
-            { "06:00 PM", 11 },
-            { "07:00 PM", 12 }
-        };
+        //private Dictionary<string, long> lotteries = new Dictionary<string, long>
+        //{
+        //    { "08:00 AM", 239 },
+        //    { "09:00 AM", 2 },
+        //    { "10:00 AM", 3 },
+        //    { "11:00 AM", 4},
+        //    { "12:00 PM", 5 },
+        //    { "01:00 PM", 6 },
+        //    { "02:00 PM", 7 },
+        //    { "03:00 PM", 8 },
+        //    { "04:00 PM", 9 },
+        //    { "05:00 PM", 10 },
+        //    { "06:00 PM", 11 },
+        //    { "07:00 PM", 12 }
+        //};
 
         public LaGranjitaOfficial(IUnitOfWork unitOfWork, ILogger<LaGranjitaOfficial> logger)
         {
@@ -59,28 +61,35 @@ namespace LotteryResult.Services
                 }
 
                 var oldResult = await unitOfWork.ResultRepository
-                    .GetAllByAsync(x => x.ProviderId == laGranjitaProviderID && x.CreatedAt.Date == venezuelaNow.Date);
+                    .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
+
+                var sorteos = await unitOfWork.LotteryRepository
+                    .GetAllByAsync(x => x.ProductId == productID);
+                var lotteries = sorteos.ToDictionary(x => x.LotteryHour.FormatTime());
 
                 var newResult = response.Select(item => {
                     var time = item.lottery.name.Replace("LA GRANJITA ", "").Replace("O", "0").ToUpper();
-                    var premierId = lotteries[LaGranjitaTerminalOfficial.FormatTime(time)];
+                    time = LaGranjitaTerminalOfficial.FormatTime(time);
+
+                    var sorteo = lotteries[time];
                     var result = item.result.Split("-");
                     var number = result[0];
                     var animal = result[1];
 
-
                     return new Result
                     {
                         Result1 = number + " " + animal,
-                        Time = LaGranjitaTerminalOfficial.FormatTime(time),
+                        Time = time,
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
-                        ProductId = laGranjitaID,
-                        ProviderId = laGranjitaProviderID,
+                        ProductId = productID,
+                        ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.ANIMALITOS,
-                        PremierId = premierId,
-                        //number = number,
-                        //animal = animal
+
+                        PremierId = sorteo.PremierId,
+                        LotteryId = sorteo.Id,
+                        Number = number,
+                        Animal = animal
                     };
                 })
                 .OrderBy(x => x.Time)

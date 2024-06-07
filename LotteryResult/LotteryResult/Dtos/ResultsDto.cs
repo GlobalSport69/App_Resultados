@@ -11,6 +11,16 @@
         public string Result { get; set; }
         public string Time { get; set; }
         public string? Sorteo { get; set; }
-        public long? lottery { get; set; }
+        public LotteryDto Lottery { get; set; }
+        public long? PremierID { get; set; }
+        public string Number { get; set; }
+        public string Complement { get; set; }
+    }
+
+    public class LotteryDto
+    {
+        public long ID { get; set; }
+        public string Name { get; set; }
+        public TimeOnly Time { get; set; }
     }
 }

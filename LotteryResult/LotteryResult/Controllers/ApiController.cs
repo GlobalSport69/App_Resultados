@@ -42,13 +42,23 @@ namespace LotteryResult.Controllers
                 return products.Select(p => new ResultsDto
                 {
                     ProductName = p.Name,
-                    Results = p.Results.GroupBy(x => x.CreatedAt).OrderBy(x => x.Key).SelectMany(g => g.Select(x => new ResultDetailDto
+                    Results = p.Results
+                    .GroupBy(x => x.CreatedAt)
+                    .OrderBy(x => x.Key)
+                    .SelectMany(g => g.Select(x => new ResultDetailDto
                     {
                         Date = g.Key.ToString("dd-MM-yyyy"),
                         Result = x.Result1,
                         Time = x.Time,
                         Sorteo = x.Sorteo,
-                        lottery = x.PremierId
+                        Lottery = x.Lottery is null ? null : (new LotteryDto { 
+                            ID = x.Lottery.Id,
+                            Name = x.Lottery.Name,
+                            Time = x.Lottery.LotteryHour
+                        }),
+                        PremierID = x.PremierId,
+                        Number = x.Number,
+                        Complement = x.Animal
                     })),
                 });
             }

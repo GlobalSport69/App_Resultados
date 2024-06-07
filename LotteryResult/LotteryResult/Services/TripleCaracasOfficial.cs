@@ -4,6 +4,7 @@ using LotteryResult.Data.Abstractions;
 using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
+using LotteryResult.Extensions;
 using PuppeteerSharp;
 using System.Globalization;
 
@@ -15,19 +16,6 @@ namespace LotteryResult.Services
         public const int productID = 3;
         private const int providerID = 9;
         private readonly ILogger<TripleCaracasOfficial> _logger;
-        private Dictionary<string, long> TripleA = new Dictionary<string, long>
-        {
-            { "01:00 PM", 146 },
-            { "04:30 PM", 164 },
-            { "07:00 PM", 149 }
-        };
-
-        private Dictionary<string, long> TripleB = new Dictionary<string, long>
-        {
-            { "01:00 PM", 147 },
-            { "04:30 PM", 165 },
-            { "07:00 PM", 150 }
-        };
 
         public TripleCaracasOfficial(IUnitOfWork unitOfWork, ILogger<TripleCaracasOfficial> logger)
         {
@@ -65,12 +53,24 @@ namespace LotteryResult.Services
                 var oldResult = await unitOfWork.ResultRepository.GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
+                var sorteos = await unitOfWork.LotteryRepository
+                    .GetAllByAsync(x => x.ProductId == productID);
+
+                var TripleA = sorteos.Where(x => x.Sorteo == "A").ToDictionary(x => x.LotteryHour.FormatTime());
+                var TripleB = sorteos.Where(x => x.Sorteo == "B").ToDictionary(x => x.LotteryHour.FormatTime());
+
                 var newResult = response.Select(item => {
                     // Crear un DateTime a partir de la cadena de texto "13:00:00"
                     DateTime dt = DateTime.ParseExact(item.sorteo.hora, "HH:mm:ss", CultureInfo.InvariantCulture);
                     // Convertir a formato de 12 horas (AM/PM)
                     string time = dt.ToString("hh:mm tt", CultureInfo.InvariantCulture).ToUpper();
-                    var premierId = item.producto_juego.nombre == "Triple A" ? TripleA[time] : TripleB[time];
+                    //var premierId = item.producto_juego.nombre == "Triple A" ? TripleA[time] : TripleB[time];
+
+                    Data.Models.Lottery sorteo = null;
+                    if (item.producto_juego.nombre == "Triple A")
+                        sorteo = TripleA[time];
+                    if (item.producto_juego.nombre == "Triple B")
+                        sorteo = TripleB[time];
 
                     return new Result
                     {
@@ -81,7 +81,9 @@ namespace LotteryResult.Services
                         ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.TRIPLES,
                         Sorteo = item.producto_juego.nombre,
-                        PremierId = premierId,
+                        LotteryId = sorteo.Id,
+                        PremierId = sorteo.PremierId,
+                        Number = item.resultado
                     };
                 })
                 .OrderBy(x => x.Time)

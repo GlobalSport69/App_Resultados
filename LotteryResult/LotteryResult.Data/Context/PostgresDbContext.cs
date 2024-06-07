@@ -27,7 +27,7 @@ public partial class PostgresDbContext : DbContext
     public virtual DbSet<ProviderProduct> ProviderProducts { get; set; }
 
     public virtual DbSet<Result> Results { get; set; }
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Lottery>(entity =>
@@ -43,6 +43,10 @@ public partial class PostgresDbContext : DbContext
                 .HasColumnName("name");
             entity.Property(e => e.PremierId).HasColumnName("premier_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.Sorteo)
+                .HasMaxLength(1)
+                .HasComment("En esta columna se especifica si el sorteo es A,B,C,D, etc")
+                .HasColumnName("sorteo");
 
             entity.HasOne(d => d.Product).WithMany(p => p.Lotteries)
                 .HasForeignKey(d => d.ProductId)
@@ -127,6 +131,9 @@ public partial class PostgresDbContext : DbContext
             entity.ToTable("results");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.Animal)
+                .HasColumnType("character varying")
+                .HasColumnName("animal");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("now()")
                 .HasColumnType("timestamp without time zone")
@@ -134,6 +141,10 @@ public partial class PostgresDbContext : DbContext
             entity.Property(e => e.Date)
                 .HasColumnType("character varying")
                 .HasColumnName("date");
+            entity.Property(e => e.LotteryId).HasColumnName("lottery_id");
+            entity.Property(e => e.Number)
+                .HasColumnType("character varying")
+                .HasColumnName("number");
             entity.Property(e => e.PremierId).HasColumnName("premier_id");
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.ProductTypeId).HasColumnName("product_type_id");

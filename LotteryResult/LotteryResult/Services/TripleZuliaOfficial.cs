@@ -3,6 +3,7 @@ using LotteryResult.Data.Abstractions;
 using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
+using LotteryResult.Extensions;
 using PuppeteerSharp;
 
 namespace LotteryResult.Services
@@ -13,20 +14,6 @@ namespace LotteryResult.Services
         public const int productID = 6;
         private const int providerID = 5;
         private readonly ILogger<TripleZuliaOfficial> _logger;
-
-        private Dictionary<string, long> TripleA = new Dictionary<string, long>
-        {
-            { "12:45 PM", 112 },
-            { "04:45 PM", 156 },
-            { "07:05 PM", 114 },
-        };
-
-        private Dictionary<string, long> TripleB = new Dictionary<string, long>
-        {
-            { "12:45 PM", 124 },
-            { "04:45 PM", 157 },
-            { "07:05 PM", 128 },
-        };
 
         public TripleZuliaOfficial(IUnitOfWork unitOfWork, ILogger<TripleZuliaOfficial> logger)
         {
@@ -55,38 +42,6 @@ namespace LotteryResult.Services
                 await using var page = await browser.NewPageAsync();
                 //await page.GoToAsync("http://www.resultadostriplezulia.com/action/index", waitUntil: WaitUntilNavigation.Networkidle2);
                 await page.GoToAsync("https://resultadostriplezulia.com/", waitUntil: WaitUntilNavigation.Networkidle2);
-
-                //var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
-                //    //let fecha = new Date();
-                //    //let dia = String(fecha.getDate()).padStart(2, '0');
-                //    //let mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript empiezan desde 0
-                //    //let ano = fecha.getFullYear();
-                //    //let fechaFormateada = dia + '-' + mes + '-' + ano;
-                //    let fechaFormateada = date;
-
-                //    let iframe = document.querySelector('iframe')
-                //    let contenidoDelIframe = iframe.contentDocument || iframe.contentWindow.document;
-                //    let table = contenidoDelIframe.querySelector('#miTabla');
-
-                //    let r = [...table.querySelectorAll('tbody tr')]
-                //    .filter(x => [...x.querySelectorAll('td')][1].innerText == fechaFormateada)
-                //    .flatMap(x => {
-                //        let tds = [...x.querySelectorAll('td')];
-                //        let a ={
-                //            time: tds[3].innerText,
-                //            result: tds[4].innerText,
-                //            sorteo: 'Triple A'
-                //        };
-                //        let b ={
-                //            time: tds[3].innerText,
-                //            result: tds[5].innerText,
-                //            sorteo: 'Triple B'
-                //        };
-                //        return [a, b];
-                //    });
-
-                //    return r;
-                //}", venezuelaNow.ToString("dd-MM-yyyy"));
 
                 // Espera hasta que haya al menos 2 elementos 'td' dentro de un 'tr' en una tabla
                 await page.WaitForFunctionAsync(@"() => {
@@ -131,9 +86,15 @@ namespace LotteryResult.Services
                     .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
+                var sorteos = await unitOfWork.LotteryRepository
+                    .GetAllByAsync(x => x.ProductId == productID);
+
+                var TripleA = sorteos.Where(x => x.Sorteo == "A").ToDictionary(x => x.LotteryHour.FormatTime());
+                var TripleB = sorteos.Where(x => x.Sorteo == "B").ToDictionary(x => x.LotteryHour.FormatTime());
+
                 var newResult = response.Select(item => {
                     var time = item.Time.ToUpper();
-                    var premierId = item.Sorteo == "Triple A" ? TripleA[time] : TripleB[time];
+                    var sorteo = item.Sorteo == "Triple A" ? TripleA[time] : TripleB[time];
 
                     return new Result
                     {
@@ -144,7 +105,9 @@ namespace LotteryResult.Services
                         ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.TRIPLES,
                         Sorteo = item.Sorteo,
-                        PremierId = premierId,
+                        LotteryId = sorteo.Id,
+                        PremierId = sorteo.PremierId,
+                        Number = item.Result
                     };
                 })
                 .OrderBy(x => x.Time)

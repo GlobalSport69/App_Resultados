@@ -28,9 +28,16 @@ public partial class Result
 
     public long? PremierId { get; set; }
 
+    public long LotteryId { get; set; }
+
+    public string? Number { get; set; }
+
+    public string? Animal { get; set; }
+
     public virtual Product Product { get; set; } = null!;
 
     public virtual ProductType? ProductType { get; set; }
 
     public virtual Provider Provider { get; set; } = null!;
+    public virtual Lottery Lottery { get; set; } = null!;
 }

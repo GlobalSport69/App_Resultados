@@ -10,6 +10,10 @@ namespace LotteryResult.Dtos
         public string Result { get; set; }
         [JsonProperty("sorteo")]
         public string Sorteo { get; set; }
+        [JsonProperty("number")]
+        public string Number { get; set; }
+        [JsonProperty("animal")]
+        public string Animal { get; set; }
     }
     public class GetResultResponseDto
     {

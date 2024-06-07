@@ -4,6 +4,7 @@ using LotteryResult.Data.Abstractions;
 using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
+using LotteryResult.Extensions;
 using LotteryResult.Models;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -17,21 +18,6 @@ namespace LotteryResult.Services
         public const int productID = 7;
         private const int providerID = 26;
         private readonly ILogger<RuletaActivaOfficial> _logger;
-
-        private Dictionary<string, long> lotteries = new Dictionary<string, long>
-        {
-            { "09:00 AM", 24 },
-            { "10:00 AM", 25 },
-            { "11:00 AM", 26 },
-            { "12:00 PM", 27 },
-            { "01:00 PM", 28 },
-            { "02:00 PM", 224 },
-            { "03:00 PM", 29 },
-            { "04:00 PM", 30 },
-            { "05:00 PM", 31 },
-            { "06:00 PM", 32 },
-            { "07:00 PM", 33 }
-        };
 
         public RuletaActivaOfficial(IUnitOfWork unitOfWork, ILogger<RuletaActivaOfficial> logger)
         {
@@ -66,28 +52,42 @@ namespace LotteryResult.Services
                             Time = x.hora,
                             Result = x.a.nro+" "+x.a.nombre,
                             Sorteo = "Triple A",
-                            //number = x.a.nro,
-                            //animal = x.a.nombre
+                            Number = x.a.nro,
+                            Animal = x.a.nombre
                         },
                         new LotteryDetail {
                             Time = x.hora,
                             Result = x.b.nro+" "+x.b.nombre,
                             Sorteo = "Triple B",
+                            Number = x.b.nro,
+                            Animal = x.b.nombre
                         },
                         new LotteryDetail {
                             Time = x.hora,
                             Result = x.c.nro+" "+x.c.nombre,
                             Sorteo = "Triple C",
+                            Number = x.c.nro,
+                            Animal = x.c.nombre
                         },
                         new LotteryDetail {
                             Time = x.hora,
                             Result = x.d.nro+" "+x.d.nombre,
                             Sorteo = "Triple D",
+                            Number = x.d.nro,
+                            Animal = x.d.nombre
                         }
                     };
                     return list;
                 });
 
+
+                var sorteos = await unitOfWork.LotteryRepository
+                    .GetAllByAsync(x => x.ProductId == productID);
+
+                var TripleA = sorteos.Where(x => x.Sorteo == "A").ToDictionary(x => x.LotteryHour.FormatTime());
+                var TripleB = sorteos.Where(x => x.Sorteo == "B").ToDictionary(x => x.LotteryHour.FormatTime());
+                var TripleC = sorteos.Where(x => x.Sorteo == "C").ToDictionary(x => x.LotteryHour.FormatTime());
+                var TripleD = sorteos.Where(x => x.Sorteo == "D").ToDictionary(x => x.LotteryHour.FormatTime());
 
 
                 var oldResult = await unitOfWork.ResultRepository
@@ -96,7 +96,16 @@ namespace LotteryResult.Services
 
                 var newResult = response.Select(item => {
                     var time = RuletaActivaOfficial.FormatTime(item.Time.ToUpper());
-                    long? premierId = item.Sorteo == "Triple D" ? lotteries[time] : null;
+
+                    Data.Models.Lottery sorteo = null;
+                    if (item.Sorteo == "Triple A")
+                        sorteo = TripleA[time];
+                    if (item.Sorteo == "Triple B")
+                        sorteo = TripleB[time];
+                    if (item.Sorteo == "Triple C")
+                        sorteo = TripleC[time];
+                    if (item.Sorteo == "Triple D")
+                        sorteo = TripleD[time];
 
                     return new Result
                     {
@@ -107,7 +116,10 @@ namespace LotteryResult.Services
                         ProviderId = providerID,
                         Sorteo = item.Sorteo,
                         ProductTypeId = (int)ProductTypeEnum.ANIMALITOS,
-                        PremierId = premierId,
+                        LotteryId = sorteo.Id,
+                        PremierId = sorteo.PremierId,
+                        Number = item.Number,
+                        Animal = item.Animal
                     };
                 })
                 .OrderBy(x => x.Time)
@@ -148,7 +160,7 @@ namespace LotteryResult.Services
 
                 if (!needSave)
                 {
-                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(LottoActivoOfficial));
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(RuletaActivaOfficial));
                     return;
                 }
             }

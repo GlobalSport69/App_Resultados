@@ -10,6 +10,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace LotteryResult.Data.Implementations
 {
@@ -32,6 +33,7 @@ namespace LotteryResult.Data.Implementations
             return await _dbContext.Products
             .Where(x => x.Enable)
                 .Include(x => x.Results.Where(r => r.CreatedAt.Date >= from.Date && r.CreatedAt.Date <= until.Date))
+                .ThenInclude(x => x.Lottery)
                 .ToListAsync();
         }
     }

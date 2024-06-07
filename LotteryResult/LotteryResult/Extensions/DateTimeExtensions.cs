@@ -1,4 +1,6 @@
-﻿namespace LotteryResult.Extensions
+﻿using System.Globalization;
+
+namespace LotteryResult.Extensions
 {
     public static class DateTimeExtensions
     {
@@ -15,6 +17,11 @@
 
             // Convierte la fecha y hora actual a la zona horaria de Venezuela
             return TimeZoneInfo.ConvertTimeFromUtc(value, venezuelaZone);
+        }
+
+        public static string FormatTime(this TimeOnly value)
+        {
+            return value.ToString("hh:mm tt", new CultureInfo("en-US")).ToUpper();
         }
     }
 }

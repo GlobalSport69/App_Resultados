@@ -4,6 +4,7 @@ using LotteryResult.Data.Abstractions;
 using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
+using LotteryResult.Extensions;
 using System.Globalization;
 
 namespace LotteryResult.Services
@@ -14,12 +15,12 @@ namespace LotteryResult.Services
         public const int productID = 18;
         private const int providerID = 18;
         private readonly ILogger<ZodiacalCaracasOfficial> _logger;
-        private Dictionary<string, long> lotteries = new Dictionary<string, long>
-        {
-            { "01:00 PM", 148 },
-            { "04:30 PM", 166 },
-            { "07:00 PM", 151 }
-        };
+        //private Dictionary<string, long> lotteries = new Dictionary<string, long>
+        //{
+        //    { "01:00 PM", 148 },
+        //    { "04:30 PM", 166 },
+        //    { "07:00 PM", 151 }
+        //};
         public ZodiacalCaracasOfficial(IUnitOfWork unitOfWork, ILogger<ZodiacalCaracasOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
@@ -57,13 +58,17 @@ namespace LotteryResult.Services
                     .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
+                var sorteos = await unitOfWork.LotteryRepository
+                    .GetAllByAsync(x => x.ProductId == productID);
+                var lotteries = sorteos.ToDictionary(x => x.LotteryHour.FormatTime());
+
                 var newResult = response.Select(item => {
 
                     //Crear un DateTime a partir de la cadena de texto "13:00:00"
                     DateTime dt = DateTime.ParseExact(item.sorteo.hora, "HH:mm:ss", CultureInfo.InvariantCulture);
                     // Convertir a formato de 12 horas (AM/PM)
                     string time = dt.ToString("hh:mm tt", CultureInfo.InvariantCulture).ToUpper();
-                    var premierId = lotteries[time];
+                    var sorteo = lotteries[time];
 
                     return new Result
                     {
@@ -73,7 +78,11 @@ namespace LotteryResult.Services
                         ProductId = productID,
                         ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.ZODIACAL,
-                        PremierId = premierId,
+
+                        LotteryId = sorteo.Id,
+                        PremierId = sorteo.PremierId,
+                        Number = item.resultado,
+                        Animal = item.resultado_elemento,
                     };
                 })
                 .OrderBy(x => x.Time)

@@ -179,7 +179,7 @@ namespace LotteryResult.Services
                 return;
             }
 
-            if (product_id == LaGranjitaOfficial.laGranjitaID)
+            if (product_id == LaGranjitaOfficial.productID)
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => laGranjitaOfficial.Handler(),
