@@ -28,6 +28,13 @@ namespace LotteryResult.Services
             { "07:05 PM", 128 },
         };
 
+        private Dictionary<string, long> TripleC = new Dictionary<string, long>
+        {
+            { "01:00 PM", 148 },
+            { "04:30 PM", 166 },
+            { "07:00 PM", 151 }
+        };
+
         public TripleZuliaOfficial(IUnitOfWork unitOfWork, ILogger<TripleZuliaOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
@@ -53,40 +60,7 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                //await page.GoToAsync("http://www.resultadostriplezulia.com/action/index", waitUntil: WaitUntilNavigation.Networkidle2);
                 await page.GoToAsync("https://resultadostriplezulia.com/", waitUntil: WaitUntilNavigation.Networkidle2);
-
-                //var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
-                //    //let fecha = new Date();
-                //    //let dia = String(fecha.getDate()).padStart(2, '0');
-                //    //let mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript empiezan desde 0
-                //    //let ano = fecha.getFullYear();
-                //    //let fechaFormateada = dia + '-' + mes + '-' + ano;
-                //    let fechaFormateada = date;
-
-                //    let iframe = document.querySelector('iframe')
-                //    let contenidoDelIframe = iframe.contentDocument || iframe.contentWindow.document;
-                //    let table = contenidoDelIframe.querySelector('#miTabla');
-
-                //    let r = [...table.querySelectorAll('tbody tr')]
-                //    .filter(x => [...x.querySelectorAll('td')][1].innerText == fechaFormateada)
-                //    .flatMap(x => {
-                //        let tds = [...x.querySelectorAll('td')];
-                //        let a ={
-                //            time: tds[3].innerText,
-                //            result: tds[4].innerText,
-                //            sorteo: 'Triple A'
-                //        };
-                //        let b ={
-                //            time: tds[3].innerText,
-                //            result: tds[5].innerText,
-                //            sorteo: 'Triple B'
-                //        };
-                //        return [a, b];
-                //    });
-
-                //    return r;
-                //}", venezuelaNow.ToString("dd-MM-yyyy"));
 
                 // Espera hasta que haya al menos 2 elementos 'td' dentro de un 'tr' en una tabla
                 await page.WaitForFunctionAsync(@"() => {
@@ -103,18 +77,28 @@ namespace LotteryResult.Services
                     let r = [...table.querySelectorAll('tbody tr')]
                     .filter(x => [...x.querySelectorAll('td')][1].innerText == fechaFormateada)
                     .flatMap(x => {
-                        let tds = [...x.querySelectorAll('td')];
-                        let a ={
-                            time: tds[3].innerText,
-                            result: tds[4].innerText,
-                            sorteo: 'Triple A'
-                        };
-                        let b ={
-                            time: tds[3].innerText,
-                            result: tds[5].innerText,
-                            sorteo: 'Triple B'
-                        };
-                        return [a, b];
+
+                        let [,,,time,a,b,c] = x.querySelectorAll('td');
+                        let [cNumber, signo] = c.innerText.split(' ');
+                        
+                        return [
+                            {
+                                time: time.innerText,
+                                result: a.innerText,
+                                sorteo: 'Triple A',
+                            },
+                            {
+                                time: time.innerText,
+                                result: b.innerText,
+                                sorteo: 'Triple B',
+                            },
+                            {
+                                time: time.innerText,
+                                result: cNumber,
+                                sorteo: 'Zodiaco del Zulia',
+                                complement: signo
+                            }
+                        ];
                     });
 
                     return r;
@@ -133,11 +117,28 @@ namespace LotteryResult.Services
 
                 var newResult = response.Select(item => {
                     var time = item.Time.ToUpper();
-                    var premierId = item.Sorteo == "Triple A" ? TripleA[time] : TripleB[time];
+                    long premierId = 0;
+                    if (item.Sorteo == "Triple A")
+                    {
+                        premierId = TripleA[time];
+                    }
+
+                    if (item.Sorteo == "Triple B")
+                    {
+                        premierId = TripleB[time];
+                    }
+
+                    if (item.Sorteo == "Zodiacal Caracas")
+                    {
+                        premierId = TripleC[time];
+                    }
+
+                    var complement = string.IsNullOrEmpty(item.Complement) ? null : $" {TripleCaracasOfficial.ZodiacSigns[item.Complement]}";
+                    var resultado = item.Result + complement ?? "";
 
                     return new Result
                     {
-                        Result1 = item.Result,
+                        Result1 = resultado,
                         Time = time,
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
@@ -145,6 +146,8 @@ namespace LotteryResult.Services
                         ProductTypeId = (int)ProductTypeEnum.TRIPLES,
                         Sorteo = item.Sorteo,
                         PremierId = premierId,
+                        //Number: item.Result,
+                        //Complement: item.Complement
                     };
                 })
                 .OrderBy(x => x.Time)

@@ -25,6 +25,13 @@ namespace LotteryResult.Services
             { "04:45 PM", 142 },
             { "10:00 PM", 144 },
         };
+
+        private Dictionary<string, long> TripleC = new Dictionary<string, long>
+        {
+            { "01:15 PM", 141 },
+            { "04:45 PM", 143 },
+            { "10:00 PM", 145 }
+        };
         public TripleTachiraOfficial(IUnitOfWork unitOfWork, ILogger<TripleTachiraOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
@@ -58,12 +65,16 @@ namespace LotteryResult.Services
                             let title = x.querySelector('.ticket-rate').innerText;
                             if (title == '') return null;
                             let time = title.substring(title.length - 7, title.length - 2).trim() +' '+ title.substr(title.length - 2);
+                            let result = x.querySelector('.ticket-name')?.innerText;
+                            let dic = { 'TACHIRA A':'Triple A','TACHIRA B':'Triple B', 'ZODIACAL': 'Tachira Zodiacal' }
+
                             return ({
                                 time: time, 
-                                result: x.querySelector('.ticket-name')?.innerText,
-                                sorteo:  title.substring(0, 9).trim()
+                                result: result.slice(0, 3),
+                                sorteo:  dic[title.substring(0, 9).trim()],
+                                complement: result.includes('\n') ? result.slice(4, 9) : null
                             });
-                        }).filter(x => x != null && x.sorteo != 'ZODIACAL');
+                        }).filter(x => x != null);
 
                     return r;
                 }");
@@ -80,11 +91,22 @@ namespace LotteryResult.Services
 
                 var newResult = response.Select(item => {
                     var time = LaGranjitaTerminalOfficial.FormatTime(item.Time);
-                    var premierId = item.Sorteo == "Triple A" ? TripleA[time] : TripleB[time];
+                    long premierId = 0;
+                    if (item.Sorteo == "Triple A")
+                        premierId = TripleA[time];
+
+                    if (item.Sorteo == "Triple B")
+                        premierId = TripleB[time];
+
+                    if (item.Sorteo == "Tachira Zodiacal")
+                        premierId = TripleC[time];
+
+                    var complement = string.IsNullOrEmpty(item.Complement) ? null : $" {TripleCaracasOfficial.ZodiacSigns[item.Complement]}";
+                    var resultado = item.Result + complement ?? "";
 
                     return new Result
                     {
-                        Result1 = item.Result,
+                        Result1 = resultado,
                         Time = time,
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
@@ -92,6 +114,8 @@ namespace LotteryResult.Services
                         ProductTypeId = (int)ProductTypeEnum.TRIPLES,
                         Sorteo = item.Sorteo,
                         PremierId = premierId,
+                        //Number: item.Result,
+                        //Complement: item.Complement
                     };
                 })
                 .OrderBy(x => x.Time)
