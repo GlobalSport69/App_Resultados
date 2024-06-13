@@ -26,6 +26,13 @@ namespace LotteryResult.Services
             { "04:30 PM", 162 },
             { "07:10 PM", 138 }
         };
+
+        private Dictionary<string, long> TripleC = new Dictionary<string, long>
+        {
+            { "01:00 PM", 135 },
+            { "04:30 PM", 163 },
+            { "07:10 PM", 139 },
+        };
         public TripleCalienteOfficial(IUnitOfWork unitOfWork, ILogger<TripleCalienteOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
@@ -71,18 +78,26 @@ namespace LotteryResult.Services
                         return list[1].innerText == fechaFormateada;
                     })
                     .flatMap(x => {
-                        let tds = [...x.querySelectorAll('td')];
-                        let a ={
-                            time: tds[3].innerText,
-                            result: tds[4].innerText,
-                            sorteo: 'Triple A'
-                        };
-                        let b ={
-                            time: tds[3].innerText,
-                            result: tds[5].innerText,
-                            sorteo: 'Triple B'
-                        };
-                        return [a, b];
+                        let [,,,time,a,b,c] = [...x.querySelectorAll('td')];
+                        let [cNumber, cSigno] = c.innerText.split(' ');
+                        return [
+                            {
+                                time: time.innerText,
+                                result: a.innerText,
+                                sorteo: 'Triple A'
+                            },
+                            {
+                                time: time.innerText,
+                                result: b.innerText,
+                                sorteo: 'Triple B'
+                            },
+                            {
+                                time: time.innerText,
+                                result: cNumber,
+                                sorteo: 'Signo Caliente',
+                                complement: cSigno
+                            }
+                        ];
                     });
 
                     return r;
@@ -100,11 +115,22 @@ namespace LotteryResult.Services
 
                 var newResult = response.Select(item => {
                     var time = item.Time.ToUpper();
-                    var premierId = item.Sorteo == "Triple A" ? TripleA[time] : TripleB[time];
+                    long premierId = 0;
+                    if (item.Sorteo == "Triple A")
+                        premierId = TripleA[time];
+
+                    if (item.Sorteo == "Triple B")
+                        premierId = TripleB[time];
+
+                    if (item.Sorteo == "Signo Caliente")
+                        premierId = TripleC[time];
+
+                    var complement = string.IsNullOrEmpty(item.Complement) ? null : $" {TripleCaracasOfficial.ZodiacSigns[item.Complement]}";
+                    var resultado = item.Result + complement ?? "";
 
                     return new Result
                     {
-                        Result1 = item.Result,
+                        Result1 = resultado,
                         Time = time,
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
@@ -112,6 +138,8 @@ namespace LotteryResult.Services
                         ProductTypeId = (int)ProductTypeEnum.TRIPLES,
                         Sorteo = item.Sorteo,
                         PremierId = premierId,
+                        //Number: item.Result,
+                        //Complement: item.Complement
                     };
                 })
                 .OrderBy(x => x.Time)

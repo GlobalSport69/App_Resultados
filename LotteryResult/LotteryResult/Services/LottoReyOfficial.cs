@@ -54,11 +54,10 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://lottorey.com.ve");
+                await page.GoToAsync("https://lottorey.com.ve/"+ venezuelaNow.ToString("yyyy/MM/dd"));
 
                 var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
                     let fechaFormateada = date;
-
                     let r = [...document.querySelectorAll('#main-container .card')]
                     .filter(x => x.querySelector('.texto-fecha').innerText == fechaFormateada)
                     .map(x => ({
