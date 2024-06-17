@@ -31,6 +31,7 @@ namespace LotteryResult.Services
         private LottoActivoOfficial lottoActivoOfficial;
         private RuletaActivaOfficial ruletaActivaOfficial;
         private GranjaPlusOfficial granjaPlusOfficial;
+        private LottoActivoRDInternacionalOfficial lottoActivoRDInternacionalOfficial;
         public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial,
             TripleCalienteOfficial tripleCalienteOfficial, ElRucoTriplesBet elRucoTriplesBet, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial,
             SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial,
@@ -38,7 +39,7 @@ namespace LotteryResult.Services
             ChanceAnimalitosOfficial chanceAnimalitosOfficial, TripleChanceOfficial tripleChanceOfficial, ZodiacalCaracasOfficial zodiacalCaracasOfficial,
             TripleTachiraOfficial tripleTachiraOfficial, TachiraZodiacalOfficial tachiraZodiacalOfficial, ChanceAstralOfficial chanceAstralOfficial,
             AstroZamoranoOfficial astroZamoranoOfficial, ZodiacoDelZuliaOfficial zodiacoDelZuliaOfficial, SignoCalienteOfficial signoCalienteOfficial,
-            LottoActivoOfficial lottoActivoOfficial, RuletaActivaOfficial ruletaActivaOfficial, GranjaPlusOfficial granjaPlusOfficial)
+            LottoActivoOfficial lottoActivoOfficial, RuletaActivaOfficial ruletaActivaOfficial, GranjaPlusOfficial granjaPlusOfficial, LottoActivoRDInternacionalOfficial lottoActivoRDInternacionalOfficial)
         {
             _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
 
@@ -68,6 +69,7 @@ namespace LotteryResult.Services
             this.lottoActivoOfficial = lottoActivoOfficial;
             this.ruletaActivaOfficial = ruletaActivaOfficial;
             this.granjaPlusOfficial = granjaPlusOfficial;
+            this.lottoActivoRDInternacionalOfficial = lottoActivoRDInternacionalOfficial;
         }
 
         public void AddJob(int product_id, string job_id, string cron_expression) {
@@ -376,6 +378,18 @@ namespace LotteryResult.Services
             {
                 RecurringJob.AddOrUpdate(job_id,
                     () => granjaPlusOfficial.Handler(),
+                    cron_expression,
+                    new RecurringJobOptions
+                    {
+                        TimeZone = _timeZone
+                    });
+                return;
+            }
+
+            if (product_id == LottoActivoRDInternacionalOfficial.productID)
+            {
+                RecurringJob.AddOrUpdate(job_id,
+                    () => lottoActivoRDInternacionalOfficial.Handler(),
                     cron_expression,
                     new RecurringJobOptions
                     {

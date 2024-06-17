@@ -34,6 +34,7 @@ namespace LotteryResult
             services.AddScoped<LottoActivoOfficial>();
             services.AddScoped<RuletaActivaOfficial>();
             services.AddScoped<GranjaPlusOfficial>();
+            services.AddScoped<LottoActivoRDInternacionalOfficial>();
 
             services.AddScoped<ProviderProductMapper>();
 

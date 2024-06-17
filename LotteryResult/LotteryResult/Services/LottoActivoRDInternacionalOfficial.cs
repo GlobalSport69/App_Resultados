@@ -6,30 +6,14 @@ using PuppeteerSharp;
 
 namespace LotteryResult.Services
 {
-    public class LottoActivoOfficial : IGetResult
+    public class LottoActivoRDInternacionalOfficial : IGetResult
     {
         private IUnitOfWork unitOfWork;
-        public const int productID = 27;
-        private const int providerID = 25;
-        private readonly ILogger<LottoActivoOfficial> _logger;
+        public const int productID = 29;
+        private const int providerID = 28;
+        private readonly ILogger<LottoActivoRDInternacionalOfficial> _logger;
 
-
-        private Dictionary<string, long> Lotteries = new Dictionary<string, long>
-        {
-            { "09:00 AM", 45 },
-            { "10:00 AM", 46 },
-            { "11:00 AM", 47 },
-            { "12:00 PM", 48 },
-            { "01:00 PM", 49 },
-            { "02:00 PM", 206 },
-            { "03:00 PM", 51 },
-            { "04:00 PM", 52 },
-            { "05:00 PM", 53 },
-            { "06:00 PM", 54 },
-            { "07:00 PM", 55 },
-        };
-
-        public LottoActivoOfficial(IUnitOfWork unitOfWork, ILogger<LottoActivoOfficial> logger)
+        public LottoActivoRDInternacionalOfficial(IUnitOfWork unitOfWork, ILogger<LottoActivoRDInternacionalOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
             _logger = logger;
@@ -40,6 +24,7 @@ namespace LotteryResult.Services
             try
             {
                 DateTime venezuelaNow = DateTime.Now;
+                var date = DateTime.Now.ToString("yyyy-MM-dd");
 
                 using var browserFetcher = new BrowserFetcher();
                 await browserFetcher.DownloadAsync();
@@ -54,7 +39,7 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://www.lottoactivo.com/resultados/lotto_activo/", waitUntil: WaitUntilNavigation.Networkidle2);
+                await page.GoToAsync($"https://www.lottoactivo.com/resultados/lotto_activo_internacional/{date}/", waitUntil: WaitUntilNavigation.Networkidle2);
 
                 // Espera hasta que haya al menos 1 elementos 'div' dentro de '#resultados'
                 await page.WaitForFunctionAsync(@"() => {
@@ -71,7 +56,7 @@ namespace LotteryResult.Services
                           const spanElement = row.querySelector('span'); 
                           return { 
                             result: spanElement.textContent,
-                            time: row.querySelector('p').innerText.replace('LOTTO ACTIVO', '').trim(),
+                            time: row.querySelector('p').innerText.replace('LOTTO ACTIVO RD INTERNACIONAL', '').trim(),
                             complement: spanElement.nextSibling.textContent.trim()
                           }
                         })
@@ -82,7 +67,7 @@ namespace LotteryResult.Services
 
                 if (!response.Any())
                 {
-                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(LottoActivoOfficial));
+                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(LottoActivoRDInternacionalOfficial));
                     return;
                 }
 
@@ -91,9 +76,9 @@ namespace LotteryResult.Services
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
                 var newResult = response.Select(item => {
+
+                    var resultado = item.Result + " " +item.Complement;
                     var time = item.Time.ToUpper();
-                    var premierId = Lotteries[time];
-                    var resultado = item.Result + " " + item.Complement;
 
                     return new Result
                     {
@@ -103,7 +88,6 @@ namespace LotteryResult.Services
                         ProductId = productID,
                         ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.ANIMALITOS,
-                        PremierId = premierId,
                         //Number: item.Result,
                         //Complement: complement
                     };
@@ -146,13 +130,13 @@ namespace LotteryResult.Services
 
                 if (!needSave)
                 {
-                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(LottoActivoOfficial));
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(LottoActivoRDInternacionalOfficial));
                     return;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(exception: ex, message: nameof(LottoActivoOfficial));
+                _logger.LogError(exception: ex, message: nameof(LottoActivoRDInternacionalOfficial));
                 throw;
             }
         }
