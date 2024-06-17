@@ -67,10 +67,14 @@ namespace LotteryResult.Services
 
                 var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
                     let r = [...document.querySelectorAll('#resultados div')]
-                    .map(row =>({ 
-	                    result: row.querySelector('h6').innerText,
-	                    time: row.querySelector('p').innerText.replace('LOTTO ACTIVO ', '')
-                    }))
+                        .map(row =>{ 
+                          const spanElement = row.querySelector('span'); 
+                          return { 
+                            result: spanElement.textContent,
+                            time: row.querySelector('p').innerText.replace('LOTTO ACTIVO', '').trim(),
+                            complement: spanElement.nextSibling.textContent.trim()
+                          }
+                        })
 
                     return r;
                 }");
@@ -89,16 +93,19 @@ namespace LotteryResult.Services
                 var newResult = response.Select(item => {
                     var time = item.Time.ToUpper();
                     var premierId = Lotteries[time];
+                    var resultado = item.Result + " " + item.Complement;
 
                     return new Result
                     {
-                        Result1 = item.Result,
+                        Result1 = resultado,
                         Time = time,
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
                         ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.ANIMALITOS,
                         PremierId = premierId,
+                        //Number: item.Result,
+                        //Complement: complement
                     };
                 })
                 .OrderBy(x => x.Time)

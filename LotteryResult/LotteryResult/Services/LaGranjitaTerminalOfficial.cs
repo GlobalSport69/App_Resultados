@@ -8,7 +8,7 @@ using System.Globalization;
 
 namespace LotteryResult.Services
 {
-    public class LaGranjitaTerminalOfficial
+    public class LaGranjitaTerminalOfficial : IGetResult
     {
         private IUnitOfWork unitOfWork;
         public const int productID = 13;

@@ -1,5 +1,4 @@
-﻿using Azure;
-using LotteryResult.Data.Abstractions;
+﻿using LotteryResult.Data.Abstractions;
 using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
@@ -7,32 +6,14 @@ using PuppeteerSharp;
 
 namespace LotteryResult.Services
 {
-    public class TripleTachiraOfficial : IGetResult
+    public class LottoActivoRDInternacionalOfficial : IGetResult
     {
         private IUnitOfWork unitOfWork;
-        public const int productID = 19;
-        private const int providerID = 19;
-        private readonly ILogger<TripleTachiraOfficial> _logger;
-        private Dictionary<string, long> TripleA = new Dictionary<string, long>
-        {
-            { "01:15 PM", 121 },
-            { "04:45 PM", 122 },
-            { "10:00 PM", 123 },
-        };
-        private Dictionary<string, long> TripleB = new Dictionary<string, long>
-        {
-            { "01:15 PM", 140 },
-            { "04:45 PM", 142 },
-            { "10:00 PM", 144 },
-        };
+        public const int productID = 29;
+        private const int providerID = 28;
+        private readonly ILogger<LottoActivoRDInternacionalOfficial> _logger;
 
-        private Dictionary<string, long> TripleC = new Dictionary<string, long>
-        {
-            { "01:15 PM", 141 },
-            { "04:45 PM", 143 },
-            { "10:00 PM", 145 }
-        };
-        public TripleTachiraOfficial(IUnitOfWork unitOfWork, ILogger<TripleTachiraOfficial> logger)
+        public LottoActivoRDInternacionalOfficial(IUnitOfWork unitOfWork, ILogger<LottoActivoRDInternacionalOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
             _logger = logger;
@@ -43,6 +24,7 @@ namespace LotteryResult.Services
             try
             {
                 DateTime venezuelaNow = DateTime.Now;
+                var date = DateTime.Now.ToString("yyyy-MM-dd");
 
                 using var browserFetcher = new BrowserFetcher();
                 await browserFetcher.DownloadAsync();
@@ -57,31 +39,35 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://tripletachira.com", waitUntil: WaitUntilNavigation.Networkidle2);
+                await page.GoToAsync($"https://www.lottoactivo.com/resultados/lotto_activo_internacional/{date}/", waitUntil: WaitUntilNavigation.Networkidle2);
+
+                // Espera hasta que haya al menos 1 elementos 'div' dentro de '#resultados'
+                await page.WaitForFunctionAsync(@"() => {
+                    const tds = document.querySelectorAll('#resultados div');
+                    return tds.length > 0;
+                }", new WaitForFunctionOptions
+                {
+                    PollingInterval = 1000,
+                });
 
                 var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
-                   let r = [...document.querySelectorAll('.single-ticket')]
-                        .map(x => {
-                            let title = x.querySelector('.ticket-rate').innerText;
-                            if (title == '') return null;
-                            let time = title.substring(title.length - 7, title.length - 2).trim() +' '+ title.substr(title.length - 2);
-                            let result = x.querySelector('.ticket-name')?.innerText;
-                            let dic = { 'TACHIRA A':'Triple A','TACHIRA B':'Triple B', 'ZODIACAL': 'Tachira Zodiacal' }
-
-                            return ({
-                                time: time, 
-                                result: result.slice(0, 3),
-                                sorteo:  dic[title.substring(0, 9).trim()],
-                                complement: result.includes('\n') ? result.slice(4, 9) : null
-                            });
-                        }).filter(x => x != null);
+                    let r = [...document.querySelectorAll('#resultados div')]
+                        .map(row =>{ 
+                          const spanElement = row.querySelector('span'); 
+                          return { 
+                            result: spanElement.textContent,
+                            time: row.querySelector('p').innerText.replace('LOTTO ACTIVO RD INTERNACIONAL', '').trim(),
+                            complement: spanElement.nextSibling.textContent.trim()
+                          }
+                        })
 
                     return r;
                 }");
 
+
                 if (!response.Any())
                 {
-                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(TripleTachiraOfficial));
+                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(LottoActivoRDInternacionalOfficial));
                     return;
                 }
 
@@ -90,19 +76,9 @@ namespace LotteryResult.Services
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
                 var newResult = response.Select(item => {
-                    var time = LaGranjitaTerminalOfficial.FormatTime(item.Time);
-                    long premierId = 0;
-                    if (item.Sorteo == "Triple A")
-                        premierId = TripleA[time];
 
-                    if (item.Sorteo == "Triple B")
-                        premierId = TripleB[time];
-
-                    if (item.Sorteo == "Tachira Zodiacal")
-                        premierId = TripleC[time];
-
-                    var complement = string.IsNullOrEmpty(item.Complement) ? null : $" {TripleCaracasOfficial.ZodiacSigns[item.Complement]}";
-                    var resultado = item.Result + complement ?? "";
+                    var resultado = item.Result + " " +item.Complement;
+                    var time = item.Time.ToUpper();
 
                     return new Result
                     {
@@ -111,11 +87,9 @@ namespace LotteryResult.Services
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
                         ProviderId = providerID,
-                        ProductTypeId = (int)ProductTypeEnum.TRIPLES,
-                        Sorteo = item.Sorteo,
-                        PremierId = premierId,
+                        ProductTypeId = (int)ProductTypeEnum.ANIMALITOS,
                         //Number: item.Result,
-                        //Complement: item.Complement
+                        //Complement: complement
                     };
                 })
                 .OrderBy(x => x.Time)
@@ -156,13 +130,13 @@ namespace LotteryResult.Services
 
                 if (!needSave)
                 {
-                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(TripleTachiraOfficial));
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(LottoActivoRDInternacionalOfficial));
                     return;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(exception: ex, message: nameof(TripleTachiraOfficial));
+                _logger.LogError(exception: ex, message: nameof(LottoActivoRDInternacionalOfficial));
                 throw;
             }
         }

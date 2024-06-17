@@ -21,6 +21,13 @@ namespace LotteryResult.Services
             { "07:00 PM", 117 },
             { "04:00 PM", 159 },
         };
+
+        private Dictionary<string, long> TripleC = new Dictionary<string, long>
+        {
+            { "12:00 PM", 131 },
+            { "04:00 PM", 160 },
+            { "07:00 PM", 133 }
+        };
         public TripleZamoranoOfficial(IUnitOfWork unitOfWork, ILogger<TripleZamoranoOfficial> logger)
         {
             this.unitOfWork = unitOfWork;
@@ -60,10 +67,23 @@ namespace LotteryResult.Services
                     var fechaFormateada = date;
                     let table = document.querySelector('table');
                     var result = [...table.querySelector('tbody').querySelectorAll('tr')].filter(x => ([...x.querySelectorAll('td')][1]).innerText == fechaFormateada)
-                    let r = result.map(x => ({
-                        result: ([...x.querySelectorAll('td')][4]).innerText,
-                        time: ([...x.querySelectorAll('td')][3]).innerText
-                    }))
+                    let r = result.flatMap(x => {
+                        let [,,,time,a,c] = [...x.querySelectorAll('td')];
+                        let number = c.innerText.slice(0, 3);
+                        return [
+                            {
+                                result: a.innerText,
+                                time: time.innerText,
+                                sorteo: 'Triple A'
+                            },
+                            {
+                                result: number,
+                                time: time.innerText,
+                                sorteo: 'Astro Zamorano', 
+                                complement: c.innerText.slice(4, 9)
+                            }
+                        ]
+                    })
 
                     return r;
                 }", venezuelaNow.ToString("dd/MM/yyyy"));
@@ -80,17 +100,29 @@ namespace LotteryResult.Services
 
                 var newResult = response.Select(item => {
                     var time = item.Time.ToUpper();
-                    var premierId = TripleA[time];
+
+                    long premierId = 0;
+                    if (item.Sorteo == "Triple A")
+                        premierId = TripleA[time];
+
+                    if (item.Sorteo == "Astro Zamorano")
+                        premierId = TripleC[time];
+
+                    var complement = string.IsNullOrEmpty(item.Complement) ? null : $" {TripleCaracasOfficial.ZodiacSigns[item.Complement]}";
+                    var resultado = item.Result + complement ?? "";
 
                     return new Result
                     {
-                        Result1 = item.Result,
+                        Result1 = resultado,
                         Time = time,
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
                         ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.TRIPLES,
                         PremierId = premierId,
+                        Sorteo = item.Sorteo,
+                        //Number: item.Result,
+                        //Complement: complement
                     };
                 })
                 .OrderBy(x => x.Time)

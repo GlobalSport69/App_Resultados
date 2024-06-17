@@ -54,26 +54,36 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://lottorey.com.ve");
+                await page.GoToAsync("https://lottorey.com.ve/"+ venezuelaNow.ToString("yyyy/MM/dd"));
 
-                var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"(date) => {
-                    let fechaFormateada = date;
-
+                var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
                     let r = [...document.querySelectorAll('#main-container .card')]
-                    .filter(x => x.querySelector('.texto-fecha').innerText == fechaFormateada)
                     .map(x => ({
                         time: x.querySelector('.texto-hora').innerText,
                         result: x.querySelector('.card-footer').innerText,
                     }))
 
                     return r;
-                }", venezuelaNow.ToString("dd/MM/yyyy"));
+                }");
 
                 if (!response.Any())
                 {
                     _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(LottoReyOfficial));
                     return;
                 }
+
+                await page.GoToAsync("https://lottorey.com.ve/" + venezuelaNow.ToString("yyyy/MM/dd")+ "/page/2");
+                var responsePage2 = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
+                    let r = [...document.querySelectorAll('#main-container .card')]
+                    .map(x => ({
+                        time: x.querySelector('.texto-hora').innerText,
+                        result: x.querySelector('.card-footer').innerText,
+                    }))
+
+                    return r;
+                }");
+
+                response.AddRange(responsePage2);
 
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
