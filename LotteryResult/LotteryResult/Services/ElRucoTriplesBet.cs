@@ -7,7 +7,7 @@ using PuppeteerSharp;
 
 namespace LotteryResult.Services
 {
-    public class ElRucoTriplesBet
+    public class ElRucoTriplesBet : IGetResult
     {
         private IUnitOfWork unitOfWork;
         public const int productID = 8;
