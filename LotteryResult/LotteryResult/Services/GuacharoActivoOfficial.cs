@@ -85,14 +85,14 @@ namespace LotteryResult.Services
                 var toUpdate = new List<Result>();
                 foreach (var item in newResult)
                 {
-                    var found = oldResult.FirstOrDefault(y => item.Time == y.Time && item.Result1 != y.Result1);
+                    var found = oldResult.FirstOrDefault(y => item.Time == y.Time && item.Sorteo == y.Sorteo && item.Result1 != y.Result1);
                     if (found is null)
                         continue;
 
                     found.Result1 = item.Result1;
                     toUpdate.Add(found);
                 }
-                var toInsert = newResult.Where(x => !oldResult.Exists(y => x.Time == y.Time));
+                var toInsert = newResult.Where(x => !oldResult.Exists(y => x.Time == y.Time && x.Sorteo == y.Sorteo));
                 var needSave = false;
                 foreach (var item in toUpdate)
                 {
