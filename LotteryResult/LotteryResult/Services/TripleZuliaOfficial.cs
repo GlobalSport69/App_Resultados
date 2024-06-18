@@ -13,6 +13,7 @@ namespace LotteryResult.Services
         public const int productID = 6;
         private const int providerID = 5;
         private readonly ILogger<TripleZuliaOfficial> _logger;
+        private INotifyPremierService notifyPremierService;
 
         private Dictionary<string, long> TripleA = new Dictionary<string, long>
         {
@@ -35,10 +36,11 @@ namespace LotteryResult.Services
             { "07:00 PM", 151 }
         };
 
-        public TripleZuliaOfficial(IUnitOfWork unitOfWork, ILogger<TripleZuliaOfficial> logger)
+        public TripleZuliaOfficial(IUnitOfWork unitOfWork, ILogger<TripleZuliaOfficial> logger, INotifyPremierService notifyPremierService)
         {
             this.unitOfWork = unitOfWork;
             _logger = logger;
+            this.notifyPremierService = notifyPremierService;
         }
 
         public async Task Handler()
@@ -153,37 +155,38 @@ namespace LotteryResult.Services
                 .OrderBy(x => x.Time)
                 .ToList();
 
+                var toUpdate = new List<Result>();
+                foreach (var item in newResult)
+                {
+                    var found = oldResult.FirstOrDefault(y => item.Time == y.Time && item.Result1 != y.Result1);
+                    if (found is null)
+                        continue;
+
+                    found.Result1 = item.Result1;
+                    toUpdate.Add(found);
+                }
+                var toInsert = newResult.Where(x => !oldResult.Exists(y => x.Time == y.Time));
                 var needSave = false;
-                // no hay resultado nuevo
-                var len = oldResult.Count();
-                if (len == newResult.Count())
+                foreach (var item in toUpdate)
                 {
-                    for (int i = 0; i < len; i++)
-                    {
-                        if (oldResult[i].Time == newResult[i].Time && oldResult[i].Result1 != newResult[i].Result1)
-                        {
-                            oldResult[i].Result1 = newResult[i].Result1;
-                            unitOfWork.ResultRepository.Update(oldResult[i]);
-                            needSave = true;
-                        }
-                    }
+                    unitOfWork.ResultRepository.Update(item);
+                    needSave = true;
+                }
+                foreach (var item in toInsert)
+                {
+                    unitOfWork.ResultRepository.Insert(item);
+                    needSave = true;
                 }
 
-                // hay resultado nuevo
-                if (newResult.Count() > len)
-                {
-                    var founds = newResult.Where(x => !oldResult.Any(y => y.Time == x.Time));
-
-                    foreach (var item in founds)
-                    {
-                        unitOfWork.ResultRepository.Insert(item);
-                        needSave = true;
-                    }
-                }
 
                 if (needSave)
                 {
                     await unitOfWork.SaveChangeAsync();
+
+                    if (toUpdate.Any())
+                        notifyPremierService.Handler(toUpdate.Select(x => x.Id).ToList(), NotifyType.Update);
+                    if (toInsert.Any())
+                        notifyPremierService.Handler(toInsert.Select(x => x.Id).ToList(), NotifyType.New);
                 }
 
                 if (!needSave)

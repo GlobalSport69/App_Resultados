@@ -13,6 +13,8 @@ namespace LotteryResult.Services
         public const int productID = 8;
         private const int providerID = 7;
         private readonly ILogger<ElRucoTriplesBet> _logger;
+        private INotifyPremierService notifyPremierService;
+
         private Dictionary<string, long> lotteries = new Dictionary<string, long>
         {
             { "08:00 AM", 184 },
@@ -28,10 +30,11 @@ namespace LotteryResult.Services
             { "06:00 PM", 194 },
             { "07:00 PM", 195 }
         };
-        public ElRucoTriplesBet(IUnitOfWork unitOfWork, ILogger<ElRucoTriplesBet> logger)
+        public ElRucoTriplesBet(IUnitOfWork unitOfWork, ILogger<ElRucoTriplesBet> logger, INotifyPremierService notifyPremierService)
         {
             this.unitOfWork = unitOfWork;
             _logger = logger;
+            this.notifyPremierService = notifyPremierService;
         }
 
         public async Task Handler()
@@ -116,70 +119,48 @@ namespace LotteryResult.Services
                 .OrderBy(x => x.Time)
                 .ToList();
 
-                var needSave = false;
-                // no hay resultado nuevo
-                var len = oldResult.Count();
-                if (len == newResult.Count())
+                var toUpdate = new List<Result>();
+                foreach (var item in newResult)
                 {
-                    for (int i = 0; i < len; i++)
-                    {
-                        if (oldResult[i].Time == newResult[i].Time && oldResult[i].Result1 != newResult[i].Result1)
-                        {
-                            oldResult[i].Result1 = newResult[i].Result1;
-                            unitOfWork.ResultRepository.Update(oldResult[i]);
-                            needSave = true;
-                        }
-                    }
+                    var found = oldResult.FirstOrDefault(y => item.Time == y.Time && item.Result1 != y.Result1);
+                    if (found is null)
+                        continue;
+
+                    found.Result1 = item.Result1;
+                    toUpdate.Add(found);
                 }
-
-                // hay resultado nuevo
-                if (newResult.Count() > len)
+                var toInsert = newResult.Where(x => !oldResult.Exists(y => x.Time == y.Time));
+                var needSave = false;
+                foreach (var item in toUpdate)
                 {
-                    var founds = newResult.Where(x => !oldResult.Any(y => y.Time == x.Time));
-
-                    foreach (var item in founds)
-                    {
-                        unitOfWork.ResultRepository.Insert(item);
-                        needSave = true;
-                    }
+                    unitOfWork.ResultRepository.Update(item);
+                    needSave = true;
+                }
+                foreach (var item in toInsert)
+                {
+                    unitOfWork.ResultRepository.Insert(item);
+                    needSave = true;
                 }
 
                 if (needSave)
                 {
                     await unitOfWork.SaveChangeAsync();
+
+                    if (toUpdate.Any())
+                        notifyPremierService.Handler(toUpdate.Select(x => x.Id).ToList(), NotifyType.Update);
+                    if (toInsert.Any())
+                        notifyPremierService.Handler(toInsert.Select(x => x.Id).ToList(), NotifyType.New);
                 }
 
                 if (!needSave)
                 {
-                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(ZodiacoDelZuliaOfficial));
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(ElRucoTriplesBet));
                     return;
                 }
-
-                //var oldResult = await unitOfWork.ResultRepository
-                //    .GetAllByAsync(x => x.ProviderId == elRucoProviderID && x.CreatedAt.Date == DateTime.Now.Date);
-                //foreach (var item in oldResult)
-                //{
-                //    unitOfWork.ResultRepository.Delete(item);
-                //}
-
-                //foreach (var item in someObject)
-                //{
-                //    unitOfWork.ResultRepository.Insert(new Data.Models.Result
-                //    {
-                //        Result1 = item.Result,
-                //        Time = item.Time.ToUpper(),
-                //        Date = DateTime.Now.ToString("dd-MM-yyyy"),
-                //        ProductId = elRucoID,
-                //        ProviderId =elRucoProviderID,
-                //        ProductTypeId = (int)ProductTypeEnum.TERMINALES
-                //    });
-                //}
-
-                //await unitOfWork.SaveChangeAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(exception: ex, message: nameof(LottoReyOfficial));
+                _logger.LogError(exception: ex, message: nameof(ElRucoTriplesBet));
                 throw;
             }
         }
