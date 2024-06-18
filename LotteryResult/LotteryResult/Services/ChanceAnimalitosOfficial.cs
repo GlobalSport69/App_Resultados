@@ -15,6 +15,8 @@ namespace LotteryResult.Services
         public const int productID = 16;
         private const int providerID = 16;
         private readonly ILogger<ChanceAnimalitosOfficial> _logger;
+        private INotifyPremierService notifyPremierService;
+
         private Dictionary<string, long> lotteries = new Dictionary<string, long>
         {
             { "09:00 AM", 262 },
@@ -30,10 +32,11 @@ namespace LotteryResult.Services
             { "07:00 PM", 272 }
         };
 
-        public ChanceAnimalitosOfficial(IUnitOfWork unitOfWork, ILogger<ChanceAnimalitosOfficial> logger)
+        public ChanceAnimalitosOfficial(IUnitOfWork unitOfWork, ILogger<ChanceAnimalitosOfficial> logger, INotifyPremierService notifyPremierService)
         {
             this.unitOfWork = unitOfWork;
             _logger = logger;
+            this.notifyPremierService = notifyPremierService;
         }
 
         public async Task Handler()
@@ -77,37 +80,38 @@ namespace LotteryResult.Services
                 .OrderBy(x => x.Time)
                 .ToList();
 
+                var toUpdate = new List<Result>();
+                foreach (var item in newResult)
+                {
+                    var found = oldResult.FirstOrDefault(y => item.Time == y.Time && item.Result1 != y.Result1);
+                    if (found is null)
+                        continue;
+
+                    found.Result1 = item.Result1;
+                    toUpdate.Add(found);
+                }
+                var toInsert = newResult.Where(x => !oldResult.Exists(y => x.Time == y.Time));
                 var needSave = false;
-                // no hay resultado nuevo
-                var len = oldResult.Count();
-                if (len == newResult.Count())
+                foreach (var item in toUpdate)
                 {
-                    for (int i = 0; i < len; i++)
-                    {
-                        if (oldResult[i].Time == newResult[i].Time && oldResult[i].Result1 != newResult[i].Result1)
-                        {
-                            oldResult[i].Result1 = newResult[i].Result1;
-                            unitOfWork.ResultRepository.Update(oldResult[i]);
-                            needSave = true;
-                        }
-                    }
+                    unitOfWork.ResultRepository.Update(item);
+                    needSave = true;
+                }
+                foreach (var item in toInsert)
+                {
+                    unitOfWork.ResultRepository.Insert(item);
+                    needSave = true;
                 }
 
-                // hay resultado nuevo
-                if (newResult.Count() > len)
-                {
-                    var founds = newResult.Where(x => !oldResult.Any(y => y.Time == x.Time));
-
-                    foreach (var item in founds)
-                    {
-                        unitOfWork.ResultRepository.Insert(item);
-                        needSave = true;
-                    }
-                }
 
                 if (needSave)
                 {
                     await unitOfWork.SaveChangeAsync();
+
+                    if (toUpdate.Any())
+                        notifyPremierService.Handler(toUpdate.Select(x => x.Id).ToList(), NotifyType.Update);
+                    if (toInsert.Any())
+                        notifyPremierService.Handler(toInsert.Select(x => x.Id).ToList(), NotifyType.New);
                 }
 
                 if (!needSave)
@@ -115,36 +119,6 @@ namespace LotteryResult.Services
                     _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(LaGranjitaOfficial));
                     return;
                 }
-
-            //    var oldResult = await unitOfWork.ResultRepository
-            //        .GetAllByAsync(x => x.ProviderId == chanceAnimalitosProviderID &&
-            //            x.CreatedAt.Date == venezuelaNow.Date);
-            //    foreach (var item in oldResult)
-            //    {
-            //        unitOfWork.ResultRepository.Delete(item);
-            //    }
-
-                //    foreach (var item in response)
-                //    {
-                //        var substrings = item.fecSorteo.Split(' ');
-                //        //var time = substrings[1].Substring(0, 5).PadLeft(2) + " " + substrings[2];
-                //        var time = substrings[1].Substring(0, 2).Replace(":", "") + ":00 " + substrings[2];
-                //        var animalFound = GetAnimalLabelFromNumber(item.codAnimalA);
-
-                //        unitOfWork.ResultRepository.Insert(new Data.Models.Result
-                //        {
-                //            Result1 = animalFound.Number +" "+ animalFound.Name.Capitalize(),
-                //            Time = LaGranjitaTerminalOfficial.FormatTime(time.ToUpper()),
-                //            Date = DateTime.Now.ToString("dd-MM-yyyy"),
-                //            ProductId = chanceAnimalitosID,
-                //            ProviderId = chanceAnimalitosProviderID,
-                //            ProductTypeId = (int)ProductTypeEnum.ANIMALITOS
-                //        });
-                //    }
-
-                //    Console.WriteLine(response);
-
-                //    await unitOfWork.SaveChangeAsync();
             }
             catch (Exception ex)
             {
