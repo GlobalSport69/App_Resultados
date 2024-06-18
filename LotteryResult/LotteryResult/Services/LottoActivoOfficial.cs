@@ -12,6 +12,7 @@ namespace LotteryResult.Services
         public const int productID = 27;
         private const int providerID = 25;
         private readonly ILogger<LottoActivoOfficial> _logger;
+        private INotifyPremierService notifyPremierService;
 
 
         private Dictionary<string, long> Lotteries = new Dictionary<string, long>
@@ -29,10 +30,11 @@ namespace LotteryResult.Services
             { "07:00 PM", 55 },
         };
 
-        public LottoActivoOfficial(IUnitOfWork unitOfWork, ILogger<LottoActivoOfficial> logger)
+        public LottoActivoOfficial(IUnitOfWork unitOfWork, ILogger<LottoActivoOfficial> logger, INotifyPremierService notifyPremierService)
         {
             this.unitOfWork = unitOfWork;
             _logger = logger;
+            this.notifyPremierService = notifyPremierService;
         }
 
         public async Task Handler()
@@ -40,6 +42,7 @@ namespace LotteryResult.Services
             try
             {
                 DateTime venezuelaNow = DateTime.Now;
+                var date = DateTime.Now.ToString("yyyy-MM-dd");
 
                 using var browserFetcher = new BrowserFetcher();
                 await browserFetcher.DownloadAsync();
@@ -54,7 +57,7 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://www.lottoactivo.com/resultados/lotto_activo/", waitUntil: WaitUntilNavigation.Networkidle2);
+                await page.GoToAsync($"https://www.lottoactivo.com/resultados/lotto_activo/{date}/", waitUntil: WaitUntilNavigation.Networkidle2);
 
                 // Espera hasta que haya al menos 1 elementos 'div' dentro de '#resultados'
                 await page.WaitForFunctionAsync(@"() => {
@@ -69,12 +72,15 @@ namespace LotteryResult.Services
                     let r = [...document.querySelectorAll('#resultados div')]
                         .map(row =>{ 
                           const spanElement = row.querySelector('span'); 
+                          if(spanElement === null){
+                            return spanElement;
+                          }
                           return { 
                             result: spanElement.textContent,
                             time: row.querySelector('p').innerText.replace('LOTTO ACTIVO', '').trim(),
                             complement: spanElement.nextSibling.textContent.trim()
                           }
-                        })
+                        }).filter(x => x !== null)
 
                     return r;
                 }");
@@ -111,37 +117,39 @@ namespace LotteryResult.Services
                 .OrderBy(x => x.Time)
                 .ToList();
 
+
+                var toUpdate = new List<Result>();
+                foreach (var item in newResult)
+                {
+                    var found = oldResult.FirstOrDefault(y => item.Time == y.Time && item.Result1 != y.Result1);
+                    if (found is null)
+                        continue;
+
+                    found.Result1 = item.Result1;
+                    toUpdate.Add(found);
+                }
+                var toInsert = newResult.Where(x => !oldResult.Exists(y => x.Time == y.Time));
                 var needSave = false;
-                // no hay resultado nuevo
-                var len = oldResult.Count();
-                if (len == newResult.Count())
+                foreach (var item in toUpdate)
                 {
-                    for (int i = 0; i < len; i++)
-                    {
-                        if (oldResult[i].Time == newResult[i].Time && oldResult[i].Result1 != newResult[i].Result1)
-                        {
-                            oldResult[i].Result1 = newResult[i].Result1;
-                            unitOfWork.ResultRepository.Update(oldResult[i]);
-                            needSave = true;
-                        }
-                    }
+                    unitOfWork.ResultRepository.Update(item);
+                    needSave = true;
+                }
+                foreach (var item in toInsert)
+                {
+                    unitOfWork.ResultRepository.Insert(item);
+                    needSave = true;
                 }
 
-                // hay resultado nuevo
-                if (newResult.Count() > len)
-                {
-                    var founds = newResult.Where(x => !oldResult.Any(y => y.Time == x.Time));
-
-                    foreach (var item in founds)
-                    {
-                        unitOfWork.ResultRepository.Insert(item);
-                        needSave = true;
-                    }
-                }
 
                 if (needSave)
                 {
                     await unitOfWork.SaveChangeAsync();
+
+                    if (toUpdate.Any())
+                        notifyPremierService.Handler(toUpdate.Select(x => x.Id).ToList(), NotifyType.Update);
+                    if (toInsert.Any())
+                        notifyPremierService.Handler(toInsert.Select(x => x.Id).ToList(), NotifyType.New);
                 }
 
                 if (!needSave)

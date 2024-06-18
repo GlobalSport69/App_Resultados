@@ -1,4 +1,5 @@
 ﻿using LotteryResult.Data.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +10,6 @@ namespace LotteryResult.Data.Abstractions
 {
     public interface IResultRepository : IGenericRepository<Result>
     {
+        public Task<List<Result>> GetResultByIds(List<long> resultID);
     }
 }
