@@ -23,14 +23,7 @@ namespace LotteryResult
             services.AddScoped<TripleBombaOfficial>();
             services.AddScoped<ChanceAnimalitosOfficial>();
             services.AddScoped<TripleChanceOfficial>();
-
             services.AddScoped<TripleTachiraOfficial>();
-            services.AddScoped<TachiraZodiacalOfficial>();
-            services.AddScoped<ZodiacalCaracasOfficial>();
-            services.AddScoped<ChanceAstralOfficial>();
-            services.AddScoped<AstroZamoranoOfficial>();
-            services.AddScoped<ZodiacoDelZuliaOfficial>();
-            services.AddScoped<SignoCalienteOfficial>();
             services.AddScoped<LottoActivoOfficial>();
             services.AddScoped<RuletaActivaOfficial>();
             services.AddScoped<GranjaPlusOfficial>();
