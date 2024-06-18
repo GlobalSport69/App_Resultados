@@ -47,7 +47,7 @@ namespace LotteryResult.Services
                 message += "\n" + found.Key + "\n";
                 foreach (var item in found)
                 {
-                    message += "Resultado: " + item.Result1 + "\n" + "Hora: " + item.Time + "\n" + "Sorteo: " + item.Sorteo + "\n<hr>\n";
+                    message += "Resultado: " + item.Result1 + "\n" + "Hora: " + item.Time + "\n" + "Sorteo: " + (string.IsNullOrEmpty(item.Sorteo) ? "N/A" : item.Sorteo) + "\n";
                 }
 
                 var result = await "https://api.telegram.org/bot6844458606:AAGYYpQDieh-sv-gyjGXBVd1mhQoiTqQ-2I/sendMessage"
