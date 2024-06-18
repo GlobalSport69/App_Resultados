@@ -72,257 +72,115 @@ namespace LotteryResult.Services
             this.lottoActivoRDInternacionalOfficial = lottoActivoRDInternacionalOfficial;
         }
 
-        public void AddJob(int product_id, string job_id, string cron_expression) {
+        public void AddJob(int product_id, string job_id, string cron_expression)
+        {
+
+            IGetResult job = null;
+
 
             if (product_id == TripleZamoranoOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id, 
-                    () => tripleZamoranoOfficial.Handler(), 
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = tripleZamoranoOfficial;
             }
 
             if (product_id == TripleCaracasOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => tripleCaracasOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = tripleCaracasOfficial;
             }
 
             if (product_id == TripleCalienteOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => tripleCalienteOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = tripleCalienteOfficial;
             }
 
             if (product_id == LottoReyOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => lottoReyOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = lottoReyOfficial;
             }
 
             if (product_id == TripleZuliaOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => tripleZuliaOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = tripleZuliaOfficial;
             }
 
             if (product_id == ElRucoTriplesBet.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => elRucoTriplesBet.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
+                job = elRucoTriplesBet;
             }
 
             if (product_id == LaRucaOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => laRucaOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = laRucaOfficial;
             }
 
             if (product_id == SelvaPlusOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => selvaPlusOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = selvaPlusOfficial;
             }
 
             if (product_id == GuacharoActivoOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => guacharoActivoOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = guacharoActivoOfficial;
             }
 
             if (product_id == LaGranjitaOfficial.laGranjitaID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => laGranjitaOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = laGranjitaOfficial;
             }
 
             if (product_id == LaRicachonaOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => laRicachonaOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = laRicachonaOfficial;
             }
 
             if (product_id == LaGranjitaTerminalOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => laGranjitaTerminalOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = laGranjitaTerminalOfficial;
             }
 
             if (product_id == LaRicachonaAnimalitosOfficial.laRicachonaAnimalitosID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => laRicachonaAnimalitosOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = laRicachonaAnimalitosOfficial;
             }
 
             if (product_id == TripleBombaOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => tripleBombaOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = tripleBombaOfficial;
             }
 
             if (product_id == ChanceAnimalitosOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => chanceAnimalitosOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = chanceAnimalitosOfficial;
             }
 
             if (product_id == TripleChanceOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => tripleChanceOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = tripleChanceOfficial;
             }
 
             if (product_id == ZodiacalCaracasOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => zodiacalCaracasOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = zodiacalCaracasOfficial;
             }
 
             if (product_id == TripleTachiraOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => tripleTachiraOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = tripleTachiraOfficial;
             }
 
             if (product_id == TachiraZodiacalOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => tachiraZodiacalOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = tachiraZodiacalOfficial;
             }
 
             if (product_id == ChanceAstralOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => chanceAstralOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = chanceAstralOfficial;
             }
 
             if (product_id == AstroZamoranoOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => astroZamoranoOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = astroZamoranoOfficial;
             }
 
             if (product_id == ZodiacoDelZuliaOfficial.productID)
@@ -339,63 +197,39 @@ namespace LotteryResult.Services
 
             if (product_id == SignoCalienteOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => signoCalienteOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
-            }
-            
-            if (product_id == LottoActivoOfficial.productID)
-            {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => lottoActivoOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = signoCalienteOfficial;
             }
 
-            
+            if (product_id == LottoActivoOfficial.productID)
+            {
+                job = lottoActivoOfficial;
+            }
+
             if (product_id == RuletaActivaOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => ruletaActivaOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = ruletaActivaOfficial;
             }
 
             if (product_id == GranjaPlusOfficial.productID)
             {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => granjaPlusOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
+                job = granjaPlusOfficial;
             }
 
             if (product_id == LottoActivoRDInternacionalOfficial.productID)
             {
+                job = lottoActivoRDInternacionalOfficial;
+            }
+
+            if (job != null)
+            {
                 RecurringJob.AddOrUpdate(job_id,
-                    () => lottoActivoRDInternacionalOfficial.Handler(),
+                    "default",
+                    () => job.Handler(),
                     cron_expression,
                     new RecurringJobOptions
                     {
-                        TimeZone = _timeZone
+                        TimeZone = _timeZone,
                     });
-                return;
             }
         }
 

@@ -5,7 +5,7 @@ namespace LotteryResult.Data.Models;
 
 public partial class Result
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
 
     public string Result1 { get; set; } = null!;
 

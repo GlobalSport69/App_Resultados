@@ -17,7 +17,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 // Add the processing server as IHostedService
-builder.Services.AddHangfireServer();
+//builder.Services.AddHangfireServer();
+builder.Services.AddHangfireServer(x => {
+    x.ServerName = string.Format("{0}:notify_premier", Environment.MachineName);
+    x.Queues = new[] { "notify_premier" };
+    x.WorkerCount = 1;
+});
+builder.Services.AddHangfireServer(x => {
+    x.ServerName = string.Format("{0}:default", Environment.MachineName);
+    x.Queues = new[] { "default" };
+});
+
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
 {
     options.LoginPath = "/auth/login";

@@ -54,7 +54,7 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://lottorey.com.ve/"+ venezuelaNow.ToString("yyyy/MM/dd"));
+                await page.GoToAsync("https://lottorey.com.ve/" + venezuelaNow.ToString("yyyy/MM/dd"));
 
                 var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
                     let r = [...document.querySelectorAll('#main-container .card')]
@@ -106,6 +106,23 @@ namespace LotteryResult.Services
                 })
                 .OrderBy(x => x.Time)
                 .ToList();
+
+
+
+                var toUpdate = new List<Result>();
+                foreach (var item in newResult)
+                {
+                    var found = oldResult.FirstOrDefault(y => item.Time == y.Time && item.Result1 != y.Result1);
+                    if (found is null)
+                        continue;
+
+                    found.Result1 = item.Result1;
+                    toUpdate.Add(found);
+                }
+
+                var toInsert = newResult.Except(toUpdate);
+
+
 
                 var needSave = false;
                 // no hay resultado nuevo

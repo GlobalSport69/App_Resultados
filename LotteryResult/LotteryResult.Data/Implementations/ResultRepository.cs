@@ -17,29 +17,12 @@ namespace LotteryResult.Data.Implementations
         public ResultRepository(PostgresDbContext dbContext) : base(dbContext)
         {
         }
-
-        public async Task DeleteResultByDateAsync(DateTime date, Expression<Func<Result, bool>> expression = null)
+        public async Task<List<Result>> GetResultByIds(List<long> resultID)
         {
-            CultureInfo cultureInfo = new CultureInfo("es-VE");
-
-            DateTime inicioDelDia = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0, cultureInfo.Calendar);
-            DateTime inicioDelDiaUTC = inicioDelDia.ToUniversalTime();
-
-            DateTime finDelDia = new DateTime(date.Year, date.Month, date.Day, 23, 59, 59, cultureInfo.Calendar);
-            DateTime finDelDiaUTC = finDelDia.ToUniversalTime();
-
-            var query = _dbContext.Results.Where(r => r.CreatedAt >= inicioDelDiaUTC && r.CreatedAt <= finDelDiaUTC);
-            if (expression != null)
-            {
-                query.Where(expression);
-            }
-
-            var oldResult = await query.ToListAsync();
-
-            foreach (var item in oldResult)
-            {
-                _dbContext.Results.Remove(item);
-            }
+            return await _dbContext.Results
+                .Where(r => resultID.Contains(r.Id))
+                .Include(x => x.Product)
+                .ToListAsync();
         }
     }
 }
