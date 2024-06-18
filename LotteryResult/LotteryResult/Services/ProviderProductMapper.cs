@@ -21,13 +21,7 @@ namespace LotteryResult.Services
         private TripleBombaOfficial tripleBombaOfficial;
         private ChanceAnimalitosOfficial chanceAnimalitosOfficial;
         private TripleChanceOfficial tripleChanceOfficial;
-        private ZodiacalCaracasOfficial zodiacalCaracasOfficial;
         private TripleTachiraOfficial tripleTachiraOfficial;
-        private TachiraZodiacalOfficial tachiraZodiacalOfficial;
-        private ChanceAstralOfficial chanceAstralOfficial;
-        private AstroZamoranoOfficial astroZamoranoOfficial;
-        private ZodiacoDelZuliaOfficial zodiacoDelZuliaOfficial;
-        private SignoCalienteOfficial signoCalienteOfficial;
         private LottoActivoOfficial lottoActivoOfficial;
         private RuletaActivaOfficial ruletaActivaOfficial;
         private GranjaPlusOfficial granjaPlusOfficial;
@@ -36,9 +30,8 @@ namespace LotteryResult.Services
             TripleCalienteOfficial tripleCalienteOfficial, ElRucoTriplesBet elRucoTriplesBet, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial,
             SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial,
             LaGranjitaTerminalOfficial laGranjitaTerminalOfficial, LaRicachonaAnimalitosOfficial laRicachonaAnimalitosOfficial, TripleBombaOfficial tripleBombaOfficial,
-            ChanceAnimalitosOfficial chanceAnimalitosOfficial, TripleChanceOfficial tripleChanceOfficial, ZodiacalCaracasOfficial zodiacalCaracasOfficial,
-            TripleTachiraOfficial tripleTachiraOfficial, TachiraZodiacalOfficial tachiraZodiacalOfficial, ChanceAstralOfficial chanceAstralOfficial,
-            AstroZamoranoOfficial astroZamoranoOfficial, ZodiacoDelZuliaOfficial zodiacoDelZuliaOfficial, SignoCalienteOfficial signoCalienteOfficial,
+            ChanceAnimalitosOfficial chanceAnimalitosOfficial, TripleChanceOfficial tripleChanceOfficial, 
+            TripleTachiraOfficial tripleTachiraOfficial,
             LottoActivoOfficial lottoActivoOfficial, RuletaActivaOfficial ruletaActivaOfficial, GranjaPlusOfficial granjaPlusOfficial, LottoActivoRDInternacionalOfficial lottoActivoRDInternacionalOfficial)
         {
             _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
@@ -59,13 +52,7 @@ namespace LotteryResult.Services
             this.tripleBombaOfficial = tripleBombaOfficial;
             this.chanceAnimalitosOfficial = chanceAnimalitosOfficial;
             this.tripleChanceOfficial = tripleChanceOfficial;
-            this.zodiacalCaracasOfficial = zodiacalCaracasOfficial;
             this.tripleTachiraOfficial = tripleTachiraOfficial;
-            this.tachiraZodiacalOfficial = tachiraZodiacalOfficial;
-            this.chanceAstralOfficial = chanceAstralOfficial;
-            this.astroZamoranoOfficial = astroZamoranoOfficial;
-            this.zodiacoDelZuliaOfficial = zodiacoDelZuliaOfficial;
-            this.signoCalienteOfficial = signoCalienteOfficial;
             this.lottoActivoOfficial = lottoActivoOfficial;
             this.ruletaActivaOfficial = ruletaActivaOfficial;
             this.granjaPlusOfficial = granjaPlusOfficial;
@@ -158,46 +145,9 @@ namespace LotteryResult.Services
                 job = tripleChanceOfficial;
             }
 
-            if (product_id == ZodiacalCaracasOfficial.productID)
-            {
-                job = zodiacalCaracasOfficial;
-            }
-
             if (product_id == TripleTachiraOfficial.productID)
             {
                 job = tripleTachiraOfficial;
-            }
-
-            if (product_id == TachiraZodiacalOfficial.productID)
-            {
-                job = tachiraZodiacalOfficial;
-            }
-
-            if (product_id == ChanceAstralOfficial.productID)
-            {
-                job = chanceAstralOfficial;
-            }
-
-            if (product_id == AstroZamoranoOfficial.productID)
-            {
-                job = astroZamoranoOfficial;
-            }
-
-            if (product_id == ZodiacoDelZuliaOfficial.productID)
-            {
-                RecurringJob.AddOrUpdate(job_id,
-                    () => zodiacoDelZuliaOfficial.Handler(),
-                    cron_expression,
-                    new RecurringJobOptions
-                    {
-                        TimeZone = _timeZone
-                    });
-                return;
-            }
-
-            if (product_id == SignoCalienteOfficial.productID)
-            {
-                job = signoCalienteOfficial;
             }
 
             if (product_id == LottoActivoOfficial.productID)
