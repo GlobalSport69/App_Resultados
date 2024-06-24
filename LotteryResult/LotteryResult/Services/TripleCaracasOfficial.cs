@@ -51,7 +51,8 @@ namespace LotteryResult.Services
             {"SAG", "SAGITARIO"},
             {"CAP", "CAPRICORNIO"},
             {"ACU", "ACUARIO"},
-            {"PIS", "PISCIS"}
+            {"PIS", "PISCIS"},
+            {"PIC", "PISCIS"}
         };
 
 
