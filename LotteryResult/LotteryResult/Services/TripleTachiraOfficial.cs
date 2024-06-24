@@ -19,20 +19,20 @@ namespace LotteryResult.Services
         {
             { "01:15 PM", 121 },
             { "04:45 PM", 122 },
-            { "10:00 PM", 123 },
+            { "10:10 PM", 123 },
         };
         private Dictionary<string, long> TripleB = new Dictionary<string, long>
         {
             { "01:15 PM", 140 },
             { "04:45 PM", 142 },
-            { "10:00 PM", 144 },
+            { "10:10 PM", 144 },
         };
 
         private Dictionary<string, long> TripleC = new Dictionary<string, long>
         {
             { "01:15 PM", 141 },
             { "04:45 PM", 143 },
-            { "10:00 PM", 145 }
+            { "10:10 PM", 145 }
         };
         public TripleTachiraOfficial(IUnitOfWork unitOfWork, ILogger<TripleTachiraOfficial> logger, INotifyPremierService notifyPremierService)
         {
