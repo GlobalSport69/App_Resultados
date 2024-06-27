@@ -51,8 +51,8 @@ namespace LotteryResult.Services
                 .AppendPathSegments("sorteo-publicados")
                 .PostJsonAsync(new
                 {
-                    idLoteria = 1
-                    //fecha = null
+                    idLoteria = 1,
+                    fecha= venezuelaNow.ToString("yyyy-MM-dd") /*2024-06-25*/
                 })
                 .ReceiveJson<RuletaActivaResponse>();
 
@@ -62,33 +62,39 @@ namespace LotteryResult.Services
                     return;
                 }
 
-                var response = data.loteria.publicaciones.SelectMany(x => {
-                    var list = new List<LotteryDetail> {
-                        new LotteryDetail {
-                            Time = x.hora,
-                            Result = x.a.nro+" "+x.a.nombre,
-                            Sorteo = "Triple A",
-                            //number = x.a.nro,
-                            //animal = x.a.nombre
-                        },
-                        new LotteryDetail {
-                            Time = x.hora,
-                            Result = x.b.nro+" "+x.b.nombre,
-                            Sorteo = "Triple B",
-                        },
-                        new LotteryDetail {
-                            Time = x.hora,
-                            Result = x.c.nro+" "+x.c.nombre,
-                            Sorteo = "Triple C",
-                        },
-                        new LotteryDetail {
-                            Time = x.hora,
-                            Result = x.d.nro+" "+x.d.nombre,
-                            Sorteo = "Triple D",
-                        }
-                    };
-                    return list;
-                });
+                var json = data.loteria.publicaciones
+                    .GroupBy(x => x.nro_sorteo)
+                    .Select(x => x.First());
+
+                var response = json
+                    .SelectMany(x => {
+                        var list = new List<LotteryDetail> {
+                            new LotteryDetail {
+                                Time = x.hora,
+                                Result = x.a.nro+" "+x.a.nombre,
+                                Sorteo = "Triple A",
+                                //number = x.a.nro,
+                                //animal = x.a.nombre
+                            },
+                            new LotteryDetail {
+                                Time = x.hora,
+                                Result = x.b.nro+" "+x.b.nombre,
+                                Sorteo = "Triple B",
+                            },
+                            new LotteryDetail {
+                                Time = x.hora,
+                                Result = x.c.nro+" "+x.c.nombre,
+                                Sorteo = "Triple C",
+                            },
+                            new LotteryDetail {
+                                Time = x.hora,
+                                Result = x.d.nro+" "+x.d.nombre,
+                                Sorteo = "Triple D",
+                            }
+                        };
+                        return list;
+                    })
+                    .ToList();
 
 
 
@@ -104,7 +110,7 @@ namespace LotteryResult.Services
                     {
                         Result1 = item.Result,
                         Time = time,
-                        Date = DateTime.Now.ToString("dd-MM-yyyy"),
+                        Date = venezuelaNow.ToString("dd-MM-yyyy"),
                         ProductId = productID,
                         ProviderId = providerID,
                         Sorteo = item.Sorteo,
