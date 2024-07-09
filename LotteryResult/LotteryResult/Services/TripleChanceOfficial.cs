@@ -191,7 +191,7 @@ namespace LotteryResult.Services
 
                 if (!needSave)
                 {
-                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(TripleZuliaOfficial));
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(TripleChanceOfficial));
                     return;
                 }
             }
