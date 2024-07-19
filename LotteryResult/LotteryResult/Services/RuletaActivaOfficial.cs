@@ -71,25 +71,27 @@ namespace LotteryResult.Services
                         var list = new List<LotteryDetail> {
                             new LotteryDetail {
                                 Time = x.hora,
-                                Result = x.a.nro+" "+x.a.nombre,
                                 Sorteo = "Triple A",
-                                //number = x.a.nro,
-                                //animal = x.a.nombre
+                                Result = x.a.nro,
+                                Complement = x.a.nombre.Capitalize()
                             },
                             new LotteryDetail {
                                 Time = x.hora,
-                                Result = x.b.nro+" "+x.b.nombre,
                                 Sorteo = "Triple B",
+                                Result = x.b.nro,
+                                Complement = x.b.nombre.Capitalize()
                             },
                             new LotteryDetail {
                                 Time = x.hora,
-                                Result = x.c.nro+" "+x.c.nombre,
                                 Sorteo = "Triple C",
+                                Result = x.c.nro,
+                                Complement = x.c.nombre.Capitalize()
                             },
                             new LotteryDetail {
                                 Time = x.hora,
-                                Result = x.d.nro+" "+x.d.nombre,
                                 Sorteo = "Triple D",
+                                Result = x.d.nro,
+                                Complement = x.d.nombre.Capitalize()
                             }
                         };
                         return list;
@@ -108,7 +110,7 @@ namespace LotteryResult.Services
 
                     return new Result
                     {
-                        Result1 = item.Result,
+                        Result1 = item.Result + " " + item.Complement,
                         Time = time,
                         Date = venezuelaNow.ToString("dd-MM-yyyy"),
                         ProductId = productID,

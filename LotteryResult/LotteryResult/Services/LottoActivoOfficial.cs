@@ -99,6 +99,7 @@ namespace LotteryResult.Services
                 var newResult = response.Select(item => {
                     var time = item.Time.ToUpper();
                     var premierId = Lotteries[time];
+                    item.Complement = item.Complement.Capitalize();
                     var resultado = item.Result + " " + item.Complement;
 
                     return new Result

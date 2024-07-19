@@ -63,6 +63,7 @@ namespace LotteryResult.Services
                 var newResult = response.Select(item => {
                     var time = item.loteria.Replace("Selva Plus ", "").ToUpper();
                     var PremierId = lotteries[time];
+                    item.nombre = item.nombre.Capitalize();
 
                     return new Result
                     {

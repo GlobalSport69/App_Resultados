@@ -67,7 +67,7 @@ namespace LotteryResult.Services
                     var premierId = lotteries[LaGranjitaTerminalOfficial.FormatTime(time)];
                     var result = item.result.Split("-");
                     var number = result[0];
-                    var animal = result[1];
+                    var animal = result[1].Capitalize();
 
 
                     return new Result

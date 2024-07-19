@@ -67,12 +67,12 @@ namespace LotteryResult.Services
 
                     return new Result
                     {
-                        Result1 = item.result.Replace("-", " "),
+                        Result1 = item.result,
                         Time = time,
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
                         ProviderId = providerID,
-                        ProductTypeId = (int)ProductTypeEnum.ANIMALITOS,
+                        ProductTypeId = (int)ProductTypeEnum.TRIPLES,
                         PremierId = PremierId
                     };
                 })
