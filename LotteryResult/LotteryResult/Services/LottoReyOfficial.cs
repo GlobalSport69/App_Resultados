@@ -95,9 +95,14 @@ namespace LotteryResult.Services
                     var time = item.Time.ToUpper();
                     var premierId = lotteries[time];
 
+                    var number = new String(item.Result.TakeWhile(c => c != ' ').ToArray());
+                    var complement = item.Result.Substring(number.Length, item.Result.Length - number.Length)
+                    .Trim()
+                    .Capitalize();
+
                     return new Result
                     {
-                        Result1 = item.Result,
+                        Result1 = $"{number} {complement}",
                         Time = time,
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,

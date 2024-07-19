@@ -83,6 +83,7 @@ namespace LotteryResult.Services
 
                 var newResult = response.Select(item => {
 
+                    item.Complement = item.Complement.Capitalize();
                     var resultado = item.Result + " " +item.Complement;
                     var time = item.Time.ToUpper();
 

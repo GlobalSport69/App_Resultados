@@ -65,10 +65,11 @@ namespace LotteryResult.Services
                 var newResult = response.Select(item => {
                     var time = item.loteria.Replace("Guacharo Activo ", "").ToUpper();
                     var premierId = lotteries[time];
+                    item.nombre = item.nombre.Trim().Capitalize();
 
                     return new Result
                     {
-                        Result1 = item.numero + " " + item.nombre.Trim(),
+                        Result1 = item.numero + " " + item.nombre,
                         Time = time,
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,

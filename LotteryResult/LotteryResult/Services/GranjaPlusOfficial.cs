@@ -49,7 +49,7 @@ namespace LotteryResult.Services
                 var newResult = response.Select(item => {
                     var time = item.loteria.Replace("Granja Plus ", "").ToUpper();
                     var number = item.numero.ToUpper();
-                    var animal = item.nombre.ToUpper();
+                    var animal = item.nombre.Capitalize();
 
                     return new Result
                     {

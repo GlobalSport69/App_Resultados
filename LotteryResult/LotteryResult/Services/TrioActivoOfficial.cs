@@ -76,11 +76,10 @@ namespace LotteryResult.Services
                 var newResult = response.Select(item => {
                     var time = item.Time.ToUpper();
                     //var premierId = Lotteries[time];
-                    var resultado = item.Result + " " + item.Complement;
 
                     return new Result
                     {
-                        Result1 = resultado,
+                        Result1 = item.Result,
                         Time = time,
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
