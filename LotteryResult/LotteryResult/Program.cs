@@ -11,6 +11,8 @@ using Serilog.Events;
 using LotteryResult.Filters;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Serilog.Sinks.Grafana.Loki;
+using Serilog.Filters;
+using LotteryResult.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +38,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddData(builder.Configuration);
 builder.Services.AddServices(builder.Configuration);
-builder.Services.AddLogging(builder => builder.AddSerilog());
+//builder.Logging.AddSerilog();
 
 
 // Add Hangfire services.
@@ -60,18 +62,23 @@ builder.Host.UseSerilog((hostContext, services, configuration) =>
 
     //configuration.WriteTo.Console(outputTemplate: "{Timestamp:dd-MM-yyyy HH:mm:ss} [{Level:u3}] [{ThreadId}] {Message}{NewLine}{Exception}");
 
-    configuration.WriteTo.GrafanaLoki(builder.Configuration.GetSection("Serilog:LokiUrl").Value,
+    configuration
+    .WriteTo.GrafanaLoki(builder.Configuration.GetSection("Serilog:LokiUrl").Value,
                 new List<LokiLabel> { 
                     new() { Key = "app", Value = "info" } 
                 },
-                restrictedToMinimumLevel: LogEventLevel.Information,
-                credentials: null);
-    configuration.WriteTo.GrafanaLoki(builder.Configuration.GetSection("Serilog:LokiUrl").Value,
+            restrictedToMinimumLevel: LogEventLevel.Information)
+    .WriteTo.GrafanaLoki(builder.Configuration.GetSection("Serilog:LokiUrl").Value,
              new List<LokiLabel> {
-                    new() { Key = "app", Value = "errors" }
+                new() { Key = "app", Value = "error" }
              },
-             restrictedToMinimumLevel: LogEventLevel.Error,
-             credentials: null);
+             restrictedToMinimumLevel: LogEventLevel.Error)
+    .WriteTo.Logger(lc => lc
+            .Filter.ByIncludingOnly(Matching.FromSource<NotifyPremierService>())
+            .WriteTo.GrafanaLoki(builder.Configuration.GetSection("Serilog:LokiUrl").Value,
+            new List<LokiLabel> {
+                new() { Key = "app", Value = "premiacion_log" }
+            }));
 });
 
 var app = builder.Build();
