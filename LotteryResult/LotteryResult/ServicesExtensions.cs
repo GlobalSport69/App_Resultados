@@ -29,6 +29,7 @@ namespace LotteryResult
             services.AddScoped<GranjaPlusOfficial>();
             services.AddScoped<LottoActivoRDInternacionalOfficial>();
             services.AddScoped<TrioActivoOfficial>();
+            services.AddScoped<CarruselMillonario>();
 
             services.AddScoped<INotifyPremierService, NotifyPremierService>();
             services.AddScoped<ProviderProductMapper>();

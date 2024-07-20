@@ -27,13 +27,14 @@ namespace LotteryResult.Services
         private GranjaPlusOfficial granjaPlusOfficial;
         private LottoActivoRDInternacionalOfficial lottoActivoRDInternacionalOfficial;
         private TrioActivoOfficial trioActivoOfficial;
+        private CarruselMillonario carruselMillonario;
         public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial,
             TripleCalienteOfficial tripleCalienteOfficial, ElRucoTriplesBet elRucoTriplesBet, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial,
             SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial,
             LaGranjitaTerminalOfficial laGranjitaTerminalOfficial, LaRicachonaAnimalitosOfficial laRicachonaAnimalitosOfficial, TripleBombaOfficial tripleBombaOfficial,
             ChanceAnimalitosOfficial chanceAnimalitosOfficial, TripleChanceOfficial tripleChanceOfficial,
             TripleTachiraOfficial tripleTachiraOfficial,
-            LottoActivoOfficial lottoActivoOfficial, RuletaActivaOfficial ruletaActivaOfficial, GranjaPlusOfficial granjaPlusOfficial, LottoActivoRDInternacionalOfficial lottoActivoRDInternacionalOfficial, TrioActivoOfficial trioActivoOfficial)
+            LottoActivoOfficial lottoActivoOfficial, RuletaActivaOfficial ruletaActivaOfficial, GranjaPlusOfficial granjaPlusOfficial, LottoActivoRDInternacionalOfficial lottoActivoRDInternacionalOfficial, TrioActivoOfficial trioActivoOfficial, CarruselMillonario carruselMillonario)
         {
             _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
 
@@ -59,6 +60,7 @@ namespace LotteryResult.Services
             this.granjaPlusOfficial = granjaPlusOfficial;
             this.lottoActivoRDInternacionalOfficial = lottoActivoRDInternacionalOfficial;
             this.trioActivoOfficial = trioActivoOfficial;
+            this.carruselMillonario = carruselMillonario;
         }
 
         public void AddJob(int product_id, string job_id, string cron_expression)
@@ -173,6 +175,10 @@ namespace LotteryResult.Services
             if (product_id == TrioActivoOfficial.productID)
             {
                 job = trioActivoOfficial;
+            }
+            if (product_id == CarruselMillonario.productID)
+            {
+                job = carruselMillonario;
             }
 
             if (job != null)
