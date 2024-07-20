@@ -71,25 +71,25 @@ namespace LotteryResult.Services
                         var list = new List<LotteryDetail> {
                             new LotteryDetail {
                                 Time = x.hora,
-                                Sorteo = "Triple A",
+                                Sorteo = "A",
                                 Result = x.a.nro,
                                 Complement = x.a.nombre.Capitalize()
                             },
                             new LotteryDetail {
                                 Time = x.hora,
-                                Sorteo = "Triple B",
+                                Sorteo = "B",
                                 Result = x.b.nro,
                                 Complement = x.b.nombre.Capitalize()
                             },
                             new LotteryDetail {
                                 Time = x.hora,
-                                Sorteo = "Triple C",
+                                Sorteo = "C",
                                 Result = x.c.nro,
                                 Complement = x.c.nombre.Capitalize()
                             },
                             new LotteryDetail {
                                 Time = x.hora,
-                                Sorteo = "Triple D",
+                                Sorteo = "D",
                                 Result = x.d.nro,
                                 Complement = x.d.nombre.Capitalize()
                             }
@@ -106,7 +106,7 @@ namespace LotteryResult.Services
 
                 var newResult = response.Select(item => {
                     var time = RuletaActivaOfficial.FormatTime(item.Time.ToUpper());
-                    long? premierId = item.Sorteo == "Triple D" ? lotteries[time] : null;
+                    long? premierId = item.Sorteo == "D" ? lotteries[time] : null;
 
                     return new Result
                     {
