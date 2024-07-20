@@ -77,6 +77,7 @@ namespace LotteryResult.Services
         }
         public async Task Premiacion(List<long> result_ids, NotifyType type)
         {
+            PremicionPremierDto body = null;
             try
             {
                 var results = await unitOfWork.ResultRepository.GetResultByIds(result_ids);
@@ -88,15 +89,15 @@ namespace LotteryResult.Services
                 {
                     var number = new string(item.Result1.TakeWhile(c => c != ' ').ToArray());
                     var date = DateOnly.ParseExact(item.Date, "dd-MM-yyyy", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd");
-
-                    var result = await "https://loteriadev.premierpluss.com/hook"
-                    .PostJsonAsync(new PremicionPremierDto
+                    body = new PremicionPremierDto
                     {
                         lotteryId = item.PremierId.Value,
                         number = number == "00" ? number : int.Parse(number).ToString(),
                         date = date,
                         complement_number = null
-                    })
+                    };
+                    var result = await "https://loteriadev.premierpluss.com/hook"
+                    .PostJsonAsync(body)
                     .ReceiveString();
 
 
@@ -104,7 +105,7 @@ namespace LotteryResult.Services
                         { Serilog.Core.Constants.SourceContextPropertyName, typeof(NotifyPremierService).FullName }
                     }))
                     {
-                        _logger.LogInformation("Respuesta obtenida: {0}", result);
+                        _logger.LogInformation(@"Respuesta obtenida: {0} Request: {@body}", result, body);
                     }
 
                     await Task.Delay(1000);
@@ -116,7 +117,7 @@ namespace LotteryResult.Services
                         { Serilog.Core.Constants.SourceContextPropertyName, typeof(NotifyPremierService).FullName }
                     }))
                 {
-                    _logger.LogError(exception: ex, message: nameof(NotifyPremierService));
+                    _logger.LogError(exception: ex, message: "Request: {@body}", body);
                 }
                 throw;
             }
