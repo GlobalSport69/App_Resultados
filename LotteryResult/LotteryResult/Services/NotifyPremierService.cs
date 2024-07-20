@@ -2,10 +2,17 @@
 using Flurl.Http;
 using Hangfire;
 using LotteryResult.Data.Abstractions;
-using static System.Net.Mime.MediaTypeNames;
+using System.Globalization;
 
 namespace LotteryResult.Services
 {
+    public class PremicionPremierDto
+    {
+        public long lotteryId { get; set; }
+        public string number { get; set; }
+        public string date { get; set; }
+        public string? complement_number { get; set; }
+    }
     
     public enum NotifyType { 
         New,
@@ -17,19 +24,22 @@ namespace LotteryResult.Services
     public class NotifyPremierService : INotifyPremierService
     {
         private IUnitOfWork unitOfWork;
+        private ILogger<NotifyPremierService> _logger;
 
-        public NotifyPremierService(IUnitOfWork unitOfWork)
+        public NotifyPremierService(IUnitOfWork unitOfWork, ILogger<NotifyPremierService> logger)
         {
             this.unitOfWork = unitOfWork;
+            this._logger = logger;
         }
 
 
         public void Handler(List<long> result_ids, NotifyType type = NotifyType.New)
         {
-            BackgroundJob.Enqueue("notify_premier", () => LongTask(result_ids, type));
+            BackgroundJob.Enqueue("notify_premier", () => EnvioTelegram(result_ids, type));
+            BackgroundJob.Enqueue("notify_premier", () => Premiacion(result_ids, type));
         }
 
-        public async Task LongTask(List<long> result_ids, NotifyType type)
+        public async Task EnvioTelegram(List<long> result_ids, NotifyType type)
         {
             try
             {
@@ -64,25 +74,52 @@ namespace LotteryResult.Services
 
                 throw;
             }
+        }
+        public async Task Premiacion(List<long> result_ids, NotifyType type)
+        {
+            try
+            {
+                var results = await unitOfWork.ResultRepository.GetResultByIds(result_ids);
+                var found = results.GroupBy(x => x.Product.Name).FirstOrDefault();
+                if (found is null)
+                    return;
 
-            //var init = DateTime.Now;
-            //await Task.Delay(TimeSpan.FromSeconds(tick * 60));
-            //var end = DateTime.Now;
-            
-            //try
-            //{
-            //    using (StreamWriter writer = new StreamWriter("Archivo.txt", true))
-            //    {
-            //        writer.WriteLine("--------------------------------------");
-            //        writer.WriteLine("Escribiendo en el archivo..." + init);
-            //        writer.WriteLine("Escribiendo en el archivo..." + end);
-            //        writer.WriteLine("Escribiendo en el archivo..." + tick+" "+ (end - init).Seconds);
-            //    }
-            //}
-            //catch (IOException e)
-            //{
-            //    Console.WriteLine(e.Message);
-            //}
+                foreach (var item in found.Where(r => r.PremierId.HasValue))
+                {
+                    var number = new string(item.Result1.TakeWhile(c => c != ' ').ToArray());
+                    var date = DateOnly.ParseExact(item.Date, "dd-MM-yyyy", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd");
+
+                    var result = await "https://loteriadev.premierpluss.com/hook"
+                    .PostJsonAsync(new PremicionPremierDto
+                    {
+                        lotteryId = item.PremierId.Value,
+                        number = number == "00" ? number : int.Parse(number).ToString(),
+                        date = date,
+                        complement_number = null
+                    })
+                    .ReceiveString();
+
+
+                    using (_logger.BeginScope(new Dictionary<string, object>{
+                        { Serilog.Core.Constants.SourceContextPropertyName, typeof(NotifyPremierService).FullName }
+                    }))
+                    {
+                        _logger.LogInformation("Respuesta obtenida: {0}", result);
+                    }
+
+                    await Task.Delay(1000);
+                }
+            }
+            catch (FlurlHttpException ex)
+            {
+                using (_logger.BeginScope(new Dictionary<string, object>{
+                        { Serilog.Core.Constants.SourceContextPropertyName, typeof(NotifyPremierService).FullName }
+                    }))
+                {
+                    _logger.LogError(exception: ex, message: nameof(NotifyPremierService));
+                }
+                throw;
+            }
         }
     }
 }
