@@ -35,8 +35,7 @@ namespace LotteryResult.Services
 
         private Dictionary<string, string> hoursMap = new Dictionary<string, string>
         {
-            { "8:00 AM", "08:00 AM" },
-            { "9:00 AM", "09:00 AM" },
+            { "09:00 AM", "09:00 AM" },
             { "10:00 AM", "10:00 AM" },
             { "11:00 AM", "11:00 AM"},
             { "12:00 M", "12:00 PM" },
@@ -47,6 +46,73 @@ namespace LotteryResult.Services
             { "5:00 PM", "05:00 PM" },
             { "6:00 PM", "06:00 PM" },
             { "7:00 PM", "07:00 PM" }
+        };
+
+        private Dictionary<string, string> animals = new Dictionary<string, string>
+        {
+            ["0"] = "DELFIN",
+            ["00"] = "BALLENA",
+            ["01"] = "CARNERO",
+            ["02"] = "TORO",
+            ["03"] = "CIEMPIÉS",
+            ["04"] = "ALACRÁN",
+            ["05"] = "LEÓN",
+            ["06"] = "RANA",
+            ["07"] = "PERICO",
+            ["08"] = "RATÓN",
+            ["09"] = "ÁGUILA",
+            ["10"] = "TIGRE",
+            ["11"] = "GATO",
+            ["12"] = "CABALLO",
+            ["13"] = "MONO",
+            ["14"] = "PALOMA",
+            ["15"] = "ZORRO",
+            ["16"] = "OSO",
+            ["17"] = "PAVO",
+            ["18"] = "BURRO",
+            ["19"] = "CHIVO",
+            ["20"] = "COCHINO",
+            ["21"] = "GALLO",
+            ["22"] = "CAMELLO",
+            ["23"] = "CEBRA",
+            ["24"] = "IGUANA",
+            ["25"] = "GALLINA",
+            ["26"] = "VACA",
+            ["27"] = "PERRO",
+            ["28"] = "ZAMURO",
+            ["29"] = "ELEFANTE",
+            ["30"] = "CAIMÁN",
+            ["31"] = "LAPA",
+            ["32"] = "ARDILLA",
+            ["33"] = "PESCADO",
+            ["34"] = "VENADO",
+            ["35"] = "JIRAFA",
+            ["36"] = "CULEBRA",
+            ["37"] = "GARZA",
+            ["38"] = "CUCARACHA",
+            ["39"] = "GANSO",
+            ["40"] = "PELICANO",
+            ["41"] = "CHIGÜIRE",
+            ["42"] = "AVESTRUZ",
+            ["43"] = "HIPOPÓTAMO",
+            ["44"] = "MARIPOSA",
+            ["45"] = "FLAMINGO",
+            ["46"] = "PATO"
+        };
+        private Dictionary<string, string> sing = new Dictionary<string, string>
+        {
+            ["ARI"] = "ARIES",
+            ["TAU"] = "TAURO",
+            ["GEM"] = "GÉMINIS",
+            ["CAN"] = "CÁNCER",
+            ["LEO"] = "LEO",
+            ["VIR"] = "VIRGO",
+            ["LIB"] = "LIBRA",
+            ["ESC"] = "ESCORPIO",
+            ["SAG"] = "SAGITARIO",
+            ["CAP"] = "CAPRICORNIO",
+            ["ACU"] = "ACUARIO",
+            ["PIS"] = "PISCIS"
         };
 
         public CarruselMillonario(IUnitOfWork unitOfWork, ILogger<CarruselMillonario> logger, INotifyPremierService notifyPremierService)
@@ -60,15 +126,19 @@ namespace LotteryResult.Services
         {
             try
             {
-                DateTime venezuelaNow = DateTime.Now;
+                var venezuelaNow = DateTime.Now;
 
-                var loginResponse = await "https://carruselmillonario.com/juegos/api/getToken.php"
+                var loginResponse2 = await "https://carruselmillonario.com/juegos/api/getToken.php"
                     .PostJsonAsync(new
                     {
                         identidad = "plustaquilla",
                         credencial = "123123",
+                        taquilla = 1769,
+                        serial = "Integracion Premier"
                     })
-                    .ReceiveJson<JObject>();
+                    .ReceiveString();
+                //.ReceiveJson<JObject>();
+                var loginResponse = JObject.Parse(loginResponse2);
                 if (!loginResponse.ContainsKey("token") || string.IsNullOrEmpty(loginResponse.Value<string>("token")))
                 {
                     throw new Exception("Falta token "+ loginResponse);
@@ -83,7 +153,7 @@ namespace LotteryResult.Services
                     })
                     .ReceiveJson<CarruselMResultsResponseDto>();
 
-                if (!resultResponse.result.Any())
+                if (!resultResponse.result.Where(x => !string.IsNullOrEmpty(x.numero)).Any())
                 {
                     _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(LaGranjitaOfficial));
                     return;
@@ -93,7 +163,7 @@ namespace LotteryResult.Services
                     .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
-                var newResult = resultResponse.result.SelectMany(item =>
+                var newResult = resultResponse.result.Where(x => !string.IsNullOrEmpty(x.numero)).SelectMany(item =>
                 {
                     var time = item.sorteo.Replace("Carrusel M", "").Trim().ToUpper();
 
@@ -104,9 +174,8 @@ namespace LotteryResult.Services
 
                     return numbers.Select((x, i) =>
                     {
-                        var animal = complements[i].Capitalize();
                         var number = x;
-                        var resultado = i < 2 ? (number + " " + animal) : complements[i];
+                        var resultado = i < 2 ? (number + " " + (animals[number]).Capitalize()) : sing[complements[i]];
 
                         return new Result
                         {
