@@ -89,10 +89,15 @@ namespace LotteryResult.Services
                 {
                     var number = new string(item.Result1.TakeWhile(c => c != ' ').ToArray());
                     var date = DateOnly.ParseExact(item.Date, "dd-MM-yyyy", CultureInfo.InvariantCulture).ToString("yyyy-MM-dd");
+
+                    var animals = new int[] { (int)ProductTypeEnum.ANIMALITOS, (int)ProductTypeEnum.ANIMALES77 };
+                    if (animals.Contains(item.ProductTypeId.Value))
+                        number = number == "00" ? number : int.Parse(number).ToString();
+
                     body = new PremicionPremierDto
                     {
                         lotteryId = item.PremierId.Value,
-                        number = number == "00" ? number : int.Parse(number).ToString(),
+                        number = number,
                         date = date,
                         complement_number = null
                     };
