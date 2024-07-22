@@ -2,6 +2,7 @@
 using Flurl.Http;
 using Hangfire;
 using LotteryResult.Data.Abstractions;
+using LotteryResult.Enum;
 using System.Globalization;
 
 namespace LotteryResult.Services
