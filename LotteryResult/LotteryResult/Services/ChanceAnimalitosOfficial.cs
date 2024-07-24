@@ -128,206 +128,202 @@ namespace LotteryResult.Services
         }
 
         private Animal GetAnimalLabelFromNumber(string number) {
-            var Animales = new ObservableCollection<Animal>()
-            {
-                new Animal()
+            var animales = new Dictionary<string, Animal> {
+                ["37"] = new Animal()
                 {
-                    Number = "37",
+                    Number = "0",
                     Name = "DELFIN",
                 },
-                new Animal()
+                ["38"] = new Animal()
                 {
-                    Number = "38",
+                    Number = "00",
                     Name = "BALLENA",
                 },
-                new Animal()
+                ["01"] = new Animal()
                 {
                     Number = "01",
                     Name = "CARNERO",
                 },
-                new Animal()
+
+                ["02"] = new Animal()
                 {
                     Number = "02",
                     Name = "TORO",
                 },
-                new Animal()
+                ["03"] = new Animal()
                 {
                     Number = "03",
                     Name = "CIEMPIÉS",
                 },
-                new Animal()
+                ["04"] = new Animal()
                 {
                     Number = "04",
                     Name = "ALACRÁN",
                 },
-                new Animal()
+                ["05"] = new Animal()
                 {
                     Number = "05",
                     Name = "LEÓN",
                 },
-                new Animal()
+                ["06"] = new Animal()
                 {
                     Number = "06",
                     Name = "RANA",
                 },
-                new Animal()
+                ["07"] = new Animal()
                 {
                     Number = "07",
                     Name = "PERICO",
                 },
-                new Animal()
+                ["08"] = new Animal()
                 {
                     Number = "08",
                     Name = "RATÓN",
                 },
-                new Animal()
+                ["09"] = new Animal()
                 {
                     Number = "09",
                     Name = "ÁGUILA",
                 },
-                new Animal()
+                ["10"] = new Animal()
                 {
                     Number = "10",
                     Name = "TIGRE",
                 },
-                new Animal()
+                ["11"] = new Animal()
                 {
                     Number = "11",
                     Name = "GATO",
                 },
-                new Animal()
+                ["12"] = new Animal()
                 {
                     Number = "12",
                     Name = "CABALLO",
                 },
-                new Animal()
+                ["13"] = new Animal()
                 {
                     Number = "13",
                     Name = "MONO",
                 },
-                new Animal()
+                ["14"] = new Animal()
                 {
                     Number = "14",
                     Name = "PALOMA",
                 },
-                new Animal()
+                ["15"] = new Animal()
                 {
                     Number = "15",
                     Name = "ZORRO",
                 },
-                new Animal()
+                ["16"] = new Animal()
                 {
                     Number = "16",
                     Name = "OSO",
                 },
-                new Animal()
+                ["17"] = new Animal()
                 {
                     Number = "17",
                     Name = "PAVO",
                 },
-                new Animal()
+                ["18"] = new Animal()
                 {
                     Number = "18",
                     Name = "BURRO",
                 },
-                new Animal()
+                ["19"] = new Animal()
                 {
                     Number = "19",
                     Name = "CHIVO",
                 },
-                new Animal()
+                ["20"] = new Animal()
                 {
                     Number = "20",
                     Name = "COCHINO",
                 },
-                new Animal()
+                ["21"] = new Animal()
                 {
                     Number = "21",
                     Name = "GALLO",
                 },
-                new Animal()
+                ["22"] = new Animal()
                 {
                     Number = "22",
                     Name = "CAMELLO",
                 },
-                new Animal()
+                ["23"] = new Animal()
                 {
                     Number = "23",
                     Name = "CEBRA",
                 },
-                new Animal()
+                ["24"] = new Animal()
                 {
                     Number = "24",
                     Name = "IGUANA",
                 },
-                new Animal()
+                ["25"] = new Animal()
                 {
                     Number = "25",
                     Name = "GALLINA",
                 },
-                new Animal()
+                ["26"] = new Animal()
                 {
                     Number = "26",
                     Name = "VACA",
                 },
-                new Animal()
+                ["27"] = new Animal()
                 {
                     Number = "27",
                     Name = "PERRO",
                 },
-                new Animal()
+                ["28"] = new Animal()
                 {
                     Number = "28",
                     Name = "ZAMURO",
                 },
-                new Animal()
+                ["29"] = new Animal()
                 {
                     Number = "29",
                     Name = "ELEFANTE",
                 },
-                new Animal()
+                ["30"] = new Animal()
                 {
                     Number = "30",
                     Name = "CAIMÁN",
                 },
-                new Animal()
+                ["31"] = new Animal()
                 {
                     Number = "31",
                     Name = "LAPA",
                 },
-                new Animal()
+                ["32"] = new Animal()
                 {
                     Number = "32",
                     Name = "ARDILLA",
                 },
-                new Animal()
+                ["33"] = new Animal()
                 {
                     Number = "33",
                     Name = "PESCADO",
                 },
-                new Animal()
+                ["34"] = new Animal()
                 {
                     Number = "34",
                     Name = "VENADO",
                 },
-                new Animal()
+                ["35"] = new Animal()
                 {
                     Number = "35",
                     Name = "JIRAFA",
                 },
-                new Animal()
+                ["36"] = new Animal()
                 {
                     Number = "36",
                     Name = "CULEBRA",
                 },
             };
-
-            var found = Animales.FirstOrDefault(x => x.Number == number);
-            if (found is null)
-            {
-                throw new Exception("Numero de animal invalido =>>> "+ number);
-            }
-            return found;
+            if (!animales.ContainsKey(number))
+                throw new Exception("Numero de animal invalido =>>> " + number);
+            return animales[number];
         }
     }
 
