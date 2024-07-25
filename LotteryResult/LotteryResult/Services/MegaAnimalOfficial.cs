@@ -59,7 +59,7 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://megaanimal40.com/resultados/mega_animal40/"+ venezuelaNow.ToString("yyyy-MM-dd"), 
+                await page.GoToAsync("https://megaanimal40.com/resultados/mega_animal40/"+ venezuelaNow.ToString("yyyy-MM-dd")+"/", 
                     waitUntil: WaitUntilNavigation.Networkidle2);
 
                 await page.WaitForFunctionAsync(@"() => {
