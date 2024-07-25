@@ -100,8 +100,8 @@ namespace LotteryResult.Services
                 var newResult = response.Select(item =>
                 {
                     var time = item.Time.Trim().ToUpper();
-                    var number = item.Result.TakeWhile(c => c != ' ');
-                    var animal = item.Result.Substring(number.Count(), item.Result.Count() - number.Count());
+                    var number = new String(item.Result.TakeWhile(c => c != ' ').ToArray());
+                    var animal = item.Result.Substring(number.Length, item.Result.Length - number.Length);
                     var IsMega = bool.Parse(item.Complement);
                     var premierId = lotteries[time];
 
