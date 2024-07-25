@@ -71,6 +71,7 @@ namespace LotteryResult.Services
                 });
 
                 var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
+                    window.scrollTo(0, document.body.scrollHeight);
                     let r = [...document.querySelectorAll('#ultimos_resultados .single_portfolio_content1')]
                     .map(x => {
                         let [_, hourLabel] = x.querySelectorAll('h6')
