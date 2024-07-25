@@ -31,9 +31,9 @@ namespace LotteryResult.Services
 
         private Dictionary<string, long> TripleC = new Dictionary<string, long>
         {
-            { "01:00 PM", 148 },
-            { "04:30 PM", 166 },
-            { "07:00 PM", 151 }
+            { "12:45 PM", 148 },
+            { "04:45 PM", 166 },
+            { "07:05 PM", 151 }
         };
 
         public TripleZuliaOfficial(IUnitOfWork unitOfWork, ILogger<TripleZuliaOfficial> logger, INotifyPremierService notifyPremierService)
