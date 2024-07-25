@@ -48,56 +48,56 @@ namespace LotteryResult.Services
             { "7:00 PM", "07:00 PM" }
         };
 
-        private Dictionary<string, string> animals = new Dictionary<string, string>
+        private Dictionary<string, Tuple<string, string>> animals = new Dictionary<string, Tuple<string, string>>
         {
-            ["0"] = "DELFIN",
-            ["00"] = "BALLENA",
-            ["01"] = "CARNERO",
-            ["02"] = "TORO",
-            ["03"] = "CIEMPIÉS",
-            ["04"] = "ALACRÁN",
-            ["05"] = "LEÓN",
-            ["06"] = "RANA",
-            ["07"] = "PERICO",
-            ["08"] = "RATÓN",
-            ["09"] = "ÁGUILA",
-            ["10"] = "TIGRE",
-            ["11"] = "GATO",
-            ["12"] = "CABALLO",
-            ["13"] = "MONO",
-            ["14"] = "PALOMA",
-            ["15"] = "ZORRO",
-            ["16"] = "OSO",
-            ["17"] = "PAVO",
-            ["18"] = "BURRO",
-            ["19"] = "CHIVO",
-            ["20"] = "COCHINO",
-            ["21"] = "GALLO",
-            ["22"] = "CAMELLO",
-            ["23"] = "CEBRA",
-            ["24"] = "IGUANA",
-            ["25"] = "GALLINA",
-            ["26"] = "VACA",
-            ["27"] = "PERRO",
-            ["28"] = "ZAMURO",
-            ["29"] = "ELEFANTE",
-            ["30"] = "CAIMÁN",
-            ["31"] = "LAPA",
-            ["32"] = "ARDILLA",
-            ["33"] = "PESCADO",
-            ["34"] = "VENADO",
-            ["35"] = "JIRAFA",
-            ["36"] = "CULEBRA",
-            ["37"] = "GARZA",
-            ["38"] = "CUCARACHA",
-            ["39"] = "GANSO",
-            ["40"] = "PELICANO",
-            ["41"] = "CHIGÜIRE",
-            ["42"] = "AVESTRUZ",
-            ["43"] = "HIPOPÓTAMO",
-            ["44"] = "MARIPOSA",
-            ["45"] = "FLAMINGO",
-            ["46"] = "PATO"
+            ["47"] = new Tuple<string, string>("0", "DELFIN"),
+            ["48"] = new Tuple<string, string>("48", "BALLENA"),
+            ["01"] = new Tuple<string, string>("01", "CARNERO"),
+            ["02"] = new Tuple<string, string>("02", "TORO"),
+            ["03"] = new Tuple<string, string>("03", "CIEMPIÉS"),
+            ["04"] = new Tuple<string, string>("04", "ALACRÁN"),
+            ["05"] = new Tuple<string, string>("05", "LEÓN"),
+            ["06"] = new Tuple<string, string>("06", "RANA"),
+            ["07"] = new Tuple<string, string>("07", "PERICO"),
+            ["08"] = new Tuple<string, string>("08", "RATÓN"),
+            ["09"] = new Tuple<string, string>("09", "ÁGUILA"),
+            ["10"] = new Tuple<string, string>("10", "TIGRE"),
+            ["11"] = new Tuple<string, string>("11", "GATO"),
+            ["12"] = new Tuple<string, string>("12", "CABALLO"),
+            ["13"] = new Tuple<string, string>("13", "MONO"),
+            ["14"] = new Tuple<string, string>("14", "PALOMA"),
+            ["15"] = new Tuple<string, string>("15", "ZORRO"),
+            ["16"] = new Tuple<string, string>("16", "OSO"),
+            ["17"] = new Tuple<string, string>("17", "PAVO"),
+            ["18"] = new Tuple<string, string>("18", "BURRO"),
+            ["19"] = new Tuple<string, string>("19", "CHIVO"),
+            ["20"] = new Tuple<string, string>("20", "COCHINO"),
+            ["21"] = new Tuple<string, string>("21", "GALLO"),
+            ["22"] = new Tuple<string, string>("22", "CAMELLO"),
+            ["23"] = new Tuple<string, string>("23", "CEBRA"),
+            ["24"] = new Tuple<string, string>("24", "IGUANA"),
+            ["25"] = new Tuple<string, string>("25", "GALLINA"),
+            ["26"] = new Tuple<string, string>("26", "VACA"),
+            ["27"] = new Tuple<string, string>("27", "PERRO"),
+            ["28"] = new Tuple<string, string>("28", "ZAMURO"),
+            ["29"] = new Tuple<string, string>("29", "ELEFANTE"),
+            ["30"] = new Tuple<string, string>("30", "CAIMÁN"),
+            ["31"] = new Tuple<string, string>("31", "LAPA"),
+            ["32"] = new Tuple<string, string>("32", "ARDILLA"),
+            ["33"] = new Tuple<string, string>("33", "PESCADO"),
+            ["34"] = new Tuple<string, string>("34", "VENADO"),
+            ["35"] = new Tuple<string, string>("35", "JIRAFA"),
+            ["36"] = new Tuple<string, string>("36", "CULEBRA"),
+            ["37"] = new Tuple<string, string>("37", "GARZA"),
+            ["38"] = new Tuple<string, string>("38", "CUCARACHA"),
+            ["39"] = new Tuple<string, string>("39", "GANSO"),
+            ["40"] = new Tuple<string, string>("40", "PELICANO"),
+            ["41"] = new Tuple<string, string>("41", "CHIGÜIRE"),
+            ["42"] = new Tuple<string, string>("42", "AVESTRUZ"),
+            ["43"] = new Tuple<string, string>("43", "HIPOPÓTAMO"),
+            ["44"] = new Tuple<string, string>("44", "MARIPOSA"),
+            ["45"] = new Tuple<string, string>("45", "FLAMINGO"),
+            ["46"] = new Tuple<string, string>("46", "PATO")
         };
         private Dictionary<string, string> sing = new Dictionary<string, string>
         {
@@ -137,7 +137,6 @@ namespace LotteryResult.Services
                         serial = "Integracion Premier"
                     })
                     .ReceiveString();
-                //.ReceiveJson<JObject>();
                 var loginResponse = JObject.Parse(loginResponse2);
                 if (!loginResponse.ContainsKey("token") || string.IsNullOrEmpty(loginResponse.Value<string>("token")))
                 {
@@ -174,8 +173,16 @@ namespace LotteryResult.Services
 
                     return numbers.Select((x, i) =>
                     {
-                        var number = x;
-                        var resultado = i < 2 ? (number + " " + (animals[number]).Capitalize()) : sing[complements[i]];
+                        string resultado = "";
+                        if (i < 2)
+                        {
+                            var number = animals[x].Item1;
+                            var animal = animals[x].Item2;
+                            resultado = number + " " + animal.Capitalize();
+                        }
+                        else {
+                            resultado = sing[complements[i]];
+                        }
 
                         return new Result
                         {
