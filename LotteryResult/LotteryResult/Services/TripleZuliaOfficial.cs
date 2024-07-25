@@ -130,7 +130,7 @@ namespace LotteryResult.Services
                         premierId = TripleB[time];
                     }
 
-                    if (item.Sorteo == "Zodiacal Caracas")
+                    if (item.Sorteo == "Zodiaco del Zulia")
                     {
                         premierId = TripleC[time];
                     }
