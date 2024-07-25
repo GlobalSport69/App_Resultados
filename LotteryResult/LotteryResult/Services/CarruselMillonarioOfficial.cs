@@ -155,7 +155,7 @@ namespace LotteryResult.Services
 
                 if (!resultResponse.result.Where(x => !string.IsNullOrEmpty(x.numero)).Any())
                 {
-                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(LaGranjitaOfficial));
+                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(CarruselMillonario));
                     return;
                 }
 

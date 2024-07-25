@@ -28,13 +28,15 @@ namespace LotteryResult.Services
         private LottoActivoRDInternacionalOfficial lottoActivoRDInternacionalOfficial;
         private TrioActivoOfficial trioActivoOfficial;
         private CarruselMillonario carruselMillonario;
+        private MegaAnimalOfficial megaAnimalOfficial;
         public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial,
             TripleCalienteOfficial tripleCalienteOfficial, ElRucoTriplesBet elRucoTriplesBet, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial,
             SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial,
             LaGranjitaTerminalOfficial laGranjitaTerminalOfficial, LaRicachonaAnimalitosOfficial laRicachonaAnimalitosOfficial, TripleBombaOfficial tripleBombaOfficial,
             ChanceAnimalitosOfficial chanceAnimalitosOfficial, TripleChanceOfficial tripleChanceOfficial,
-            TripleTachiraOfficial tripleTachiraOfficial,
-            LottoActivoOfficial lottoActivoOfficial, RuletaActivaOfficial ruletaActivaOfficial, GranjaPlusOfficial granjaPlusOfficial, LottoActivoRDInternacionalOfficial lottoActivoRDInternacionalOfficial, TrioActivoOfficial trioActivoOfficial, CarruselMillonario carruselMillonario)
+            TripleTachiraOfficial tripleTachiraOfficial, LottoActivoOfficial lottoActivoOfficial, RuletaActivaOfficial ruletaActivaOfficial, GranjaPlusOfficial granjaPlusOfficial, 
+            LottoActivoRDInternacionalOfficial lottoActivoRDInternacionalOfficial, TrioActivoOfficial trioActivoOfficial, CarruselMillonario carruselMillonario, 
+            MegaAnimalOfficial megaAnimalOfficial)
         {
             _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
 
@@ -61,6 +63,7 @@ namespace LotteryResult.Services
             this.lottoActivoRDInternacionalOfficial = lottoActivoRDInternacionalOfficial;
             this.trioActivoOfficial = trioActivoOfficial;
             this.carruselMillonario = carruselMillonario;
+            this.megaAnimalOfficial = megaAnimalOfficial;
         }
 
         public void AddJob(int product_id, string job_id, string cron_expression)
@@ -176,9 +179,15 @@ namespace LotteryResult.Services
             {
                 job = trioActivoOfficial;
             }
+
             if (product_id == CarruselMillonario.productID)
             {
                 job = carruselMillonario;
+            }
+            
+            if (product_id == MegaAnimalOfficial.productID)
+            {
+                job = megaAnimalOfficial;
             }
 
             if (job != null)
