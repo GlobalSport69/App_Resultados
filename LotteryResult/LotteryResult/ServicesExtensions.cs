@@ -30,6 +30,7 @@ namespace LotteryResult
             services.AddScoped<LottoActivoRDInternacionalOfficial>();
             services.AddScoped<TrioActivoOfficial>();
             services.AddScoped<CarruselMillonario>();
+            services.AddScoped<MegaAnimalOfficial>();
 
             services.AddScoped<INotifyPremierService, NotifyPremierService>();
             services.AddScoped<ProviderProductMapper>();
