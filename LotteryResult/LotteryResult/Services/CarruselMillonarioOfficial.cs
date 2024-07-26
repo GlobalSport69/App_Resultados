@@ -51,7 +51,7 @@ namespace LotteryResult.Services
         private Dictionary<string, Tuple<string, string>> animals = new Dictionary<string, Tuple<string, string>>
         {
             ["47"] = new Tuple<string, string>("0", "DELFIN"),
-            ["48"] = new Tuple<string, string>("48", "BALLENA"),
+            ["00"] = new Tuple<string, string>("00", "BALLENA"),
             ["01"] = new Tuple<string, string>("01", "CARNERO"),
             ["02"] = new Tuple<string, string>("02", "TORO"),
             ["03"] = new Tuple<string, string>("03", "CIEMPIÉS"),
