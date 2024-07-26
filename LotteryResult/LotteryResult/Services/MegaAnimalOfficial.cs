@@ -70,8 +70,13 @@ namespace LotteryResult.Services
                     PollingInterval = 1000,
                 });
 
-                var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
+                await page.EvaluateFunctionAsync(@"() => {
                     window.scrollTo(0, document.body.scrollHeight);
+                }");
+
+                await Task.Delay(500);
+
+                var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
                     let r = [...document.querySelectorAll('#ultimos_resultados .single_portfolio_content1')]
                     .map(x => {
                         let [_, hourLabel] = x.querySelectorAll('h6')
