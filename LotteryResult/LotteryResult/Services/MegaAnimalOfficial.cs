@@ -74,7 +74,7 @@ namespace LotteryResult.Services
                     window.scrollTo(0, document.body.scrollHeight);
                 }");
 
-                await Task.Delay(500);
+                await Task.Delay(1000);
 
                 var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
                     let r = [...document.querySelectorAll('#ultimos_resultados .single_portfolio_content1')]
@@ -106,7 +106,7 @@ namespace LotteryResult.Services
                 {
                     var time = item.Time.Trim().ToUpper();
                     var number = new String(item.Result.TakeWhile(c => c != ' ').ToArray());
-                    var animal = item.Result.Substring(number.Length, item.Result.Length - number.Length);
+                    var animal = item.Result.Substring(number.Length, item.Result.Length - number.Length).Trim();
                     var IsMega = bool.Parse(item.Complement);
                     var premierId = lotteries[time];
 
