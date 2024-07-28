@@ -54,11 +54,14 @@ namespace LotteryResult.Services
                     let r = [...document.querySelectorAll('#resultados > div')]
                         .map(row =>{ 
                           const spanElement = row.querySelector('span'); 
+                          if(!spanElement){
+                            return spanElement;
+                          }
                           return { 
                             result: spanElement.innerText,
                             time: row.querySelector('p').innerText.replace('TRIO ACTIVO', '').trim(),
                           }
-                        })
+                        }).filter(r => r != null);
                     return r;
                 }");
 
