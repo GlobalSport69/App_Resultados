@@ -9,6 +9,13 @@ namespace LotteryResult.Controllers
 {
     public class AuthController : Controller
     {
+        private IConfiguration _configuration;
+
+        public AuthController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         public IActionResult Login()
         {
             var user = HttpContext.User;
@@ -38,8 +45,9 @@ namespace LotteryResult.Controllers
             {
                 return View(request);
             }
-
-            if (request.UserName != "admin" && request.Password != "admin")
+            
+            var pass = _configuration.GetValue<string>("AdminPass");
+            if (request.UserName != "admin" || request.Password != pass)
             {
                 ModelState.AddModelError("_", "Correo o contraseña invalidos");
                 return View(request);

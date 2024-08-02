@@ -26,11 +26,13 @@ namespace LotteryResult.Services
     {
         private IUnitOfWork unitOfWork;
         private ILogger<NotifyPremierService> _logger;
+        private IConfiguration _configuration;
 
-        public NotifyPremierService(IUnitOfWork unitOfWork, ILogger<NotifyPremierService> logger)
+        public NotifyPremierService(IUnitOfWork unitOfWork, ILogger<NotifyPremierService> logger, IConfiguration configuration)
         {
             this.unitOfWork = unitOfWork;
             this._logger = logger;
+            _configuration = configuration;
         }
 
 
@@ -48,8 +50,8 @@ namespace LotteryResult.Services
                 var found = results.GroupBy(x => x.Product.Name).FirstOrDefault();
                 if (found is null)
                     return;
-
-                var message = string.Empty;
+                //var message = string.Empty;
+                var message = "PRODUCCION\n";
                 if (type == NotifyType.New)
                     message += "NUEVOS\n";
                 else 
@@ -82,7 +84,15 @@ namespace LotteryResult.Services
             try
             {
                 var results = await unitOfWork.ResultRepository.GetResultByIds(result_ids);
-                var found = results.GroupBy(x => x.Product.Name).FirstOrDefault();
+
+                // la linea final es esta
+                //var found = results.GroupBy(x => x.Product.Name).FirstOrDefault();
+
+                // esta line es provicional
+                var tripleChanceID = 17;
+                var found = results.GroupBy(x => x.Product.Id).FirstOrDefault(g => g.Key == tripleChanceID);
+                
+                
                 if (found is null)
                     return;
 
@@ -102,7 +112,11 @@ namespace LotteryResult.Services
                         date = date,
                         complement_number = null
                     };
-                    var result = await "https://loteriadev.premierpluss.com/hook"
+                    var hookUrl = _configuration.GetSection("PremierHookUrl").Value ?? string.Empty;
+                    if (string.IsNullOrEmpty(hookUrl))
+                        throw new ArgumentException("PremierHookUrl is empty");
+
+                    var result = await hookUrl
                     .PostJsonAsync(body)
                     .ReceiveString();
 
