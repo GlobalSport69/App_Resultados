@@ -20,6 +20,8 @@ services:
       - ./bk.sql:/docker-entrypoint-initdb.d/02_file.sql
     ports:
       - "5444:5432"
+    networks:
+      - loki
 
   app_dev:
     image: "app_resultados"
@@ -34,6 +36,8 @@ services:
         ARCH: $ARCH
     volumes:
       - ./app/logs:/src/logs
+    networks:
+      - loki
     depends_on:
       - app_db_dev
     ports:
