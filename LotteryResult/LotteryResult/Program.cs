@@ -97,7 +97,10 @@ app.UseStaticFiles();
 //app.UseHangfireDashboard();
 var options = new DashboardOptions()
 {
-    Authorization = new[] { new MyHangfireAuthorizationFilter() }
+    Authorization = new[] { new MyHangfireAuthorizationFilter() },
+    // bajo prueba
+    IgnoreAntiforgeryToken = true
+    // bajo prueba
 };
 
 app.UseRouting();
