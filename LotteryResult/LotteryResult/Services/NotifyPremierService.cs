@@ -133,11 +133,13 @@ namespace LotteryResult.Services
             }
             catch (FlurlHttpException ex)
             {
+                var response = ex.GetResponseStringAsync();
+
                 using (_logger.BeginScope(new Dictionary<string, object>{
                         { Serilog.Core.Constants.SourceContextPropertyName, typeof(NotifyPremierService).FullName }
                     }))
                 {
-                    _logger.LogError(exception: ex, message: "Request: {@body}", body);
+                    _logger.LogError(exception: ex, message: "Request: {@body} Response: {response}", body, response);
                 }
                 throw;
             }
