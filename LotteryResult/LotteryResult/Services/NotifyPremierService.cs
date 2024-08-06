@@ -86,13 +86,13 @@ namespace LotteryResult.Services
                 var results = await unitOfWork.ResultRepository.GetResultByIds(result_ids);
 
                 // la linea final es esta
-                //var found = results.GroupBy(x => x.Product.Name).FirstOrDefault();
+                var found = results.GroupBy(x => x.Product.Name).FirstOrDefault();
 
                 // esta line es provicional
-                var tripleChanceID = 17;
-                var found = results.GroupBy(x => x.Product.Id).FirstOrDefault(g => g.Key == tripleChanceID);
-                
-                
+                //var tripleChanceID = 17;
+                //var found = results.GroupBy(x => x.Product.Id).FirstOrDefault(g => g.Key == tripleChanceID);
+
+
                 if (found is null)
                     return;
 
