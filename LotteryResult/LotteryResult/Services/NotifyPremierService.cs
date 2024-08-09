@@ -14,7 +14,7 @@ namespace LotteryResult.Services
         public string date { get; set; }
         public string? complement_number { get; set; }
     }
-    
+
     public enum NotifyType { 
         New,
         Update
@@ -39,7 +39,7 @@ namespace LotteryResult.Services
         public void Handler(List<long> result_ids, NotifyType type = NotifyType.New)
         {
             BackgroundJob.Enqueue("notify_premier", () => EnvioTelegram(result_ids, type));
-            BackgroundJob.Enqueue("notify_premier", () => Premiacion(result_ids, type));
+            //BackgroundJob.Enqueue("notify_premier", () => Premiacion(result_ids, type));
         }
 
         public async Task EnvioTelegram(List<long> result_ids, NotifyType type)
@@ -62,7 +62,7 @@ namespace LotteryResult.Services
                 {
                     message += "Resultado: " + item.Result1 + "\n" + "Hora: " + item.Time + "\n" + "Sorteo: " + (string.IsNullOrEmpty(item.Sorteo) ? "N/A" : item.Sorteo) + "\n";
                 }
-
+                return;
                 var result = await "https://api.telegram.org/bot6844458606:AAGYYpQDieh-sv-gyjGXBVd1mhQoiTqQ-2I/sendMessage"
                     .SetQueryParams(new {
                         chat_id= "-1002082761148",
@@ -77,7 +77,7 @@ namespace LotteryResult.Services
 
                 throw;
             }
-        }
+        } 
         public async Task Premiacion(List<long> result_ids, NotifyType type)
         {
             PremicionPremierDto body = null;
@@ -121,7 +121,6 @@ namespace LotteryResult.Services
                     .WithHeader("Referer", hookUrl)
                     .PostJsonAsync(body)
                     .ReceiveString();
-
 
                     using (_logger.BeginScope(new Dictionary<string, object>{
                         { Serilog.Core.Constants.SourceContextPropertyName, typeof(NotifyPremierService).FullName }

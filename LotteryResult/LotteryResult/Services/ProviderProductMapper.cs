@@ -30,6 +30,7 @@ namespace LotteryResult.Services
         private CarruselMillonario carruselMillonario;
         private MegaAnimalOfficial megaAnimalOfficial;
         private CazalotonOfficial cazalotonOfficial;
+        private GranjaMillonariaOfficial granjaMillonariaOfficial;
         public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial,
             TripleCalienteOfficial tripleCalienteOfficial, ElRucoTriplesBet elRucoTriplesBet, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial,
             SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial,
@@ -37,7 +38,7 @@ namespace LotteryResult.Services
             ChanceAnimalitosOfficial chanceAnimalitosOfficial, TripleChanceOfficial tripleChanceOfficial,
             TripleTachiraOfficial tripleTachiraOfficial, LottoActivoOfficial lottoActivoOfficial, RuletaActivaOfficial ruletaActivaOfficial, GranjaPlusOfficial granjaPlusOfficial,
             LottoActivoRDInternacionalOfficial lottoActivoRDInternacionalOfficial, TrioActivoOfficial trioActivoOfficial, CarruselMillonario carruselMillonario,
-            MegaAnimalOfficial megaAnimalOfficial, CazalotonOfficial cazalotonOfficial)
+            MegaAnimalOfficial megaAnimalOfficial, CazalotonOfficial cazalotonOfficial, GranjaMillonariaOfficial granjaMillonariaOfficial)
         {
             _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
 
@@ -66,6 +67,7 @@ namespace LotteryResult.Services
             this.carruselMillonario = carruselMillonario;
             this.megaAnimalOfficial = megaAnimalOfficial;
             this.cazalotonOfficial = cazalotonOfficial;
+            this.granjaMillonariaOfficial = granjaMillonariaOfficial;
         }
 
         public void AddJob(int product_id, string job_id, string cron_expression)
@@ -195,6 +197,11 @@ namespace LotteryResult.Services
             if (product_id == CazalotonOfficial.productID)
             {
                 job = cazalotonOfficial;
+            }
+            
+            if (product_id == GranjaMillonariaOfficial.productID)
+            {
+                job = granjaMillonariaOfficial;
             }
 
             if (job != null)

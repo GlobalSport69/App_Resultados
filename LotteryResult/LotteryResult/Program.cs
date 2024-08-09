@@ -63,11 +63,13 @@ builder.Host.UseSerilog((hostContext, services, configuration) =>
     //configuration.WriteTo.Console(outputTemplate: "{Timestamp:dd-MM-yyyy HH:mm:ss} [{Level:u3}] [{ThreadId}] {Message}{NewLine}{Exception}");
 
     configuration
-    .WriteTo.GrafanaLoki(builder.Configuration.GetSection("Serilog:LokiUrl").Value,
-                new List<LokiLabel> { 
-                    new() { Key = "app", Value = "info" } 
-                },
-            restrictedToMinimumLevel: LogEventLevel.Information)
+    .WriteTo.Logger(lc => lc
+            .Filter.ByExcluding(Matching.FromSource<NotifyPremierService>())
+            .WriteTo.GrafanaLoki(builder.Configuration.GetSection("Serilog:LokiUrl").Value,
+            new List<LokiLabel> {
+                new() { Key = "app", Value = "info" }
+            },
+            restrictedToMinimumLevel: LogEventLevel.Information))
     .WriteTo.GrafanaLoki(builder.Configuration.GetSection("Serilog:LokiUrl").Value,
              new List<LokiLabel> {
                 new() { Key = "app", Value = "error" }
