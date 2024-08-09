@@ -31,6 +31,7 @@ namespace LotteryResult.Services
         private MegaAnimalOfficial megaAnimalOfficial;
         private CazalotonOfficial cazalotonOfficial;
         private GranjaMillonariaOfficial granjaMillonariaOfficial;
+        private GranjazoOfficial granjazoOfficial;
         public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial,
             TripleCalienteOfficial tripleCalienteOfficial, ElRucoTriplesBet elRucoTriplesBet, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial,
             SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial,
@@ -38,7 +39,7 @@ namespace LotteryResult.Services
             ChanceAnimalitosOfficial chanceAnimalitosOfficial, TripleChanceOfficial tripleChanceOfficial,
             TripleTachiraOfficial tripleTachiraOfficial, LottoActivoOfficial lottoActivoOfficial, RuletaActivaOfficial ruletaActivaOfficial, GranjaPlusOfficial granjaPlusOfficial,
             LottoActivoRDInternacionalOfficial lottoActivoRDInternacionalOfficial, TrioActivoOfficial trioActivoOfficial, CarruselMillonario carruselMillonario,
-            MegaAnimalOfficial megaAnimalOfficial, CazalotonOfficial cazalotonOfficial, GranjaMillonariaOfficial granjaMillonariaOfficial)
+            MegaAnimalOfficial megaAnimalOfficial, CazalotonOfficial cazalotonOfficial, GranjaMillonariaOfficial granjaMillonariaOfficial, GranjazoOfficial granjazoOfficial)
         {
             _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
 
@@ -68,6 +69,7 @@ namespace LotteryResult.Services
             this.megaAnimalOfficial = megaAnimalOfficial;
             this.cazalotonOfficial = cazalotonOfficial;
             this.granjaMillonariaOfficial = granjaMillonariaOfficial;
+            this.granjazoOfficial = granjazoOfficial;
         }
 
         public void AddJob(int product_id, string job_id, string cron_expression)
@@ -202,6 +204,11 @@ namespace LotteryResult.Services
             if (product_id == GranjaMillonariaOfficial.productID)
             {
                 job = granjaMillonariaOfficial;
+            }
+
+            if (product_id == GranjazoOfficial.productID)
+            {
+                job = granjazoOfficial;
             }
 
             if (job != null)
