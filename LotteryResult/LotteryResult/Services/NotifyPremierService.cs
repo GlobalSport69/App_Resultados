@@ -39,7 +39,7 @@ namespace LotteryResult.Services
         public void Handler(List<long> result_ids, NotifyType type = NotifyType.New)
         {
             BackgroundJob.Enqueue("notify_premier", () => EnvioTelegram(result_ids, type));
-            //BackgroundJob.Enqueue("notify_premier", () => Premiacion(result_ids, type));
+            BackgroundJob.Enqueue("notify_premier", () => Premiacion(result_ids, type));
         }
 
         public async Task EnvioTelegram(List<long> result_ids, NotifyType type)
