@@ -62,7 +62,7 @@ namespace LotteryResult.Services
                 {
                     message += "Resultado: " + item.Result1 + "\n" + "Hora: " + item.Time + "\n" + "Sorteo: " + (string.IsNullOrEmpty(item.Sorteo) ? "N/A" : item.Sorteo) + "\n";
                 }
-                return;
+
                 var result = await "https://api.telegram.org/bot6844458606:AAGYYpQDieh-sv-gyjGXBVd1mhQoiTqQ-2I/sendMessage"
                     .SetQueryParams(new {
                         chat_id= "-1002082761148",
