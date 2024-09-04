@@ -1,5 +1,6 @@
 ﻿using LotteryResult.Data.Abstractions;
 using LotteryResult.Services;
+using LotteryResult.Services.CloseNotification;
 
 namespace LotteryResult
 {
@@ -37,6 +38,8 @@ namespace LotteryResult
 
             services.AddScoped<INotifyPremierService, NotifyPremierService>();
             services.AddScoped<ProviderProductMapper>();
+
+            services.AddCloseNotificationServices();
 
             return services;
         }
