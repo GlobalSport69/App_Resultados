@@ -5,6 +5,7 @@ using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
 using LotteryResult.Extensions;
+using PuppeteerSharp;
 using System.Collections.ObjectModel;
 
 namespace LotteryResult.Services
@@ -45,9 +46,66 @@ namespace LotteryResult.Services
             {
                 var venezuelaNow = DateTime.Now;
 
-                var response = await "http://api.admfox.com.ve/Animalitos.svc/IAnimalitos/ListarResultados"
-                    .AppendPathSegments(venezuelaNow.ToString("dd-MM-yyyy"), venezuelaNow.ToString("dd-MM-yyyy"))
-                    .GetJsonAsync<List<ChanceAnimalitosResponse>>();
+                //var response = await "http://api.admfox.com.ve/Animalitos.svc/IAnimalitos/ListarResultados"
+                //    .AppendPathSegments(venezuelaNow.ToString("dd-MM-yyyy"), venezuelaNow.ToString("dd-MM-yyyy"))
+                //    .GetJsonAsync<List<ChanceAnimalitosResponse>>();
+
+                using var browserFetcher = new BrowserFetcher();
+                await browserFetcher.DownloadAsync();
+                await using var browser = await Puppeteer.LaunchAsync(
+                    new LaunchOptions
+                    {
+                        Headless = true,
+                        Args = new string[]
+                        {
+                            "--no-sandbox",
+                            "--disable-setuid-sandbox"
+                        }
+                    });
+                await using var page = await browser.NewPageAsync();
+                await page.GoToAsync("https://tuchance.com.ve", waitUntil: WaitUntilNavigation.Networkidle2);
+
+                // Espera hasta que haya al menos 2 elementos 'td' dentro de un 'tr' en una tabla
+                await page.WaitForFunctionAsync(@"() => {
+                    const trs = document.getElementById('animalitos').querySelectorAll('tbody tr')
+                    return trs.length > 0;
+                }", new WaitForFunctionOptions
+                {
+                    PollingInterval = 1000,
+                });
+
+                var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
+                    let chanceWaitingMessage = 'Esperando resultados';
+                    let rows = [...document.getElementById('animalitos').querySelectorAll('tbody tr')];
+                    let r = rows.flatMap(r => {
+                        let [ td1, td2, td3, td4 ] = r.querySelectorAll('td');
+                        let obj = [];
+
+                        let hour1 = td1 != undefined ? td1.innerText : undefined;
+                        if(hour1 != '' && hour1 != undefined && hour1 != chanceWaitingMessage){
+                            let img1 = td2.querySelector('img');
+                            let result1 = img1.src.slice(img1.src.length - 6, img1.src.length).replace('.png', '').replace('/', '');
+                            obj.push({
+                                time: hour1,
+                                result: result1
+                            })
+                        }
+
+                        let hour2 = td3  != undefined ? td3.innerText : undefined;
+                        if(hour2 != ''&& hour2 != undefined && hour2 != chanceWaitingMessage){
+                            let img2 = td4.querySelector('img');
+                            let result2 = img2.src.slice(img2.src.length - 6, img2.src.length).replace('.png', '').replace('/', '');
+                            obj.push({
+                                time: hour2,
+                                result: result2
+                            })
+                        }
+
+                        return obj;
+                    })
+
+                    return r;
+                }");
 
                 if (!response.Any())
                 {
@@ -60,10 +118,13 @@ namespace LotteryResult.Services
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
                 var newResult = response.Select(item => {
-                    var substrings = item.fecSorteo.Split(' ');
-                    var time = substrings[1].Substring(0, 2).Replace(":", "") + ":00 " + substrings[2];
-                    time = LaGranjitaTerminalOfficial.FormatTime(time.ToUpper());
-                    var animalFound = GetAnimalLabelFromNumber(item.codAnimalA);
+                    //var substrings = item.fecSorteo.Split(' ');
+                    //var time = substrings[1].Substring(0, 2).Replace(":", "") + ":00 " + substrings[2];
+                    //time = LaGranjitaTerminalOfficial.FormatTime(time.ToUpper());
+                    //var animalFound = GetAnimalLabelFromNumber(item.codAnimalA);
+
+                    var time = item.Time;
+                    var animalFound = GetAnimalLabelFromNumber(item.Result);
                     var premierId = lotteries[time];
 
                     return new Result
@@ -129,12 +190,22 @@ namespace LotteryResult.Services
 
         private Animal GetAnimalLabelFromNumber(string number) {
             var animales = new Dictionary<string, Animal> {
-                ["37"] = new Animal()
+                //["37"] = new Animal()
+                //{
+                //    Number = "0",
+                //    Name = "DELFIN",
+                //},
+                //["38"] = new Animal()
+                //{
+                //    Number = "00",
+                //    Name = "BALLENA",
+                //},
+                ["0"] = new Animal()
                 {
                     Number = "0",
                     Name = "DELFIN",
                 },
-                ["38"] = new Animal()
+                ["00"] = new Animal()
                 {
                     Number = "00",
                     Name = "BALLENA",

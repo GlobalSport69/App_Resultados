@@ -78,6 +78,8 @@ namespace LotteryResult.Services
 
                 var newResult = response.Select(item => {
                     var time = item.Time.ToUpper();
+                    time = new string(item.Time.Take(5).ToArray()) + " " + new string(item.Time.TakeLast(2).ToArray());
+
                     var number = new String(item.Result.TakeWhile(c => char.IsNumber(c)).ToArray());
                     var animal = item.Result.Substring(number.Length, item.Result.Length - number.Length).Trim().Capitalize();
                     //var premierId = Lotteries[time];

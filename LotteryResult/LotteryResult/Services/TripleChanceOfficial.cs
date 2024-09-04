@@ -63,7 +63,7 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://tuchance.com.ve/resultadosChance", waitUntil: WaitUntilNavigation.Networkidle2);
+                await page.GoToAsync("https://tuchance.com.ve", waitUntil: WaitUntilNavigation.Networkidle2);
 
                 # region Para probar con resultados de dias anteriores
                 //await page.EvaluateFunctionAsync(@"(date) => {
@@ -83,27 +83,47 @@ namespace LotteryResult.Services
                 //});
                 #endregion
 
+                // Espera hasta que haya al menos 2 elementos 'td' dentro de un 'tr' en una tabla
+                await page.WaitForFunctionAsync(@"() => {
+                    const trs = document.getElementById('tripleSig').querySelectorAll('tbody tr')
+                    return trs.length > 0;
+                }", new WaitForFunctionOptions
+                {
+                    PollingInterval = 1000,
+                });
+
                 var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
-                    let r = [...document.querySelectorAll('.table tbody tr')]
-                    .flatMap(x => {
-                        let [t, a, b, c1, c2] = [...x.querySelectorAll('td span')]
+                    let rows = [...document.getElementById('tripleSig').querySelectorAll('tbody tr')];
+                    let r = rows.flatMap(r => {
+                        let [ td1, td2, td3 ] = r.querySelectorAll('td');
+                        let hour1 = td1 != undefined ? td1.innerText : undefined;
+
+                        if(hour1 == undefined || hour1 == ''){
+                            return [];
+                        }
+
+                        let [resultA, resultB] = td2.innerText.split('-');
+                        let resultc = td3.innerText.replace('-', '').trim();
+
+                        let urlImg = 'http://tuchance.com.ve/wp-content/uploads/2024/06/'
+                        let complement = td3.querySelector('img').src.replace(urlImg, '').replace('.png', '');
                         return [
                             {
-                                time: t.innerText,
-                                result: a.innerText,
-                                sorteo: 'Triple A',
+                                time: hour1,
+                                result: resultA.trim(),
+                                sorteo: 'Triple A'  
                             },
                             {
-                                time: t.innerText,
-                                result: b.innerText,
-                                sorteo: 'Triple B',
+                                time: hour1,
+                                result: resultB.trim(),
+                                sorteo: 'Triple B'  
                             },
                             {
-                                time: t.innerText,
-                                result: c1.innerText,
+                                time: hour1,
+                                result: resultc.trim(),
+                                number: resultc.trim(),
                                 sorteo: 'Chance Astral',
-                                number: c1.innerText,
-                                complement: c2.innerText
+                                complement: complement
                             }
                         ]
                     })
@@ -122,8 +142,8 @@ namespace LotteryResult.Services
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
                 var newResult = response.Select(item => {
-                    var time = item.Time.Substring(0, item.Time.Length - 2) + " " + item.Time.Substring(item.Time.Length - 2);
-                    time = time.ToUpper();
+                    //var time = item.Time.Substring(0, item.Time.Length - 2) + " " + item.Time.Substring(item.Time.Length - 2);
+                    var time = item.Time.ToUpper();
 
                     long premierId = 0;
                     if (item.Sorteo == "Triple A")
