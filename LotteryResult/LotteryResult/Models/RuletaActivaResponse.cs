@@ -14,7 +14,6 @@
     public class Publicaciones
     {
         public string hora { get; set; }
-        public string nro_sorteo { get; set; }
         public RuletaActivaPublicacionesDetalle a { get; set; }
         public RuletaActivaPublicacionesDetalle b { get; set; }
         public RuletaActivaPublicacionesDetalle c { get; set; }

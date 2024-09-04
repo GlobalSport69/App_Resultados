@@ -47,7 +47,7 @@ namespace LotteryResult.Services
             {
                 DateTime venezuelaNow = DateTime.Now;
 
-                var data = await "https://apis.sigtve.com/api/v1"
+                var data = await "https://latococa.com/proyect/api/v1"
                 .AppendPathSegments("sorteo-publicados")
                 .PostJsonAsync(new
                 {
@@ -58,13 +58,11 @@ namespace LotteryResult.Services
 
                 if (data is null || !data.loteria.publicaciones.Any())
                 {
-                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(LaGranjitaOfficial));
+                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(RuletaActivaOfficial));
                     return;
                 }
 
-                var json = data.loteria.publicaciones
-                    .GroupBy(x => x.nro_sorteo)
-                    .Select(x => x.First());
+                var json = data.loteria.publicaciones;
 
                 var response = json
                     .SelectMany(x => {
@@ -160,7 +158,7 @@ namespace LotteryResult.Services
 
                 if (!needSave)
                 {
-                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(LottoActivoOfficial));
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(RuletaActivaOfficial));
                     return;
                 }
             }
