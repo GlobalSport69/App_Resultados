@@ -17,20 +17,18 @@ namespace LotteryResult.Services
         private readonly ILogger<CarruselMillonario> _logger;
         private readonly INotifyPremierService notifyPremierService;
 
-        private Dictionary<string, long> lotteries = new Dictionary<string, long>
+        private Dictionary<string, long> lotteriesA = new Dictionary<string, long>
         {
-            { "08:00 AM", 239 },
-            { "09:00 AM", 2 },
-            { "10:00 AM", 3 },
-            { "11:00 AM", 4},
-            { "12:00 PM", 5 },
-            { "01:00 PM", 6 },
-            { "02:00 PM", 7 },
-            { "03:00 PM", 8 },
-            { "04:00 PM", 9 },
-            { "05:00 PM", 10 },
-            { "06:00 PM", 11 },
-            { "07:00 PM", 12 }
+            { "09:00 AM", 323 },
+            { "10:00 AM", 324 },
+            { "11:00 AM", 325 },
+            { "12:00 PM", 326 },
+            { "01:00 PM", 327 },
+            { "02:00 PM", 328 },
+            { "04:00 PM", 329 },
+            { "05:00 PM", 330 },
+            { "06:00 PM", 331 },
+            { "07:00 PM", 332 }
         };
 
         private Dictionary<string, string> hoursMap = new Dictionary<string, string>
@@ -168,7 +166,7 @@ namespace LotteryResult.Services
 
                     var numbers = item.numero.Split('-');
                     var complements = item.resultado.Split('-');
-                    var sorteosLabel = new string[] { "A", "B", "C" };
+                    string[] sorteosLabel = new string[] { "A", "B", "C" };
                     //var premierId = lotteries[hoursMap[time]];
 
                     return numbers.Select((x, i) =>
@@ -184,17 +182,18 @@ namespace LotteryResult.Services
                             resultado = sing[complements[i]];
                         }
 
+                        time = hoursMap[time];
+                        long? premierId = sorteosLabel[i] == "A" ? (lotteriesA[time]) : null;
                         return new Result
                         {
                             Result1 = resultado,
-                            Time = hoursMap[time],
+                            Time = time,
                             Date = DateTime.Now.ToString("dd-MM-yyyy"),
                             Sorteo = sorteosLabel[i],
                             ProductId = productID,
                             ProviderId = providerID,
                             ProductTypeId = (int)ProductTypeEnum.ANIMALITOS,
-
-                            //PremierId = premierId,
+                            PremierId = premierId,
                             //number = number,
                             //animal = animal
                         };
