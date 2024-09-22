@@ -67,7 +67,11 @@ namespace LotteryResult.Services
 
                 // Espera hasta que haya al menos 2 elementos 'td' dentro de un 'tr' en una tabla
                 await page.WaitForFunctionAsync(@"() => {
-                    const trs = document.getElementById('animalitos').querySelectorAll('tbody tr')
+                    let container = document.getElementById('animalitos');
+                    if(container == null){
+                        return false;
+                    }
+                    const trs = container.querySelectorAll('tbody tr')
                     return trs.length > 0;
                 }", new WaitForFunctionOptions
                 {
