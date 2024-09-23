@@ -162,8 +162,6 @@ namespace LotteryResult.Services
 
                 var newResult = resultResponse.result.Where(x => !string.IsNullOrEmpty(x.numero)).SelectMany(item =>
                 {
-                    var time = item.sorteo.Replace("Carrusel M", "").Trim().ToUpper();
-
                     var numbers = item.numero.Split('-');
                     var complements = item.resultado.Split('-');
                     string[] sorteosLabel = new string[] { "A", "B", "C" };
@@ -171,6 +169,7 @@ namespace LotteryResult.Services
 
                     return numbers.Select((x, i) =>
                     {
+                        var time = item.sorteo.Replace("Carrusel M", "").Trim().ToUpper();
                         string resultado = "";
                         if (i < 2)
                         {
