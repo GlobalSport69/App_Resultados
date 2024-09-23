@@ -1,10 +1,14 @@
-﻿using Flurl;
+﻿using Azure;
+using Flurl;
 using Flurl.Http;
 using LotteryResult.Data.Abstractions;
 using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
 using LotteryResult.Extensions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using NuGet.ProjectModel;
 using PuppeteerSharp;
 using System.Collections.ObjectModel;
 
@@ -18,19 +22,34 @@ namespace LotteryResult.Services
         private readonly ILogger<ChanceAnimalitosOfficial> _logger;
         private INotifyPremierService notifyPremierService;
 
+        private Dictionary<string, string> Times = new Dictionary<string, string>
+        {
+            { "C00", "09:00 AM" },
+            { "C01", "10:00 AM" },
+            { "C02", "11:00 AM" },
+            { "C03", "12:00 PM" },
+            { "C04", "01:00 PM" },
+            { "C05", "02:00 PM" },
+            { "C06", "03:00 PM" },
+            { "C07", "04:00 PM" },
+            { "C08", "05:00 PM" },
+            { "C09", "06:00 PM" },
+            { "C10", "07:00 PM" }
+        };
+
         private Dictionary<string, long> lotteries = new Dictionary<string, long>
         {
-            { "09:00 AM", 262 },
-            { "10:00 AM", 263 },
-            { "11:00 AM", 264 },
-            { "12:00 PM", 265 },
-            { "01:00 PM", 266 },
-            { "02:00 PM", 267 },
-            { "03:00 PM", 268 },
-            { "04:00 PM", 269 },
-            { "05:00 PM", 270 },
-            { "06:00 PM", 271 },
-            { "07:00 PM", 272 }
+            { "C00", 262 },
+            { "C01", 263 },
+            { "C02", 264 },
+            { "C03", 265 },
+            { "C04", 266 },
+            { "C05", 267 },
+            { "C06", 268 },
+            { "C07", 269 },
+            { "C08", 270 },
+            { "C09", 271 },
+            { "C10", 272 }
         };
 
         public ChanceAnimalitosOfficial(IUnitOfWork unitOfWork, ILogger<ChanceAnimalitosOfficial> logger, INotifyPremierService notifyPremierService)
@@ -46,70 +65,14 @@ namespace LotteryResult.Services
             {
                 var venezuelaNow = DateTime.Now;
 
-                //var response = await "http://api.admfox.com.ve/Animalitos.svc/IAnimalitos/ListarResultados"
-                //    .AppendPathSegments(venezuelaNow.ToString("dd-MM-yyyy"), venezuelaNow.ToString("dd-MM-yyyy"))
-                //    .GetJsonAsync<List<ChanceAnimalitosResponse>>();
+                var response = await "https://api.loteriasoportex.com/monitor/resultados"
+                   .PostJsonAsync(new
+                   {
+                       fecha = venezuelaNow.ToString("yyyy-MM-dd")
+                   })
+                .ReceiveJson<JArray>();
 
-                using var browserFetcher = new BrowserFetcher();
-                await browserFetcher.DownloadAsync();
-                await using var browser = await Puppeteer.LaunchAsync(
-                    new LaunchOptions
-                    {
-                        Headless = true,
-                        Args = new string[]
-                        {
-                            "--no-sandbox",
-                            "--disable-setuid-sandbox"
-                        }
-                    });
-                await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://tuchance.com.ve", waitUntil: WaitUntilNavigation.Networkidle2);
-
-                // Espera hasta que haya al menos 2 elementos 'td' dentro de un 'tr' en una tabla
-                await page.WaitForFunctionAsync(@"() => {
-                    let container = document.getElementById('animalitos');
-                    if(container == null){
-                        return false;
-                    }
-                    const trs = container.querySelectorAll('tbody tr')
-                    return trs.length > 0;
-                }", new WaitForFunctionOptions
-                {
-                    PollingInterval = 1000,
-                });
-
-                var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
-                    let chanceWaitingMessage = 'Esperando resultados';
-                    let rows = [...document.getElementById('animalitos').querySelectorAll('tbody tr')];
-                    let r = rows.flatMap(r => {
-                        let [ td1, td2, td3, td4 ] = r.querySelectorAll('td');
-                        let obj = [];
-
-                        let hour1 = td1 != undefined ? td1.innerText : undefined;
-                        if(hour1 != '' && hour1 != undefined && hour1 != chanceWaitingMessage){
-                            let img1 = td2.querySelector('img');
-                            let result1 = img1.src.slice(img1.src.length - 6, img1.src.length).replace('.png', '').replace('/', '');
-                            obj.push({
-                                time: hour1,
-                                result: result1
-                            })
-                        }
-
-                        let hour2 = td3  != undefined ? td3.innerText : undefined;
-                        if(hour2 != ''&& hour2 != undefined && hour2 != chanceWaitingMessage){
-                            let img2 = td4.querySelector('img');
-                            let result2 = img2.src.slice(img2.src.length - 6, img2.src.length).replace('.png', '').replace('/', '');
-                            obj.push({
-                                time: hour2,
-                                result: result2
-                            })
-                        }
-
-                        return obj;
-                    })
-
-                    return r;
-                }");
+                response = new JArray(response.Where(x => x.GetValue<string>("codigo").StartsWith('C')));
 
                 if (!response.Any())
                 {
@@ -122,14 +85,13 @@ namespace LotteryResult.Services
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
                 var newResult = response.Select(item => {
-                    //var substrings = item.fecSorteo.Split(' ');
-                    //var time = substrings[1].Substring(0, 2).Replace(":", "") + ":00 " + substrings[2];
-                    //time = LaGranjitaTerminalOfficial.FormatTime(time.ToUpper());
-                    //var animalFound = GetAnimalLabelFromNumber(item.codAnimalA);
 
-                    var time = item.Time;
-                    var animalFound = GetAnimalLabelFromNumber(item.Result);
-                    var premierId = lotteries[time];
+                    var codigo = item.GetValue<string>("codigo");
+                    var number = item.GetValue<string>("numero");
+
+                    var time = Times[codigo];
+                    var premierId = lotteries[codigo];
+                    var animalFound = GetAnimalLabelFromNumber(number);
 
                     return new Result
                     {
@@ -194,17 +156,12 @@ namespace LotteryResult.Services
 
         private Animal GetAnimalLabelFromNumber(string number) {
             var animales = new Dictionary<string, Animal> {
-                //["37"] = new Animal()
-                //{
-                //    Number = "0",
-                //    Name = "DELFIN",
-                //},
-                //["38"] = new Animal()
-                //{
-                //    Number = "00",
-                //    Name = "BALLENA",
-                //},
                 ["0"] = new Animal()
+                {
+                    Number = "0",
+                    Name = "DELFIN",
+                },
+                ["99"] = new Animal()
                 {
                     Number = "0",
                     Name = "DELFIN",
