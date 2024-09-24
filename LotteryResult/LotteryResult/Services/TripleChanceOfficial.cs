@@ -1,11 +1,13 @@
 ﻿using Azure;
+using Flurl.Http;
 using LotteryResult.Data.Abstractions;
 using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
+using LotteryResult.Models;
 using PuppeteerSharp;
 using System.Drawing;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Linq;
 
 namespace LotteryResult.Services
 {
@@ -17,25 +19,60 @@ namespace LotteryResult.Services
         private readonly ILogger<TripleChanceOfficial> _logger;
         private INotifyPremierService notifyPremierService;
 
-        private Dictionary<string, long> TripleA = new Dictionary<string, long>
+        private Dictionary<string, string> HoursMap = new Dictionary<string, string>
         {
-            { "01:00 PM", 253 },
-            { "04:30 PM", 256 },
-            { "07:00 PM", 259 },
+            { "711", "01:00 PM" },
+            { "712", "01:00 PM" },
+            { "713", "01:00 PM" },
+            { "721", "04:30 PM" },
+            { "722", "04:30 PM" },
+            { "723", "04:30 PM" },
+            { "731", "07:00 PM" },
+            { "732", "07:00 PM" },
+            { "733", "07:00 PM" },
         };
 
-        private Dictionary<string, long> TripleB = new Dictionary<string, long>
+        private Dictionary<string, string> LabelMap = new Dictionary<string, string>
         {
-            { "01:00 PM", 254 },
-            { "04:30 PM", 257 },
-            { "07:00 PM", 260 },
+            { "711", "Triple A" },
+            { "712", "Triple B" },
+            { "713", "Chance Astral" },
+            { "721", "Triple A" },
+            { "722", "Triple B" },
+            { "723", "Chance Astral" },
+            { "731", "Triple A" },
+            { "732", "Triple B" },
+            { "733", "Chance Astral" },
         };
 
-        private Dictionary<string, long> TripleC = new Dictionary<string, long>
+        private Dictionary<string, string> AstralMap = new Dictionary<string, string>
         {
-            { "01:00 PM", 255 },
-            { "04:30 PM", 258 },
-            { "07:00 PM", 261 }
+            { "A", "ARIES" },
+            { "B", "TAURO" },
+            { "C", "GEMNIS" },
+            { "D", "CANCER" },
+            { "E", "LEO" },
+            { "F", "VIRGO" },
+            { "G", "LIBRA" },
+            { "H", "ESCORPIO" },
+            { "I", "SAGITARIO" },
+            { "J", "CAPRICORNIO" },
+            { "K", "ACUARIO" },
+            { "L", "PISCIS" },
+        };
+
+
+        private Dictionary<string, long> Lotteries = new Dictionary<string, long>
+        {
+            { "711", 253 },
+            { "721", 256 },
+            { "731", 259 },
+            { "712", 254 },
+            { "722", 257 },
+            { "732", 260 },
+            { "713", 255 },
+            { "723", 258 },
+            { "733", 261 }
         };
         public TripleChanceOfficial(IUnitOfWork unitOfWork, ILogger<TripleChanceOfficial> logger, INotifyPremierService notifyPremierService)
         {
@@ -50,86 +87,14 @@ namespace LotteryResult.Services
             {
                 DateTime venezuelaNow = DateTime.Now;
 
-                using var browserFetcher = new BrowserFetcher();
-                await browserFetcher.DownloadAsync();
-                await using var browser = await Puppeteer.LaunchAsync(
-                    new LaunchOptions
-                    {
-                        Headless = true,
-                        Args = new string[]
-                        {
-                            "--no-sandbox",
-                            "--disable-setuid-sandbox"
-                        }
-                    });
-                await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://tuchance.com.ve", waitUntil: WaitUntilNavigation.Networkidle2);
+                var response = await "https://api.loteriasoportex.com/monitor/resultados"
+                   .PostJsonAsync(new
+                   {
+                       fecha = venezuelaNow.ToString("yyyy-MM-dd")
+                   })
+                .ReceiveJson<List<ChanceResponse>>();
 
-                # region Para probar con resultados de dias anteriores
-                //await page.EvaluateFunctionAsync(@"(date) => {
-                //    var found = [...document.querySelectorAll('li')].find(x => x.innerText == date);
-                //    if(found === undefined){
-                //        return;
-                //    }
-                //    found.click();
-                //}", "11-6-2024" /* 6-6-2024 */);
-
-                //await page.WaitForFunctionAsync(@"() => {
-                //    const tds = document.querySelectorAll('table tr td');
-                //    return tds.length > 1;
-                //}", new WaitForFunctionOptions
-                //{
-                //    PollingInterval = 1000,
-                //});
-                #endregion
-
-                // Espera hasta que haya al menos 2 elementos 'td' dentro de un 'tr' en una tabla
-                await page.WaitForFunctionAsync(@"() => {
-                    const trs = document.getElementById('tripleSig').querySelectorAll('tbody tr')
-                    return trs.length > 0;
-                }", new WaitForFunctionOptions
-                {
-                    PollingInterval = 1000,
-                });
-
-                var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
-                    let rows = [...document.getElementById('tripleSig').querySelectorAll('tbody tr')];
-                    let r = rows.flatMap(r => {
-                        let [ td1, td2, td3 ] = r.querySelectorAll('td');
-                        let hour1 = td1 != undefined ? td1.innerText : undefined;
-
-                        if(hour1 == undefined || hour1 == ''){
-                            return [];
-                        }
-
-                        let [resultA, resultB] = td2.innerText.split('-');
-                        let resultc = td3.innerText.replace('-', '').trim();
-
-                        let urlImg = 'http://tuchance.com.ve/wp-content/uploads/2024/06/'
-                        let complement = td3.querySelector('img').src.replace(urlImg, '').replace('.png', '');
-                        return [
-                            {
-                                time: hour1,
-                                result: resultA.trim(),
-                                sorteo: 'Triple A'  
-                            },
-                            {
-                                time: hour1,
-                                result: resultB.trim(),
-                                sorteo: 'Triple B'  
-                            },
-                            {
-                                time: hour1,
-                                result: resultc.trim(),
-                                number: resultc.trim(),
-                                sorteo: 'Chance Astral',
-                                complement: complement
-                            }
-                        ]
-                    })
-
-                    return r;
-                }");
+                response = response.Where(x => !x.Code.StartsWith('C')).ToList();
 
                 if (!response.Any())
                 {
@@ -143,20 +108,16 @@ namespace LotteryResult.Services
 
                 var newResult = response.Select(item => {
                     //var time = item.Time.Substring(0, item.Time.Length - 2) + " " + item.Time.Substring(item.Time.Length - 2);
-                    var time = item.Time.ToUpper();
+                    var time = HoursMap[item.Code];
+                    var sorteo = LabelMap[item.Code];
+                    long premierId = Lotteries[item.Code];
 
-                    long premierId = 0;
-                    if (item.Sorteo == "Triple A")
-                        premierId = TripleA[time];
-
-                    if (item.Sorteo == "Triple B")
-                        premierId = TripleB[time];
-
-                    if (item.Sorteo == "Chance Astral")
-                        premierId = TripleC[time];
-
-                    var complement = string.IsNullOrEmpty(item.Complement) ? null : $" {item.Complement}";
-                    var resultado = item.Result + complement ?? "";
+                    var resultado = item.Number;
+                    if (resultado.Length > 3)
+                    {
+                        var astralKey = new string(resultado.TakeLast(1).ToArray());
+                        resultado = new string(resultado.Take(3).ToArray()) + " " + AstralMap[astralKey];
+                    }
 
                     return new Result
                     {
@@ -166,7 +127,7 @@ namespace LotteryResult.Services
                         ProductId = productID,
                         ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.TRIPLES,
-                        Sorteo = item.Sorteo,
+                        Sorteo = sorteo,
                         PremierId = premierId,
                         //Number: item.Result,
                         //Complement: complement
