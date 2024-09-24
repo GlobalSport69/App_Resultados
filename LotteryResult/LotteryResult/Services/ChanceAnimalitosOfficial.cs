@@ -6,6 +6,7 @@ using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
 using LotteryResult.Extensions;
+using LotteryResult.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NuGet.ProjectModel;
@@ -70,9 +71,9 @@ namespace LotteryResult.Services
                    {
                        fecha = venezuelaNow.ToString("yyyy-MM-dd")
                    })
-                .ReceiveJson<JArray>();
+                .ReceiveJson<List<ChanceResponse>>();
 
-                response = new JArray(response.Where(x => x.GetValue<string>("codigo").StartsWith('C')));
+                response = response.Where(x => x.Code.StartsWith('C')).ToList();
 
                 if (!response.Any())
                 {
@@ -86,12 +87,9 @@ namespace LotteryResult.Services
 
                 var newResult = response.Select(item => {
 
-                    var codigo = item.GetValue<string>("codigo");
-                    var number = item.GetValue<string>("numero");
-
-                    var time = Times[codigo];
-                    var premierId = lotteries[codigo];
-                    var animalFound = GetAnimalLabelFromNumber(number);
+                    var time = Times[item.Code];
+                    var premierId = lotteries[item.Code];
+                    var animalFound = GetAnimalLabelFromNumber(item.Number);
 
                     return new Result
                     {
