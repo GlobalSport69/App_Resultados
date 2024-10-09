@@ -40,6 +40,7 @@ namespace LotteryResult
             services.AddScoped<ProviderProductMapper>();
 
             services.AddCloseNotificationServices();
+            services.AddScoped<SetLimitForIntegrations>();
 
             return services;
         }
