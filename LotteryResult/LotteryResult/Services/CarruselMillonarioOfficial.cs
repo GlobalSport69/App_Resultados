@@ -19,16 +19,16 @@ namespace LotteryResult.Services
 
         private Dictionary<string, long> lotteriesA = new Dictionary<string, long>
         {
-            { "09:00 AM", 323 },
-            { "10:00 AM", 324 },
-            { "11:00 AM", 325 },
-            { "12:00 PM", 326 },
-            { "01:00 PM", 327 },
-            { "02:00 PM", 328 },
-            { "04:00 PM", 329 },
-            { "05:00 PM", 330 },
-            { "06:00 PM", 331 },
-            { "07:00 PM", 332 }
+            { "09:00 AM", 324 },
+            { "10:00 AM", 325 },
+            { "11:00 AM", 326 },
+            { "12:00 PM", 327 },
+            { "01:00 PM", 328 },
+            { "02:00 PM", 329 },
+            { "04:00 PM", 330 },
+            { "05:00 PM", 331 },
+            { "06:00 PM", 332 },
+            { "07:00 PM", 333 }
         };
 
         private Dictionary<string, string> hoursMap = new Dictionary<string, string>
