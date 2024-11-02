@@ -80,7 +80,7 @@ namespace LotteryResult.Services
                     .map(x => ({
                         time: x.querySelector('.texto-hora').innerText,
                         result: x.querySelector('.card-footer').innerText,
-                    }))
+                    })).filter(x => x.time != '');
 
                     return r;
                 }");
