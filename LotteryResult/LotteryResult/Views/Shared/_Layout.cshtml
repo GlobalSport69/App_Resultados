@@ -25,20 +25,15 @@
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
 
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Productos</a>
                         </li>
-
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Results" asp-action="Index">Resultados</a>
                         </li>
 
                         <li class="nav-item">
-                            @*<a class="nav-link text-dark" asp-area="" asp-controller="Hangfire" asp-action="Index">Hangfire</a>*@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Hangfire">Hangfire</a>
                         </li>
 
@@ -46,9 +41,11 @@
                             <a class="nav-link text-dark" href="@_configuration["GrafanaUrl"]">Logs</a>
                         </li>
                     </ul>
-                </div>
-                <div class="nav-item">
-                    <a class="nav-link text-dark" asp-controller="Auth" asp-action="LogOut">Cerrar Sesión</a>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Auth" asp-action="LogOut">Cerrar Sesión</a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </nav>
@@ -61,7 +58,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2023 - LotteryResult - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2023 - IA 2030 C.A.
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
