@@ -83,7 +83,7 @@ namespace LotteryResult.Services
                 var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
                    let r = [...document.querySelectorAll('.resultados .card-result')].map(x => ({
                         time: x.querySelector('h4').innerText.replace('SORTEO DE ', ''),
-                        result: x.querySelector('img').src.replace('https://latococa.com/assets/fichas/laruca/', '').replace('.png', '')
+                        result: x.querySelector('img').src.replace('https://latococa.com/assets/fichas/elruco/', '').replace('.png', '')
                     }));
 
                     return r;
