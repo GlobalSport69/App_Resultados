@@ -30,6 +30,22 @@ namespace LotteryResult.Services
             { "06:00 PM", 194 },
             { "07:00 PM", 195 }
         };
+
+        private Dictionary<string, string> HoursMap = new Dictionary<string, string>
+        {
+            { "8:00 AM", "08:00 AM" },
+            { "9:00 AM", "09:00 AM" },
+            { "10:00 AM", "10:00 AM" },
+            { "11:00 AM", "11:00 AM" },
+            { "12:00 PM", "12:00 PM" },
+            { "13:00 PM", "01:00 PM" },
+            { "14:00 PM", "02:00 PM" },
+            { "15:00 PM", "03:00 PM" },
+            { "16:00 PM", "04:00 PM" },
+            { "17:00 PM", "05:00 PM" },
+            { "18:00 PM", "06:00 PM" },
+            { "19:00 PM", "07:00 PM" },
+        };
         public ElRucoTriplesBet(IUnitOfWork unitOfWork, ILogger<ElRucoTriplesBet> logger, INotifyPremierService notifyPremierService)
         {
             this.unitOfWork = unitOfWork;
@@ -41,30 +57,6 @@ namespace LotteryResult.Services
         {
             try
             {
-                //using var browserFetcher = new BrowserFetcher();
-                //await browserFetcher.DownloadAsync();
-                //await using var browser = await Puppeteer.LaunchAsync(
-                //    new LaunchOptions { Headless = true });
-                //await using var page = await browser.NewPageAsync();
-                //await page.GoToAsync("https://lottollano.com.ve/elruco.php");
-
-                //var someObject = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
-                //    let fecha = new Date();
-                //    let dia = String(fecha.getDate()).padStart(2, '0');
-                //    let mes = String(fecha.getMonth() + 1).padStart(2, '0'); // Los meses en JavaScript empiezan desde 0
-                //    let ano = fecha.getFullYear();
-                //    let fechaFormateada = dia + '/' + mes + '/' + ano;
-
-                //    let r = [...document.querySelectorAll('table tbody tr')]
-                //    .filter(tr => ([...tr.querySelectorAll('td')][0]).innerHTML.split('<br>')[1] == fechaFormateada)
-                //    .map(tr => ({
-                //        time: ([...tr.querySelectorAll('td')][0]).innerHTML.split('<br>')[2],
-                //        result: ([...tr.querySelectorAll('td')][1]).querySelector('img').getAttribute('src').replace('./elruco/', '').replace('.jpg', '')
-                //    }))
-
-                //    return r;
-                //}");
-
                 using var browserFetcher = new BrowserFetcher();
                 await browserFetcher.DownloadAsync();
                 await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
@@ -77,21 +69,30 @@ namespace LotteryResult.Services
                         }
                 });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://triples.bet/products-results/resultados-el-ruco");
+                await page.GoToAsync("https://www.elruco.com.ve", waitUntil: WaitUntilNavigation.Networkidle2);
+
+                // Espera hasta que haya al menos 1 elementos 'div' dentro de '.resultados'
+                await page.WaitForFunctionAsync(@"() => {
+                    const tds = document.querySelectorAll('.resultados > div');
+                    return tds.length > 0;
+                }", new WaitForFunctionOptions
+                {
+                    PollingInterval = 1000,
+                });
 
                 var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
-                   let r = [...document.querySelectorAll('.results-content-item')]
-                    .map(x => ({
-                        time: x.querySelector('.results-title-draw-hour').innerText,
-                        result: x.querySelector('.number-ruco')?.innerText
-                    })).filter(x => x.result !== undefined);
+                   let r = [...document.querySelectorAll('.resultados .card-result')].map(x => ({
+                        time: x.querySelector('h4').innerText.replace('SORTEO DE ', ''),
+                        result: x.querySelector('img').src.replace('https://latococa.com/assets/fichas/laruca/', '').replace('.png', '')
+                    }));
 
                     return r;
                 }");
 
+
                 if (!response.Any())
                 {
-                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(LottoReyOfficial));
+                    _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(ElRucoTriplesBet));
                     return;
                 }
 
@@ -102,7 +103,7 @@ namespace LotteryResult.Services
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
                 var newResult = response.Select(item => {
-                    var time = item.Time.ToUpper();
+                    var time = HoursMap[item.Time.ToUpper()];
                     var premierId = lotteries[time];
 
                     return new Result
