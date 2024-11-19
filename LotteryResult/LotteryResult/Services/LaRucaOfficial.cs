@@ -32,18 +32,17 @@ namespace LotteryResult.Services
 
         private Dictionary<string, string> HoursMap = new Dictionary<string, string>
         {
-            { "8:00 AM", "08:00 AM" },
-            { "9:00 AM", "09:00 AM" },
-            { "10:00 AM", "10:00 AM" },
-            { "11:00 AM", "11:00 AM" },
-            { "12:00 PM", "12:00 PM" },
-            { "13:00 PM", "01:00 PM" },
-            { "14:00 PM", "02:00 PM" },
-            { "15:00 PM", "03:00 PM" },
-            { "16:00 PM", "04:00 PM" },
-            { "17:00 PM", "05:00 PM" },
-            { "18:00 PM", "06:00 PM" },
-            { "19:00 PM", "07:00 PM" },
+            { "9:15 AM", "09:15 AM" },
+            { "10:15 AM", "10:15 AM" },
+            { "11:15 AM", "11:15 AM" },
+            { "12:15 PM", "12:15 PM" },
+            { "13:15 PM", "01:15 PM" },
+            { "14:15 PM", "02:15 PM" },
+            { "15:15 PM", "03:15 PM" },
+            { "16:15 PM", "04:15 PM" },
+            { "17:15 PM", "05:15 PM" },
+            { "18:15 PM", "06:15 PM" },
+            { "19:15 PM", "07:15 PM" },
         };
 
         public LaRucaOfficial(IUnitOfWork unitOfWork, ILogger<LaRucaOfficial> logger, INotifyPremierService notifyPremierService)
