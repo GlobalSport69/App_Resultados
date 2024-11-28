@@ -17,6 +17,7 @@ namespace LotteryResult.Services
 
         private Dictionary<string, long> Lotteries = new Dictionary<string, long>
         {
+            { "08:00 AM", 355 },
             { "09:00 AM", 45 },
             { "10:00 AM", 46 },
             { "11:00 AM", 47 },
