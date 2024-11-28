@@ -1,6 +1,6 @@
 ﻿using Hangfire;
-using LotteryResult.Services;
-using LotteryResult.Services.CloseNotification;
+using LotteryResult.Services.PremierPlussJobs;
+using LotteryResult.Services.PremierPlussJobs.CloseNotification;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LotteryResult.Controllers
@@ -11,12 +11,14 @@ namespace LotteryResult.Controllers
         private Guacharo guacharo;
         private SelvaPlus selva;
         private SetLimitForIntegrations SetQuotas;
+        private UpdateRates updateRates;
 
-        public CloseNotifyController(Guacharo guacharo, SelvaPlus selva, SetLimitForIntegrations setQuotas)
+        public CloseNotifyController(Guacharo guacharo, SelvaPlus selva, SetLimitForIntegrations setQuotas, UpdateRates updateRates)
         {
             this.guacharo = guacharo;
             this.selva = selva;
             SetQuotas = setQuotas;
+            this.updateRates = updateRates;
         }
 
 
@@ -79,6 +81,25 @@ namespace LotteryResult.Controllers
                 else
                 {
                     RecurringJob.RemoveIfExists("job_setlimit");
+                }
+            }
+            
+            if (job_key == "job_updateRate")
+            {
+                if (status)
+                {
+                    RecurringJob.AddOrUpdate("job_updateRate",
+                        "default",
+                        () => updateRates.Handler(),
+                        UpdateRates.CronExpression,
+                        new RecurringJobOptions
+                        {
+                            TimeZone = _timeZone,
+                        });
+                }
+                else
+                {
+                    RecurringJob.RemoveIfExists("job_updateRate");
                 }
             }
 

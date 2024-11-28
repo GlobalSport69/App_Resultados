@@ -15,11 +15,13 @@ namespace LotteryResult.Services
         public string? complement_number { get; set; }
     }
 
-    public enum NotifyType { 
+    public enum NotifyType
+    {
         New,
         Update
     }
-    public interface INotifyPremierService {
+    public interface INotifyPremierService
+    {
         public void Handler(List<long> result_ids, NotifyType type = NotifyType.New);
     }
     public class NotifyPremierService : INotifyPremierService
@@ -31,7 +33,7 @@ namespace LotteryResult.Services
         public NotifyPremierService(IUnitOfWork unitOfWork, ILogger<NotifyPremierService> logger, IConfiguration configuration)
         {
             this.unitOfWork = unitOfWork;
-            this._logger = logger;
+            _logger = logger;
             _configuration = configuration;
         }
 
@@ -54,7 +56,7 @@ namespace LotteryResult.Services
                 var message = "PRODUCCION\n";
                 if (type == NotifyType.New)
                     message += "NUEVOS\n";
-                else 
+                else
                     message += "ACTUALIZADOS\n";
 
                 message += "\n" + found.Key + "\n";
@@ -64,10 +66,11 @@ namespace LotteryResult.Services
                 }
 
                 var result = await "https://api.telegram.org/bot6844458606:AAGYYpQDieh-sv-gyjGXBVd1mhQoiTqQ-2I/sendMessage"
-                    .SetQueryParams(new {
-                        chat_id= "-1002082761148",
-                        parse_mode= "html",
-                        text= message,
+                    .SetQueryParams(new
+                    {
+                        chat_id = "-1002082761148",
+                        parse_mode = "html",
+                        text = message,
                         reply_to_message_id = "207712"
                     })
                     .GetStringAsync();
@@ -77,7 +80,7 @@ namespace LotteryResult.Services
 
                 throw;
             }
-        } 
+        }
         public async Task Premiacion(List<long> result_ids, NotifyType type)
         {
             PremicionPremierDto body = null;

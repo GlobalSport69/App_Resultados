@@ -1,6 +1,6 @@
 ﻿using Flurl.Http;
 
-namespace LotteryResult.Services.CloseNotification
+namespace LotteryResult.Services.PremierPlussJobs.CloseNotification
 {
     public class SendCloseLotteryNotifyToPremierApi
     {

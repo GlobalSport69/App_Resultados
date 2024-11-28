@@ -4,7 +4,7 @@ using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
 
-namespace LotteryResult.Services.CloseNotification
+namespace LotteryResult.Services.PremierPlussJobs.CloseNotification
 {
     public class Guacharo : IGetResult
     {

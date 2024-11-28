@@ -1,6 +1,7 @@
 ﻿using LotteryResult.Data.Abstractions;
 using LotteryResult.Services;
-using LotteryResult.Services.CloseNotification;
+using LotteryResult.Services.PremierPlussJobs;
+using LotteryResult.Services.PremierPlussJobs.CloseNotification;
 
 namespace LotteryResult
 {
@@ -41,6 +42,7 @@ namespace LotteryResult
 
             services.AddCloseNotificationServices();
             services.AddScoped<SetLimitForIntegrations>();
+            services.AddScoped<UpdateRates>();
 
             return services;
         }

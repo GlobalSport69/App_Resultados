@@ -1,4 +1,4 @@
-﻿namespace LotteryResult.Services.CloseNotification
+﻿namespace LotteryResult.Services.PremierPlussJobs.CloseNotification
 {
     public static class CloseNotifyExtensions
     {

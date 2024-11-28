@@ -1,7 +1,6 @@
 ﻿using Flurl.Http;
-using LotteryResult.Services.CloseNotification;
 
-namespace LotteryResult.Services
+namespace LotteryResult.Services.PremierPlussJobs
 {
     public class SetLimitForIntegrations
     {
