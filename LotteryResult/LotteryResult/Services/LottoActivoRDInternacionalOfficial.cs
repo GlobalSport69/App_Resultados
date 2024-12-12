@@ -12,6 +12,21 @@ namespace LotteryResult.Services
         public const int productID = 29;
         private const int providerID = 28;
         private readonly ILogger<LottoActivoRDInternacionalOfficial> _logger;
+        private Dictionary<string, long> lotteries = new Dictionary<string, long>
+        {
+            { "08:30 AM", 476 },
+            { "09:30 AM", 477 },
+            { "10:30 AM", 478 },
+            { "11:30 AM", 479 },
+            { "12:30 PM", 480 },
+            { "01:30 PM", 481 },
+            { "02:30 PM", 482 },
+            { "03:30 PM", 483 },
+            { "04:30 PM", 484 },
+            { "05:30 PM", 485 },
+            { "06:30 PM", 486 },
+            { "07:30 PM", 487 }
+        };
 
         public LottoActivoRDInternacionalOfficial(IUnitOfWork unitOfWork, ILogger<LottoActivoRDInternacionalOfficial> logger)
         {
@@ -86,6 +101,7 @@ namespace LotteryResult.Services
                     item.Complement = item.Complement.Capitalize();
                     var resultado = item.Result + " " +item.Complement;
                     var time = item.Time.ToUpper();
+                    long premierId = lotteries[time];
 
                     return new Result
                     {
@@ -95,6 +111,7 @@ namespace LotteryResult.Services
                         ProductId = productID,
                         ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.ANIMALITOS,
+                        PremierId = premierId
                         //Number: item.Result,
                         //Complement: complement
                     };
