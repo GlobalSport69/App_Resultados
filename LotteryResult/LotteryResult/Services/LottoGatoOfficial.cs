@@ -6,6 +6,7 @@ using LotteryResult.Dtos;
 using LotteryResult.Enum;
 using LotteryResult.Models.CarruselMillonario;
 using LotteryResult.Models.Gatazo;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NuGet.ProjectModel;
 using System.Linq;
@@ -77,14 +78,18 @@ namespace LotteryResult.Services
                     throw new Exception("Falta token "+ loginResponse);
                 }
 
-                var resultResponse = await "https://api.betm3.com/taquilla-api-v3/rani"
+                var token = loginResponse.SelectToken("d.tkn").ToString();
+                var fechaunix = (new DateTimeOffset(venezuelaNow)).ToUnixTimeMilliseconds();
+                var json = await "https://api.betm3.com/taquilla-api-v3/rani"
                     .WithHeader("x-api-key", "11e78a1e-fe5f-46bb-a16a-09b6b07765b2")
                     .SetQueryParams(new
                     {
-                        tkn = loginResponse.SelectToken("a.tkn").ToString(),
-                        f = (new DateTimeOffset(venezuelaNow)).ToUnixTimeMilliseconds()
+                        tkn = token,
+                        f = fechaunix
                     })
-                    .GetJsonAsync<Betm3Response>();
+                    .GetStringAsync();
+
+                var resultResponse = JsonConvert.DeserializeObject<Betm3Response>(json);
 
                 if (!resultResponse.Status || !resultResponse.Data.Where(x => x.LotteryName.ToUpper() == "Lotto Gato".ToUpper()).Any())
                 {
