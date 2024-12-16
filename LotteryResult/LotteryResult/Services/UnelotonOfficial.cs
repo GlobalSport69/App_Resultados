@@ -14,11 +14,18 @@ namespace LotteryResult.Services
         private readonly ILogger<UnelotonOfficial> _logger;
         private INotifyPremierService notifyPremierService;
 
-        private Dictionary<string, long> Lotteries = new Dictionary<string, long>
+        private Dictionary<string, long> LotteriesA = new Dictionary<string, long>
         {
-            { "01:15 PM", 309 },
-            { "04:15 PM", 312 },
-            { "07:10 PM", 315 }
+            { "01:15 PM", 316 },
+            { "04:15 PM", 319 },
+            { "07:10 PM", 320 }
+        };
+
+        private Dictionary<string, long> LotteriesB = new Dictionary<string, long>
+        {
+            { "01:15 PM", 317 },
+            { "04:15 PM", 319 },
+            { "07:10 PM", 321 }
         };
         public UnelotonOfficial(IUnitOfWork unitOfWork, ILogger<UnelotonOfficial> logger, INotifyPremierService notifyPremierService)
         {
@@ -83,7 +90,7 @@ namespace LotteryResult.Services
 
                 var newResult = response.Select(item => {
                     var time = item.Time.ToUpper();
-                    var premierId = Lotteries[time];
+                    var premierId = item.Sorteo == "Triple A" ? LotteriesA[time] : LotteriesB[time];
                     var number = item.Result;
 
                     return new Result
@@ -95,6 +102,7 @@ namespace LotteryResult.Services
                         ProviderId = providerID,
                         ProductTypeId = (int)ProductTypeEnum.TRIPLES,
                         PremierId = premierId,
+                        Sorteo = item.Sorteo,
                         //Number: item.Result,
                         //Complement: complement
                     };
