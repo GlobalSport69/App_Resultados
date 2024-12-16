@@ -141,7 +141,7 @@ namespace LotteryResult.Services
 
                 if (!needSave)
                 {
-                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(LaGranjitaOfficial));
+                    _logger.LogInformation("No hubo cambios en los resultados de {0}", nameof(ChanceAnimalitosOfficial));
                     return;
                 }
             }

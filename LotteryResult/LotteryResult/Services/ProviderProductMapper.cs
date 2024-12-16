@@ -33,6 +33,7 @@ namespace LotteryResult.Services
         private GranjaMillonariaOfficial granjaMillonariaOfficial;
         private GranjazoOfficial granjazoOfficial;
         private LottoGatoOfficial lottoGatoOfficial;
+        private GatazoOfficial gatazoOfficial;
         public ProviderProductMapper(TripleZamoranoOfficial tripleZamoranoOfficial, LottoReyOfficial lottoReyOfficial, TripleZuliaOfficial tripleZuliaOfficial,
             TripleCalienteOfficial tripleCalienteOfficial, ElRucoTriplesBet elRucoTriplesBet, LaRucaOfficial laRucaOfficial, TripleCaracasOfficial tripleCaracasOfficial,
             SelvaPlusOfficial selvaPlusOfficial, GuacharoActivoOfficial guacharoActivoOfficial, LaGranjitaOfficial laGranjitaOfficial, LaRicachonaOfficial laRicachonaOfficial,
@@ -40,7 +41,7 @@ namespace LotteryResult.Services
             ChanceAnimalitosOfficial chanceAnimalitosOfficial, TripleChanceOfficial tripleChanceOfficial,
             TripleTachiraOfficial tripleTachiraOfficial, LottoActivoOfficial lottoActivoOfficial, RuletaActivaOfficial ruletaActivaOfficial, GranjaPlusOfficial granjaPlusOfficial,
             LottoActivoRDInternacionalOfficial lottoActivoRDInternacionalOfficial, TrioActivoOfficial trioActivoOfficial, CarruselMillonario carruselMillonario,
-            MegaAnimalOfficial megaAnimalOfficial, CazalotonOfficial cazalotonOfficial, GranjaMillonariaOfficial granjaMillonariaOfficial, GranjazoOfficial granjazoOfficial, LottoGatoOfficial lottoGatoOfficial)
+            MegaAnimalOfficial megaAnimalOfficial, CazalotonOfficial cazalotonOfficial, GranjaMillonariaOfficial granjaMillonariaOfficial, GranjazoOfficial granjazoOfficial, LottoGatoOfficial lottoGatoOfficial, GatazoOfficial gatazoOfficial)
         {
             _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time");
 
@@ -72,6 +73,7 @@ namespace LotteryResult.Services
             this.granjaMillonariaOfficial = granjaMillonariaOfficial;
             this.granjazoOfficial = granjazoOfficial;
             this.lottoGatoOfficial = lottoGatoOfficial;
+            this.gatazoOfficial = gatazoOfficial;
         }
 
         public void AddJob(int product_id, string job_id, string cron_expression)
@@ -216,6 +218,11 @@ namespace LotteryResult.Services
             if (product_id == LottoGatoOfficial.productID)
             {
                 job = lottoGatoOfficial;
+            }
+            
+            if (product_id == GatazoOfficial.productID)
+            {
+                job = gatazoOfficial;
             }
 
             if (job != null)

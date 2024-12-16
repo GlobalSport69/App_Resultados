@@ -37,6 +37,7 @@ namespace LotteryResult
             services.AddScoped<GranjaMillonariaOfficial>();
             services.AddScoped<GranjazoOfficial>();
             services.AddScoped<LottoGatoOfficial>();
+            services.AddScoped<GatazoOfficial>();
 
             services.AddScoped<INotifyPremierService, NotifyPremierService>();
             services.AddScoped<ProviderProductMapper>();
