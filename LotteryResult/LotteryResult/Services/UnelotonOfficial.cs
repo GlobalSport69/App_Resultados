@@ -54,7 +54,7 @@ namespace LotteryResult.Services
                         }
                     });
                 await using var page = await browser.NewPageAsync();
-                await page.GoToAsync($"https://loteriadehoy.com/animalito/cazaloton/resultados/", waitUntil: WaitUntilNavigation.Networkidle2);
+                await page.GoToAsync($"https://loteriadehoy.com/loteria/tripleuneloton/resultados/", waitUntil: WaitUntilNavigation.Networkidle2);
 
                 var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
                     let r = [...document.querySelectorAll('.resultados tbody tr')].flatMap(x => {
