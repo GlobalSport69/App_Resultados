@@ -38,6 +38,7 @@ namespace LotteryResult
             services.AddScoped<GranjazoOfficial>();
             services.AddScoped<LottoGatoOfficial>();
             services.AddScoped<GatazoOfficial>();
+            services.AddScoped<UnelotonOfficial>();
 
             services.AddScoped<INotifyPremierService, NotifyPremierService>();
             services.AddScoped<ProviderProductMapper>();
