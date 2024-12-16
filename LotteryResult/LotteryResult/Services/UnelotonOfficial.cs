@@ -18,14 +18,14 @@ namespace LotteryResult.Services
         {
             { "01:15 PM", 316 },
             { "04:15 PM", 319 },
-            { "07:10 PM", 320 }
+            { "07:15 PM", 320 }
         };
 
         private Dictionary<string, long> LotteriesB = new Dictionary<string, long>
         {
             { "01:15 PM", 317 },
             { "04:15 PM", 319 },
-            { "07:10 PM", 321 }
+            { "07:15 PM", 321 }
         };
         public UnelotonOfficial(IUnitOfWork unitOfWork, ILogger<UnelotonOfficial> logger, INotifyPremierService notifyPremierService)
         {
