@@ -14,6 +14,20 @@ namespace LotteryResult.Services
         private readonly ILogger<GranjazoOfficial> _logger;
         private INotifyPremierService notifyPremierService;
 
+        private Dictionary<string, string> Times = new Dictionary<string, string>
+        {
+            { "09:30am", "09:30 AM" },
+            { "10:30am", "10:30 AM" },
+            { "11:30am", "11:30 AM" },
+            { "12:30pm", "12:30 PM" },
+            { "01:30pm", "01:30 PM" },
+            { "04:30pm", "04:30 PM" },
+            { "05:30pm", "05:30 PM" },
+            { "06:30pm", "06:30 PM" },
+            { "07:30pm", "07:30 PM" },
+            { "08:30pm", "08:30 PM" }
+        };
+
         public GranjazoOfficial(IUnitOfWork unitOfWork, ILogger<GranjazoOfficial> logger, INotifyPremierService notifyPremierService)
         {
             this.unitOfWork = unitOfWork;
@@ -77,7 +91,7 @@ namespace LotteryResult.Services
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
                 var newResult = response.Select(item => {
-                    var time = item.Time.ToUpper();
+                    var time = Times[item.Time];
                     var number = new String(item.Result.TakeWhile(c => char.IsNumber(c)).ToArray());
                     var animal = item.Result.Substring(number.Length, item.Result.Length - number.Length).Trim().Capitalize();
                     //var premierId = Lotteries[time];
