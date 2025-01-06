@@ -12,13 +12,15 @@ namespace LotteryResult.Controllers
         private SelvaPlus selva;
         private SetLimitForIntegrations SetQuotas;
         private UpdateRates updateRates;
+        private DeleteExpireQuotas deleteExpireQuotas;
 
-        public CloseNotifyController(Guacharo guacharo, SelvaPlus selva, SetLimitForIntegrations setQuotas, UpdateRates updateRates)
+        public CloseNotifyController(Guacharo guacharo, SelvaPlus selva, SetLimitForIntegrations setQuotas, UpdateRates updateRates, DeleteExpireQuotas deleteExpireQuotas)
         {
             this.guacharo = guacharo;
             this.selva = selva;
             SetQuotas = setQuotas;
             this.updateRates = updateRates;
+            this.deleteExpireQuotas = deleteExpireQuotas;
         }
 
 
@@ -100,6 +102,25 @@ namespace LotteryResult.Controllers
                 else
                 {
                     RecurringJob.RemoveIfExists("job_updateRate");
+                }
+            }
+            
+            if (job_key == "job_deleteExpireQuotas")
+            {
+                if (status)
+                {
+                    RecurringJob.AddOrUpdate("job_deleteExpireQuotas",
+                        "default",
+                        () => updateRates.Handler(),
+                        DeleteExpireQuotas.CronExpression,
+                        new RecurringJobOptions
+                        {
+                            TimeZone = _timeZone,
+                        });
+                }
+                else
+                {
+                    RecurringJob.RemoveIfExists("job_deleteExpireQuotas");
                 }
             }
 

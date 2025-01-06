@@ -46,6 +46,7 @@ namespace LotteryResult
             services.AddCloseNotificationServices();
             services.AddScoped<SetLimitForIntegrations>();
             services.AddScoped<UpdateRates>();
+            services.AddScoped<DeleteExpireQuotas>();
 
             return services;
         }
