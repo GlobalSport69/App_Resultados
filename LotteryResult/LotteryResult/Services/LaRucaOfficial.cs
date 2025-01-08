@@ -107,7 +107,7 @@ namespace LotteryResult.Services
 
                     return new Result
                     {
-                        Result1 = item.Result,
+                        Result1 = item.Result.PadLeft(2, '0'),
                         Time = time,
                         Date = DateTime.Now.ToString("dd-MM-yyyy"),
                         ProductId = productID,
