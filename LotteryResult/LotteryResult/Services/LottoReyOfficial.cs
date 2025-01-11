@@ -1,9 +1,9 @@
 ﻿using Azure;
+using Flurl.Http;
 using LotteryResult.Data.Abstractions;
 using LotteryResult.Data.Models;
 using LotteryResult.Dtos;
 using LotteryResult.Enum;
-using PuppeteerSharp;
 
 namespace LotteryResult.Services
 {
@@ -30,6 +30,64 @@ namespace LotteryResult.Services
             { "06:30 PM", 76 },
             { "07:30 PM", 77 }
         };
+
+        private Dictionary<string, string> Hours = new Dictionary<string, string>
+        {
+            { "08:30:00", "08:30 AM"},
+            { "09:30:00", "09:30 AM" },
+            { "10:30:00", "10:30 AM" },
+            { "11:30:00", "11:30 AM" },
+            { "12:30:00", "12:30 PM" },
+            { "13:30:00", "01:30 PM" },
+            { "14:30:00", "02:30 PM" },
+            { "15:30:00", "03:30 PM" },
+            { "16:30:00", "04:30 PM" },
+            { "17:30:00", "05:30 PM" },
+            { "18:30:00", "06:30 PM" },
+            { "19:30:00", "07:30 PM" }
+        };
+
+        private Dictionary<string, string> Animals = new Dictionary<string, string>
+        {
+            { "0", "DELFIN"},
+            { "00", "BALLENA" },
+            { "01", "CARNERO" },
+            { "02", "TORO" },
+            { "03", "CIEMPIES" },
+            { "04", "ALACRAN" },
+            { "05", "LEON" },
+            { "06", "RANA" },
+            { "07", "PERICO" },
+            { "08", "RATON" },
+            { "09", "AGUILA" },
+            { "10", "TIGRE" },
+            { "11", "GATO" },
+            { "12", "CABALLO" },
+            { "13", "MONO" },
+            { "14", "PALOMA" },
+            { "15", "ZORRO" },
+            { "16", "OSO" },
+            { "17", "PAVO" },
+            { "18", "BURRO" },
+            { "19", "CHIVO" },
+            { "20", "COCHINO" },
+            { "21", "GALLO" },
+            { "22", "CAMELLO" },
+            { "23", "CEBRA" },
+            { "24", "IGUANA" },
+            { "25", "GALLINA" },
+            { "26", "VACA" },
+            { "27", "PERRO" },
+            { "28", "ZAMURO" },
+            { "29", "ELEFANTE" },
+            { "30", "CAIMAN" },
+            { "31", "LAPA" },
+            { "32", "ARDILLA" },
+            { "33", "PESCADO" },
+            { "34", "VENADO" },
+            { "35", "JIRAFA" },
+            { "36", "CULEBRA" },
+        };
         public LottoReyOfficial(IUnitOfWork unitOfWork, ILogger<LottoReyOfficial> logger, INotifyPremierService notifyPremierService)
         {
             this.unitOfWork = unitOfWork;
@@ -43,60 +101,33 @@ namespace LotteryResult.Services
             {
                 DateTime venezuelaNow = DateTime.Now;
 
-                using var browserFetcher = new BrowserFetcher();
-                await browserFetcher.DownloadAsync();
-                await using var browser = await Puppeteer.LaunchAsync(
-                    new LaunchOptions
-                    {
-                        Headless = true,
-                        Args = new string[]
-                        {
-                            "--no-sandbox",
-                            "--disable-setuid-sandbox"
-                        }
-                    });
-                await using var page = await browser.NewPageAsync();
-                await page.GoToAsync("https://lottorey.com.ve/" + venezuelaNow.ToString("yyyy/MM/dd"));
+                var response = await "https://api.sourcesws.com/api/resultados"
+                    .WithOAuthBearerToken("98844|MhLHygrtJY02GLOvNlb5KXafxtMK6tGsz5G3KSR3")
+                    .GetJsonAsync<LottoReyResponse>();
 
-                var response = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
-                    let r = [...document.querySelectorAll('#main-container .card')]
-                    .map(x => ({
-                        time: x.querySelector('.texto-hora').innerText,
-                        result: x.querySelector('.card-footer').innerText,
-                    })).filter(x => x.time != '');
+                if (!response.success) {
+                    _logger.LogInformation("Ocurrio un error en {0} {@1}", nameof(LottoReyOfficial), response);
+                    return;
+                }
+                
+                response.data.resultado_list = response.data.resultado_list.Where(x => x.fecha == venezuelaNow.ToString("yyyy-MM-dd")).ToList();
 
-                    return r;
-                }");
-
-                if (!response.Any())
+                if (!response.data.resultado_list.Any())
                 {
                     _logger.LogInformation("No se obtuvieron resultados en {0}", nameof(LottoReyOfficial));
                     return;
                 }
 
-                await page.GoToAsync("https://lottorey.com.ve/" + venezuelaNow.ToString("yyyy/MM/dd")+ "/page/2");
-                var responsePage2 = await page.EvaluateFunctionAsync<List<LotteryDetail>>(@"() => {
-                    let r = [...document.querySelectorAll('#main-container .card')]
-                    .map(x => ({
-                        time: x.querySelector('.texto-hora').innerText,
-                        result: x.querySelector('.card-footer').innerText,
-                    })).filter(x => x.time != '');
-
-                    return r;
-                }");
-
-                response.AddRange(responsePage2);
-
                 var oldResult = await unitOfWork.ResultRepository
                     .GetAllByAsync(x => x.ProviderId == providerID && x.CreatedAt.Date == venezuelaNow.Date);
                 oldResult = oldResult.OrderBy(x => x.Time).ToList();
 
-                var newResult = response.Select(item => {
-                    var time = item.Time.ToUpper();
+                var newResult = response.data.resultado_list.Select(item => {
+                    var time = Hours[item.sorteo];
                     var premierId = lotteries[time];
 
-                    var number = new String(item.Result.TakeWhile(c => c != ' ').ToArray());
-                    var complement = item.Result.Substring(number.Length, item.Result.Length - number.Length)
+                    var number = item.resultado;
+                    var complement = Animals[number]
                     .Trim()
                     .Capitalize();
 
