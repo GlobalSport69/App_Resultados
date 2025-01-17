@@ -73,7 +73,8 @@ namespace LotteryResult.Services
                    })
                 .ReceiveJson<List<ChanceResponse>>();
 
-                response = response.Where(x => x.Code.StartsWith('C')).ToList();
+                response = response.Where(x => Times.ContainsKey(x.Code)).ToList();
+                //response = response.Where(x => x.Code.StartsWith('C')).ToList();
 
                 if (!response.Any())
                 {

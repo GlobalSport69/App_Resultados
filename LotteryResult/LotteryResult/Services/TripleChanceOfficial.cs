@@ -94,7 +94,8 @@ namespace LotteryResult.Services
                    })
                 .ReceiveJson<List<ChanceResponse>>();
 
-                response = response.Where(x => !x.Code.StartsWith('C')).ToList();
+                //response = response.Where(x => !x.Code.StartsWith('C')).ToList();
+                response = response.Where(x => HoursMap.ContainsKey(x.Code)).ToList();
 
                 if (!response.Any())
                 {
